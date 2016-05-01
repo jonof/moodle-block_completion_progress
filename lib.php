@@ -131,6 +131,8 @@ function block_completion_progress_course_submissions($courseid) {
 function block_completion_progress_modules_with_alternate_links() {
     return array(
         'assign' => array(
+            // The following can be used when MDL-52133 is resolved
+            // 'url' => '/mod/assign/view.php?id=:cmid&action=grade&userid=:userid&rownum=0',
             'url' => '/mod/assign/view.php?id=:cmid&action=grading',
             'capability' => 'mod/assign:grade',
         ),
@@ -458,7 +460,10 @@ function block_completion_progress_bar($activities, $completions, $config, $user
             $celloptions['style'] .= $colours['attempted_colour'].';';
             $cellcontent = $OUTPUT->pix_icon($useicons == 1 ? 'tick' : 'blank', '', 'block_completion_progress');
 
-        } else if ((!isset($config->orderby) || $config->orderby == 'orderbytime') && $activity['expected'] < $now) {
+        } else if (
+            (!isset($config->orderby) || $config->orderby == 'orderbytime') &&
+            (isset($activity['expected']) && $activity['expected'] > 0 && $activity['expected'] < $now)
+        ) {
             $celloptions['style'] .= $colours['notattempted_colour'].';';
             $cellcontent = $OUTPUT->pix_icon($useicons == 1 ? 'cross' : 'blank', '', 'block_completion_progress');
 
