@@ -59,10 +59,10 @@ if ($ADMIN->fulltree) {
         $options)
     );
 
-    $settings->add(new admin_setting_configcolourpicker('block_completion_progress/attempted_colour',
-        get_string('attempted_colour_title', 'block_completion_progress'),
-        get_string('attempted_colour_descr', 'block_completion_progress'),
-        get_string('attempted_colour', 'block_completion_progress'),
+    $settings->add(new admin_setting_configcolourpicker('block_completion_progress/completed_colour',
+        get_string('completed_colour_title', 'block_completion_progress'),
+        get_string('completed_colour_descr', 'block_completion_progress'),
+        get_string('completed_colour', 'block_completion_progress'),
         null )
     );
 
@@ -73,17 +73,17 @@ if ($ADMIN->fulltree) {
         null )
     );
 
-    $settings->add(new admin_setting_configcolourpicker('block_completion_progress/notattempted_colour',
-        get_string('notattempted_colour_title', 'block_completion_progress'),
-        get_string('notattempted_colour_descr', 'block_completion_progress'),
-        get_string('notAttempted_colour', 'block_completion_progress'),
+    $settings->add(new admin_setting_configcolourpicker('block_completion_progress/notCompleted_colour',
+        get_string('notCompleted_colour_title', 'block_completion_progress'),
+        get_string('notCompleted_colour_descr', 'block_completion_progress'),
+        get_string('notCompleted_colour', 'block_completion_progress'),
         null )
     );
 
-    $settings->add(new admin_setting_configcolourpicker('block_completion_progress/futurenotattempted_colour',
-        get_string('futurenotattempted_colour_title', 'block_completion_progress'),
-        get_string('futurenotattempted_colour_descr', 'block_completion_progress'),
-        get_string('futureNotAttempted_colour', 'block_completion_progress'),
+    $settings->add(new admin_setting_configcolourpicker('block_completion_progress/futureNotCompleted_colour',
+        get_string('futureNotCompleted_colour_title', 'block_completion_progress'),
+        get_string('futureNotCompleted_colour_descr', 'block_completion_progress'),
+        get_string('futureNotCompleted_colour', 'block_completion_progress'),
         null )
     );
 

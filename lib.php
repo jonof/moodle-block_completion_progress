@@ -120,6 +120,7 @@ function block_completion_progress_course_submissions($courseid) {
             $submissions[] = $mapping;
         }
     }
+
     return $submissions;
 }
 
@@ -129,10 +130,8 @@ function block_completion_progress_course_submissions($courseid) {
  * @return array URLs and associated capabilities, per activity
  */
 function block_completion_progress_modules_with_alternate_links() {
-    return array(
+    $alternatelinks = array(
         'assign' => array(
-            // The following can be used when MDL-52133 is resolved
-            // 'url' => '/mod/assign/view.php?id=:cmid&action=grade&userid=:userid&rownum=0',
             'url' => '/mod/assign/view.php?id=:cmid&action=grading',
             'capability' => 'mod/assign:grade',
         ),
@@ -150,6 +149,12 @@ function block_completion_progress_modules_with_alternate_links() {
             'capability' => 'mod/quiz:viewreports',
         ),
     );
+
+    if ($CFG->version > 2015111604) {
+        $alternatelinks['assign']['url'] = '/mod/assign/view.php?id=:cmid&action=grade&userid=:userid';
+    }
+
+    return $alternatelinks;
 }
 
 /**
@@ -164,7 +169,6 @@ function block_completion_progress_get_activities($courseid, $config = null, $fo
     $modinfo = get_fast_modinfo($courseid, -1);
     $sections = $modinfo->get_sections();
     $activities = array();
-
     foreach ($modinfo->instances as $module => $instances) {
         $modulename = get_string('pluginname', $module);
         foreach ($instances as $index => $cm) {
@@ -184,7 +188,7 @@ function block_completion_progress_get_activities($courseid, $config = null, $fo
                     'expected'   => $cm->completionexpected,
                     'section'    => $cm->sectionnum,
                     'position'   => array_search($cm->id, $sections[$cm->sectionnum]),
-                    'url'        => $cm->url->out(),
+                    'url'        => method_exists($cm->url, 'out') ? $cm->url->out() : '',
                     'context'    => $cm->context,
                     'icon'       => $cm->get_icon_url(),
                     'available'  => $cm->available,
@@ -342,10 +346,10 @@ function block_completion_progress_bar($activities, $completions, $config, $user
 
     // Get colours and use defaults if they are not set in global settings.
     $colournames = array(
-        'attempted_colour' => 'attempted_colour',
+        'completed_colour' => 'completed_colour',
         'submittednotcomplete_colour' => 'submittednotcomplete_colour',
-        'notattempted_colour' => 'notAttempted_colour',
-        'futurenotattempted_colour' => 'futureNotAttempted_colour'
+        'notCompleted_colour' => 'notCompleted_colour',
+        'futureNotCompleted_colour' => 'futureNotCompleted_colour'
     );
     $colours = array();
     foreach ($colournames as $name => $stringkey) {
@@ -457,23 +461,23 @@ function block_completion_progress_bar($activities, $completions, $config, $user
             $cellcontent = $OUTPUT->pix_icon('blank', '', 'block_completion_progress');
 
         } else if ($complete === true) {
-            $celloptions['style'] .= $colours['attempted_colour'].';';
+            $celloptions['style'] .= $colours['completed_colour'].';';
             $cellcontent = $OUTPUT->pix_icon($useicons == 1 ? 'tick' : 'blank', '', 'block_completion_progress');
 
         } else if (
             (!isset($config->orderby) || $config->orderby == 'orderbytime') &&
             (isset($activity['expected']) && $activity['expected'] > 0 && $activity['expected'] < $now)
         ) {
-            $celloptions['style'] .= $colours['notattempted_colour'].';';
+            $celloptions['style'] .= $colours['notCompleted_colour'].';';
             $cellcontent = $OUTPUT->pix_icon($useicons == 1 ? 'cross' : 'blank', '', 'block_completion_progress');
 
         } else {
-            $celloptions['style'] .= $colours['futurenotattempted_colour'].';';
+            $celloptions['style'] .= $colours['futureNotCompleted_colour'].';';
             $cellcontent = $OUTPUT->pix_icon('blank', '', 'block_completion_progress');
         }
         if (!empty($activity['available']) || $simple) {
             $celloptions['onclick'] = 'document.location=\''.$activity['link'].'\';';
-        } else {
+        } else if (!empty($activity['link'])) {
             $celloptions['style'] .= 'cursor: not-allowed;';
         }
         if ($longbars != 'wrap' && $counter == 1) {
@@ -523,7 +527,7 @@ function block_completion_progress_bar($activities, $completions, $config, $user
         $text .= html_writer::empty_tag('img',
                 array('src' => $activity['icon'], 'class' => 'moduleIcon', 'alt' => '', 'role' => 'presentation'));
         $text .= s($activity['name']);
-        if (!empty($activity['available']) || $simple) {
+        if (!empty($activity['link']) && (!empty($activity['available']) || $simple)) {
             $content .= $OUTPUT->action_link($activity['link'], $text);
         } else {
             $content .= $text;

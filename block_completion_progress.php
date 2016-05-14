@@ -203,10 +203,9 @@ class block_completion_progress extends block_base {
             if ($this->page->user_is_editing() && $this->content->text == '') {
                 $this->content->text = get_string('no_blocks', 'block_completion_progress');
             }
-        }
 
-        // Gather content for block on regular course.
-        else {
+        } else {
+            // Gather content for block on regular course.
 
             // Check if user is in group for block.
             if (
@@ -217,11 +216,19 @@ class block_completion_progress extends block_base {
                 return $this->content;
             }
 
-            // Check if completion is enabled.
-            $completion = new completion_info($COURSE);
-            if (!$CFG->enablecompletion || !$completion->is_enabled()) {
+            // Check if completion is enabled at site level.
+            if (!$CFG->enablecompletion) {
                 if (has_capability('moodle/block:edit', $this->context)) {
                     $this->content->text .= get_string('completion_not_enabled', 'block_completion_progress');
+                }
+                return $this->content;
+            }
+
+            // Check if completion is enabled at course level.
+            $completion = new completion_info($COURSE);
+            if (!$completion->is_enabled()) {
+                if (has_capability('moodle/block:edit', $this->context)) {
+                    $this->content->text .= get_string('completion_not_enabled_course', 'block_completion_progress');
                 }
                 return $this->content;
             }

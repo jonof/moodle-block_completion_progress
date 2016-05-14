@@ -28,10 +28,10 @@ require_once(dirname(__FILE__) . '/../../config.php');
 require_once($CFG->dirroot.'/blocks/completion_progress/lib.php');
 require_once($CFG->libdir.'/tablelib.php');
 
-define('USER_SMALL_CLASS', 20);   // Below this is considered small.
-define('USER_LARGE_CLASS', 200);  // Above this is considered large.
-define('DEFAULT_PAGE_SIZE', 20);
-define('SHOW_ALL_PAGE_SIZE', 5000);
+const USER_SMALL_CLASS = 20;   // Below this is considered small.
+const USER_LARGE_CLASS = 200;  // Above this is considered large.
+const DEFAULT_PAGE_SIZE = 20;
+const SHOW_ALL_PAGE_SIZE = 5000;
 
 // Gather form data.
 $id       = required_param('instanceid', PARAM_INT);

@@ -57,7 +57,7 @@ class block_completion_progress_edit_form extends block_edit_form {
         );
         $orderbylabel = get_string('config_orderby', 'block_completion_progress');
         $mform->addElement('select', 'config_orderby', $orderbylabel, $orderingoptions);
-        $mform->setDefault('config_orderby', DEFAULT_ORDERBY);
+        $mform->setDefault('config_orderby', DEFAULT_COMPLETIONPROGRESS_ORDERBY);
         $mform->addHelpButton('config_orderby', 'how_ordering_works', 'block_completion_progress');
 
         // Check if all elements have an expect completion by time set.
@@ -69,9 +69,8 @@ class block_completion_progress_edit_form extends block_edit_form {
         }
         if (!$allwithexpected) {
             $warningstring = get_string('not_all_expected_set', 'block_completion_progress', $expectedbystring);
-            $expectedwarning = HTML_WRITER::tag('div', $warningstring, array('class' => 'error'));
+            $expectedwarning = HTML_WRITER::tag('div', $warningstring, array('class' => 'warning'));
             $mform->addElement('static', $expectedwarning, '', $expectedwarning);
-            $mform->disabledif($expectedwarning, 'config_orderby', 'neq', 'orderbytime');
         }
 
         // Control how long bars wrap/scroll.
@@ -82,7 +81,7 @@ class block_completion_progress_edit_form extends block_edit_form {
         );
         $longbarslabel = get_string('config_longbars', 'block_completion_progress');
         $mform->addElement('select', 'config_longbars', $longbarslabel, $longbaroptions);
-        $defaultlongbars = get_config('block_completion_progress', 'defaultlongbars') ?: DEFAULT_LONGBARS;
+        $defaultlongbars = get_config('block_completion_progress', 'defaultlongbars') ?: DEFAULT_COMPLETIONPROGRESS_LONGBARS;
         $mform->setDefault('config_longbars', $defaultlongbars);
         $mform->addHelpButton('config_longbars', 'how_longbars_works', 'block_completion_progress');
 
@@ -91,13 +90,13 @@ class block_completion_progress_edit_form extends block_edit_form {
                            get_string('config_icons', 'block_completion_progress').' '.
                            $OUTPUT->pix_icon('tick', '', 'block_completion_progress', array('class' => 'iconOnConfig')).'&nbsp;'.
                            $OUTPUT->pix_icon('cross', '', 'block_completion_progress', array('class' => 'iconOnConfig')));
-        $mform->setDefault('config_progressBarIcons', DEFAULT_PROGRESSBARICONS);
+        $mform->setDefault('config_progressBarIcons', DEFAULT_COMPLETIONPROGRESS_PROGRESSBARICONS);
         $mform->addHelpButton('config_progressBarIcons', 'why_use_icons', 'block_completion_progress');
 
         // Allow progress percentage to be turned on for students.
         $mform->addElement('selectyesno', 'config_showpercentage',
                            get_string('config_percentage', 'block_completion_progress'));
-        $mform->setDefault('config_showpercentage', DEFAULT_SHOWPERCENTAGE);
+        $mform->setDefault('config_showpercentage', DEFAULT_COMPLETIONPROGRESS_SHOWPERCENTAGE);
         $mform->addHelpButton('config_showpercentage', 'why_show_precentage', 'block_completion_progress');
 
         // Allow the block to be visible to a single group.
