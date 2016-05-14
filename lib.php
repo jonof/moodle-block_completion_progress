@@ -130,6 +130,8 @@ function block_completion_progress_course_submissions($courseid) {
  * @return array URLs and associated capabilities, per activity
  */
 function block_completion_progress_modules_with_alternate_links() {
+    global $CFG;
+
     $alternatelinks = array(
         'assign' => array(
             'url' => '/mod/assign/view.php?id=:cmid&action=grading',
