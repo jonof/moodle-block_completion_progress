@@ -183,7 +183,7 @@ $submissions = block_completion_progress_course_submissions($course->id);
 foreach ($submissions as $mapping) {
     $mapvalues = explode('-', $mapping);
     $index = 0;
-    while ($users[$index]->id != $mapvalues[0] && $index < $numberofusers) {
+    while ($index < $numberofusers && $users[$index]->id != $mapvalues[0]) {
         $index++;
     }
     if ($index < $numberofusers) {

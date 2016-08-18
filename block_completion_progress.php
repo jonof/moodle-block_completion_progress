@@ -127,7 +127,13 @@ class block_completion_progress extends block_base {
                 return $this->content;
             }
 
+            // Show a message when the user is not enrolled in any courses.
             $courses = enrol_get_my_courses();
+            if (($this->page->user_is_editing() || is_siteadmin()) && empty($courses)) {
+                $this->content->text = get_string('no_courses', 'block_completion_progress');
+                return $this->content;
+            }
+
             $coursenametoshow = get_config('block_completion_progress', 'coursenametoshow') ?:
                 DEFAULT_COMPLETIONPROGRESS_COURSENAMETOSHOW;
             $sql = "SELECT bi.id,

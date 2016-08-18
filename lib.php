@@ -317,8 +317,8 @@ function block_completion_progress_completions($activities, $userid, $course, $s
     foreach ($activities as $activity) {
         $cm->id = $activity['id'];
         $activitycompletion = $completion->get_data($cm, true, $userid);
-        $completions[$activity['id']] = $activitycompletion->completionstate >= 1;
-        if (!$completions[$activity['id']] && in_array($activity['id'], $submissions)) {
+        $completions[$activity['id']] = $activitycompletion->completionstate;
+        if ($completions[$activity['id']] === COMPLETION_INCOMPLETE && in_array($activity['id'], $submissions)) {
             $completions[$activity['id']] = 'submitted';
         }
     }
@@ -342,6 +342,7 @@ function block_completion_progress_bar($activities, $completions, $config, $user
     global $OUTPUT, $CFG, $USER;
     $content = '';
     $now = time();
+    $usingrtl = right_to_left();
     $numactivities = count($activities);
     $dateformat = get_string('strftimedate', 'langconfig');
     $alternatelinks = block_completion_progress_modules_with_alternate_links();
@@ -366,6 +367,7 @@ function block_completion_progress_bar($activities, $completions, $config, $user
     $displaynow = $orderby == 'orderbytime';
     $showpercentage = isset($config->showpercentage) ? $config->showpercentage : DEFAULT_COMPLETIONPROGRESS_SHOWPERCENTAGE;
     $rowoptions = array();
+    $rowoptions['style'] = '';
     $content .= HTML_WRITER::start_div('barContainer');
 
     // Determine the segment width.
@@ -384,7 +386,7 @@ function block_completion_progress_bar($activities, $completions, $config, $user
         $cellwidth = DEFAULT_COMPLETIONPROGRESS_SCROLLCELLWIDTH;
         $cellunit = 'px';
         $celldisplay = 'inline-block';
-        $rowoptions['style'] = 'white-space: nowrap;';
+        $rowoptions['style'] .= 'white-space: nowrap;';
         $leftpoly = HTML_WRITER::tag('polygon', '', array('points' => '30,0 0,15 30,30', 'class' => 'triangle-polygon'));
         $rightpoly = HTML_WRITER::tag('polygon', '', array('points' => '0,0 30,15 0,30', 'class' => 'triangle-polygon'));
         $content .= HTML_WRITER::tag('svg', $leftpoly, array('class' => 'left-arrow-svg', 'height' => '30', 'width' => '30'));
@@ -396,7 +398,8 @@ function block_completion_progress_bar($activities, $completions, $config, $user
         $celldisplay = 'table-cell';
     }
 
-    // Place now arrow.
+    // Determine where to put the NOW indicator.
+    $nowpos = -1;
     if ($orderby == 'orderbytime' && $longbars != 'wrap' && $displaynow == 1 && !$simple) {
 
         // Find where to put now arrow.
@@ -404,25 +407,10 @@ function block_completion_progress_bar($activities, $completions, $config, $user
         while ($nowpos < $numactivities && $now > $activities[$nowpos]['expected'] && $activities[$nowpos]['expected'] != 0) {
             $nowpos++;
         }
-        $content .= HTML_WRITER::start_div('nowRow', $rowoptions);
+        $rowoptions['style'] .= 'margin-top: 25px;';
         $nowstring = get_string('now_indicator', 'block_completion_progress');
-        if ($nowpos < $numactivities / 2) {
-            for ($i = 0; $i < $nowpos; $i++) {
-                $content .= HTML_WRITER::div(null, 'blankDiv', array('style' => "width:$cellwidth$cellunit;"));
-            }
-            $celloptions = array('style' => "text-align:left; width:$cellwidth;");
-            $content .= HTML_WRITER::start_div('nowDiv', $celloptions);
-            $content .= $OUTPUT->pix_icon('left', $nowstring, 'block_completion_progress', array('class' => 'nowicon'));
-            $content .= $nowstring;
-            $content .= HTML_WRITER::end_div();
-        } else {
-            $celloptions = array('style' => 'text-align:right; width:'. ($cellwidth * $nowpos) . $cellunit .';');
-            $content .= HTML_WRITER::start_div('nowdiv', $celloptions);
-            $content .= $nowstring;
-            $content .= $OUTPUT->pix_icon('right', $nowstring, 'block_completion_progress', array('class' => 'nowicon'));
-            $content .= HTML_WRITER::end_div();
-        }
-        $content .= HTML_WRITER::end_div();
+        $leftarrowimg = $OUTPUT->pix_icon('left', $nowstring, 'block_completion_progress', array('class' => 'nowicon'));
+        $rightarrowimg = $OUTPUT->pix_icon('right', $nowstring, 'block_completion_progress', array('class' => 'nowicon'));
     }
 
     // Determine links to activities.
@@ -462,11 +450,12 @@ function block_completion_progress_bar($activities, $completions, $config, $user
             $celloptions['style'] .= $colours['submittednotcomplete_colour'].';';
             $cellcontent = $OUTPUT->pix_icon('blank', '', 'block_completion_progress');
 
-        } else if ($complete === true) {
+        } else if ($complete == COMPLETION_COMPLETE || $complete == COMPLETION_COMPLETE_PASS) {
             $celloptions['style'] .= $colours['completed_colour'].';';
             $cellcontent = $OUTPUT->pix_icon($useicons == 1 ? 'tick' : 'blank', '', 'block_completion_progress');
 
         } else if (
+            $complete == COMPLETION_COMPLETE_FAIL ||
             (!isset($config->orderby) || $config->orderby == 'orderbytime') &&
             (isset($activity['expected']) && $activity['expected'] > 0 && $activity['expected'] < $now)
         ) {
@@ -488,6 +477,23 @@ function block_completion_progress_bar($activities, $completions, $config, $user
         if ($longbars != 'wrap' && $counter == $numactivities) {
             $celloptions['class'] .= ' lastProgressBarCell';
         }
+
+        // Place the NOW indicator.
+        if ($nowpos >= 0) {
+            if ($nowpos == 0 && $counter == 1) {
+                $nowcontent = $usingrtl ? $rightarrowimg.$nowstring : $leftarrowimg.$nowstring;
+                $cellcontent .= HTML_WRITER::div($nowcontent, 'nowDiv firstNow');
+            } else if ($nowpos == $counter) {
+                if ($nowpos < $numactivities / 2) {
+                    $nowcontent = $usingrtl ? $rightarrowimg.$nowstring : $leftarrowimg.$nowstring;
+                    $cellcontent .= HTML_WRITER::div($nowcontent, 'nowDiv firstHalfNow');
+                } else {
+                    $nowcontent = $usingrtl ? $nowstring.$leftarrowimg : $nowstring.$rightarrowimg;
+                    $cellcontent .= HTML_WRITER::div($nowcontent, 'nowDiv lastHalfNow');
+                }
+            }
+        }
+
         $counter++;
         $content .= HTML_WRITER::div($cellcontent, null, $celloptions);
     }
@@ -518,6 +524,11 @@ function block_completion_progress_bar($activities, $completions, $config, $user
     $content .= HTML_WRITER::end_tag('div');
 
     // Add hidden divs for activity information.
+    $stringincomplete = get_string('completion-n', 'completion');
+    $stringcomplete = get_string('completed', 'completion');
+    $stringpassed = get_string('completion-pass', 'completion');
+    $stringfailed = get_string('completion-fail', 'completion');
+    $stringsubmitted = get_string('submitted', 'block_completion_progress');
     foreach ($activities as $activity) {
         $completed = $completions[$activity['id']];
         $divoptions = array('class' => 'progressEventInfo',
@@ -535,17 +546,23 @@ function block_completion_progress_bar($activities, $completions, $config, $user
             $content .= $text;
         }
         $content .= HTML_WRITER::empty_tag('br');
-        if ($completed && $completed !== 'failed' && $completed !== 'submitted') {
-            $content .= get_string('completed', 'completion').'&nbsp;';
+        if ($completed == COMPLETION_COMPLETE) {
+            $content .= $stringcomplete.'&nbsp;';
             $icon = 'tick';
-        } else {
-            $content .= get_string('completion-n', 'completion').'&nbsp;';
+        } else if ($completed == COMPLETION_COMPLETE_PASS) {
+            $content .= $stringpassed.'&nbsp;';
+            $icon = 'tick';
+        } else if ($completed == COMPLETION_COMPLETE_FAIL) {
+            $content .= $stringfailed.'&nbsp;';
             $icon = 'cross';
+        } else {
+            $content .= $stringincomplete .'&nbsp;';
+            $icon = 'cross';
+            if ($completed === 'submitted') {
+                $content .= '(' . $stringsubmitted . ')&nbsp;';
+            }
         }
         $content .= $OUTPUT->pix_icon($icon, '', 'block_completion_progress', array('class' => 'iconInInfo'));
-        if ($completed === 'submitted') {
-            $content .= ' (' . get_string('submitted', 'block_completion_progress') . ')';
-        }
         $content .= HTML_WRITER::empty_tag('br');
         if ($activity['expected'] != 0) {
             $content .= HTML_WRITER::start_tag('div', array('class' => 'expectedBy'));
@@ -570,7 +587,10 @@ function block_completion_progress_percentage($activities, $completions) {
     $completecount = 0;
 
     foreach ($activities as $activity) {
-        if ($completions[$activity['id']] == 1) {
+        if (
+            $completions[$activity['id']] == COMPLETION_COMPLETE ||
+            $completions[$activity['id']] == COMPLETION_COMPLETE_PASS)
+        {
             $completecount++;
         }
     }

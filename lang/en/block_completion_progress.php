@@ -69,6 +69,7 @@ $string['mouse_over_prompt'] = 'Mouse over or touch bar for info.';
 $string['no_activities_config_message'] = 'There are no activities or resources with activity completion set or no activities or resources have been selected. Set activity completion on activities and resources then configure this block.';
 $string['no_activities_message'] = 'No activities or resources are being monitored. Use config to set up monitoring.';
 $string['no_blocks'] = 'No Completion Progress blocks are set up for your courses.';
+$string['no_courses'] = "You are not enrolled in any courses. Only bars from enrolled courses will be shown.";
 $string['no_visible_activities_message'] = 'None of the monitored activities are currently visible.';
 $string['not_all_expected_set'] = 'Not all activities with completion have an "{$a}" date set.';
 $string['notCompleted_colour'] = '#C71C22';
