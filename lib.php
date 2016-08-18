@@ -546,23 +546,29 @@ function block_completion_progress_bar($activities, $completions, $config, $user
             $content .= $text;
         }
         $content .= HTML_WRITER::empty_tag('br');
+        $altattribute = '';
         if ($completed == COMPLETION_COMPLETE) {
             $content .= $stringcomplete.'&nbsp;';
             $icon = 'tick';
+            $altattribute = $stringcomplete;
         } else if ($completed == COMPLETION_COMPLETE_PASS) {
             $content .= $stringpassed.'&nbsp;';
             $icon = 'tick';
+            $altattribute = $stringpassed;
         } else if ($completed == COMPLETION_COMPLETE_FAIL) {
             $content .= $stringfailed.'&nbsp;';
             $icon = 'cross';
+            $altattribute = $stringfailed;
         } else {
             $content .= $stringincomplete .'&nbsp;';
             $icon = 'cross';
+            $altattribute = $stringincomplete;
             if ($completed === 'submitted') {
                 $content .= '(' . $stringsubmitted . ')&nbsp;';
+                $altattribute .= '(' . $stringsubmitted . ')';
             }
         }
-        $content .= $OUTPUT->pix_icon($icon, '', 'block_completion_progress', array('class' => 'iconInInfo'));
+        $content .= $OUTPUT->pix_icon($icon, $altattribute, 'block_completion_progress', array('class' => 'iconInInfo'));
         $content .= HTML_WRITER::empty_tag('br');
         if ($activity['expected'] != 0) {
             $content .= HTML_WRITER::start_tag('div', array('class' => 'expectedBy'));
@@ -589,8 +595,8 @@ function block_completion_progress_percentage($activities, $completions) {
     foreach ($activities as $activity) {
         if (
             $completions[$activity['id']] == COMPLETION_COMPLETE ||
-            $completions[$activity['id']] == COMPLETION_COMPLETE_PASS)
-        {
+            $completions[$activity['id']] == COMPLETION_COMPLETE_PASS
+        ) {
             $completecount++;
         }
     }
