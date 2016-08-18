@@ -256,7 +256,7 @@ function block_completion_progress_compare_times($a, $b) {
  * @return array The array with restricted activities removed
  */
 function block_completion_progress_filter_visibility($activities, $userid, $courseid) {
-    global $CFG, $USER;
+    global $CFG;
     $filteredactivities = array();
     $modinfo = get_fast_modinfo($courseid, $userid);
     $coursecontext = CONTEXT_COURSE::instance($courseid);
@@ -273,7 +273,7 @@ function block_completion_progress_filter_visibility($activities, $userid, $cour
 
         // Check availability, allowing for visible, but not accessible items.
         if (!empty($CFG->enableavailability)) {
-            if (has_capability('moodle/course:viewhiddenactivities', $coursecontext, $USER->id)) {
+            if (has_capability('moodle/course:viewhiddenactivities', $coursecontext, $userid)) {
                 $activity['available'] = true;
             } else {
                 if (isset($coursemodule->available) && !$coursemodule->available && empty($coursemodule->availableinfo)) {
