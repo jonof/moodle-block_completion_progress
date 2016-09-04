@@ -372,11 +372,17 @@ function block_completion_progress_bar($activities, $completions, $config, $user
 
     // Determine the segment width.
     $wrapafter = get_config('block_completion_progress', 'wrapafter') ?: DEFAULT_COMPLETIONPROGRESS_WRAPAFTER;
+    if ($wrapafter <= 1) {
+        $wrapafter = 1;
+    }
     if ($numactivities <= $wrapafter) {
         $longbars = 'squeeze';
     }
     if ($longbars == 'wrap') {
         $rows = ceil($numactivities / $wrapafter);
+        if ($rows <= 1) {
+            $rows = 1;
+        }
         $cellwidth = floor(100 / ceil($numactivities / $rows));
         $cellunit = '%';
         $celldisplay = 'inline-block';
@@ -393,7 +399,7 @@ function block_completion_progress_bar($activities, $completions, $config, $user
         $content .= HTML_WRITER::tag('svg', $rightpoly, array('class' => 'right-arrow-svg', 'height' => '30', 'width' => '30'));
     }
     if ($longbars == 'squeeze') {
-        $cellwidth = floor(100 / $numactivities);
+        $cellwidth = $numactivities > 0 ? floor(100 / $numactivities) : 1;
         $cellunit = '%';
         $celldisplay = 'table-cell';
     }
