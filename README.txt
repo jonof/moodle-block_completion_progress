@@ -21,3 +21,6 @@ Once the Completion Progress block is installed, you can use it in a course as f
 
 Hidden items will not appear in the Completion Progress block until they are visible to students.
 This is useful for a scheduled release of activities.
+
+To package the plugin:
+run `zip -r block_completion_progress_moodle31_2016090500.zip ../moodle-block_NJCTL/ -x *.git*`
