@@ -142,7 +142,8 @@ class block_completion_progress_base_testcase extends advanced_testcase {
         $this->assertContains('assign', $text, '', true);
         $this->assertNotContains('quiz', $text, '', true);
         // The status is futureNotCompleted
-        $this->assertContains('background-color:#025187', $text, '');
+        $color1 = get_string('futureNotCompleted_colour', 'block_completion_progress');
+        $this->assertContains('background-color:' . $color1, $text, '');
 
         $submission = $assign->get_user_submission($this->students[0]->id, true);
         $submission->status = ASSIGN_SUBMISSION_STATUS_SUBMITTED;
@@ -170,6 +171,7 @@ class block_completion_progress_base_testcase extends advanced_testcase {
         );
 
         // The status is send but not finished
-        $this->assertContains('background-color:#FFCC00', $text, '');
+        $color2 = get_string('submittednotcomplete_colour', 'block_completion_progress');
+        $this->assertContains('background-color:' . $color2, $text, '');
     }
 }
