@@ -28,8 +28,9 @@ defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 require_once($CFG->dirroot . '/mod/assign/locallib.php');
+require_once($CFG->dirroot.'/blocks/completion_progress/lib.php');
 
-class mod_assign_base_testcase extends advanced_testcase {
+class block_completion_progress_base_testcase extends advanced_testcase {
 
     /** @const Default number of students to create */
     const DEFAULT_STUDENT_COUNT = 3;
@@ -78,7 +79,7 @@ class mod_assign_base_testcase extends advanced_testcase {
      * Convenience function to create a testable instance of an assignment.
      *
      * @param array $params Array of parameters to pass to the generator
-     * @return testable_assign Testable wrapper around the assign class.
+     * @return assign Assign class.
      */
     protected function create_instance($params=array()) {
         $generator = $this->getDataGenerator()->get_plugin_generator('mod_assign');
@@ -91,17 +92,84 @@ class mod_assign_base_testcase extends advanced_testcase {
 
     public function test_assign_get_completion_state() {
         global $DB;
-        $assign = $this->create_instance(array('submissiondrafts' => 0, 'completionsubmit' => 1));
+
+        // Add a block
+        $context = CONTEXT_COURSE::instance($this->course->id);
+        $block_info = [
+          'blockname' => 'completion_progress',
+          'parentcontextid' => $context->id,
+          'pagetypepattern' => 'course-view-*',
+          'showinsubcontexts' => 0,
+          'defaultweight' => 5,
+          'defaultregion' => 'side-post',
+          'configdata' => 'Tzo4OiJzdGRDbGFzcyI6Njp7czo3OiJvcmRlcmJ5IjtzOjExOiJvcmRlcmJ5dGltZSI7czo4OiJsb25nYmFycyI7czo3OiJzcXVlZXplIjtzOjE2OiJwcm9ncmVzc0Jhckljb25zIjtzOjE6IjEiO3M6MTQ6InNob3dwZXJjZW50YWdlIjtzOjE6IjAiO3M6MTM6InByb2dyZXNzVGl0bGUiO3M6MDoiIjtzOjE4OiJhY3Rpdml0aWVzaW5jbHVkZWQiO3M6MTg6ImFjdGl2aXR5Y29tcGxldGlvbiI7fQ=='
+        ];
+
+        $block_instance_id = $DB->insert_record('block_instances', (object) $block_info);
+
+        $assign = $this->create_instance([
+          'submissiondrafts' => 0,
+          'completionsubmit' => 1,
+          'completion' => COMPLETION_TRACKING_AUTOMATIC
+        ]);
 
         $this->setUser($this->students[0]);
-        $result = assign_get_completion_state($this->course, $assign->get_course_module(), $this->students[0]->id, false);
+
+        $result = assign_get_completion_state(
+          $this->course,
+          $assign->get_course_module(),
+          $this->students[0]->id,
+          false
+        );
         $this->assertFalse($result);
+
+        $submissions = block_completion_progress_student_submissions($this->course->id, $this->students[0]->id);
+        $config = unserialize(base64_decode($block_info['configdata']));
+        $activities = block_completion_progress_get_activities($this->course->id, $config);
+
+        $completions = block_completion_progress_completions($activities, $this->students[0]->id, $this->course,
+          $submissions);
+
+        $text = block_completion_progress_bar(
+          $activities,
+          $completions,
+          $config,
+          $this->students[0]->id,
+          $this->course,
+          $block_instance_id
+        );
+
+        $this->assertContains('assign', $text, '', true);
+        $this->assertNotContains('quiz', $text, '', true);
+        // The status is futureNotCompleted
+        $this->assertContains('background-color:#025187', $text, '');
+
         $submission = $assign->get_user_submission($this->students[0]->id, true);
         $submission->status = ASSIGN_SUBMISSION_STATUS_SUBMITTED;
         $DB->update_record('assign_submission', $submission);
 
-        $result = assign_get_completion_state($this->course, $assign->get_course_module(), $this->students[0]->id, false);
-
+        $result = assign_get_completion_state(
+          $this->course,
+          $assign->get_course_module(),
+          $this->students[0]->id,
+          false
+        );
         $this->assertTrue($result);
+
+        $submissions = block_completion_progress_student_submissions($this->course->id, $this->students[0]->id);
+        $completions = block_completion_progress_completions($activities, $this->students[0]->id, $this->course,
+          $submissions);
+
+        $text = block_completion_progress_bar(
+          $activities,
+          $completions,
+          $config,
+          $this->students[0]->id,
+          $this->course,
+          $block_instance_id
+        );
+
+        // The status is send but not finished
+        $this->assertContains('background-color:#FFCC00', $text, '');
     }
 }
