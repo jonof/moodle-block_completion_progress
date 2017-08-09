@@ -164,10 +164,12 @@ if ($group && $group != 0) {
 $picturefields = user_picture::fields('u');
 $sql = "SELECT DISTINCT $picturefields,
         COALESCE(ROUND(gg.finalgrade,2), 0) AS grade,
+        COALESCE(l.timeaccess, 0) AS lastonlinetime,
         en.timecreated, 0 AS enrolment
         FROM {user} u
         JOIN {role_assignments} a ON (a.contextid = :contextid AND a.userid = u.id $rolewhere)
         $groupjoin
+        LEFT JOIN {user_lastaccess} l ON (l.courseid = :courseid AND l.userid = u.id)
         LEFT JOIN {enrol} en ON (en.courseid = :courseid)
         LEFT JOIN {user_enrolments} ue ON (ue.enrolid = en.id AND ue.userid = u.id)
         LEFT JOIN {grade_grades} gg ON (gg.userid = u.id)
@@ -211,14 +213,16 @@ echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'return
 // Setup submissions table.
 $table = new flexible_table('mod-block-completion-progress-overview');
 $table->pagesize($perpage, $numberofusers);
-$tablecolumns = array('select', 'fullname', 'enrolment', 'progress', 'grade');
+$tablecolumns = array('select', 'fullname', 'enrolment', 'lastonline', 'progress', 'grade', 'progressbar');
 $table->define_columns($tablecolumns);
 $tableheaders = array(
                     '',
                     get_string('fullname'),
                     'Enrollment Date',
+                    get_string('lastonline', 'block_completion_progress'),
                     get_string('progress', 'block_completion_progress'),
                     'Grade'
+                    get_string('progressbar', 'block_completion_progress')
                 );
 $table->define_headers($tableheaders);
 $table->sortable(true);
@@ -228,15 +232,20 @@ $table->column_style_all('text-align', 'left');
 $table->column_style_all('vertical-align', 'middle');
 $table->column_style('select', 'text-align', 'left');
 $table->column_style('select', 'padding', '5px 0 5px 5px');
-$table->column_style('select', 'width', '6%');
-$table->column_style('fullname', 'width', '24%');
-$table->column_style('enrolment', 'width', '24%');
+$table->column_style('select', 'width', '5%');
+$table->column_style('fullname', 'width', '15%');
+$table->column_style('enrolment', 'width', '15%');
+$table->column_style('lastonline', 'width', '15%');
 $table->column_style('progress', 'text-align', 'center');
-$table->column_style('progress', 'width', '24%');
+$table->column_style('progress', 'width', '10%');
 $table->column_style('progress', 'text-align', 'center');
-$table->column_style('grade', 'width', '24%');
+$table->column_style('grade', 'width', '10%');
+$table->column_style('progressbar', 'min-width', '200px');		
+$table->column_style('progressbar', 'width', '*');		
+$table->column_style('progressbar', 'padding', '0');
 
 $table->no_sorting('select');
+$table->no_sorting('progressbar');
 $select = '';
 $table->define_baseurl($PAGE->url);
 $table->setup();
@@ -276,6 +285,11 @@ for ($i = $startuser; $i < $enduser; $i++) {
     }
     $picture = $OUTPUT->user_picture($users[$i], array('course' => $course->id));
     $namelink = html_writer::link($CFG->wwwroot.'/user/view.php?id='.$users[$i]->id.'&course='.$course->id, fullname($users[$i]));
+    if (empty($users[$i]->lastonlinetime)) {
+        $lastonline = get_string('never');
+    } else {
+        $lastonline = userdate($users[$i]->lastonlinetime);
+    }
     if (empty($users[$i]->enrolment)) {
         $enrolment = get_string('never');
     } else {
@@ -303,11 +317,13 @@ for ($i = $startuser; $i < $enduser; $i++) {
         'select' => $select,
         'fullname' => $namelink,
         'enrolment' => $enrolment,
+        'lastonlinetime' => $users[$i]->lastonlinetime,
         'lastonline' => $lastonline,
         'progressvalue' => $progressvalue,
         'progress' => $progress,
         'gradevalue' => $gradevalue,
         'grade' => $grade,
+        'progressbar' => $progressbar,
     );
 }
 
@@ -326,8 +342,10 @@ if ($numberofusers > 0) {
             $rows[$i]['select'],
             $rows[$i]['fullname'],
             $rows[$i]['enrolment'],
+            $rows[$i]['lastonline'],
             $rows[$i]['progress'],
             $rows[$i]['grade']
+            $rows[$i]['progressbar'],
         ));
     }
 }
@@ -404,6 +422,8 @@ function block_completion_progress_compare_rows($a, $b) {
             case 'name':
                 $aspect = 'lastname';
                 break;
+            case 'lastonline':
+                $aspect = 'lastonlinetime';
             case 'enrolment':
                 $aspect = 'enrolment';
                 break;
