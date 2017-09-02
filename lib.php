@@ -96,7 +96,7 @@ function block_completion_progress_course_submissions($courseid) {
 
     // Queries to deliver instance IDs of activities with submissions by user.
     $queries = array (
-        'assign' => "SELECT CONCAT(s.userid, '-', c.id)
+        'assign' => "SELECT ". $DB->sql_concat('s.userid', ''-'', 'c.id') ."
                        FROM {assign_submission} s, {assign} a, {modules} m, {course_modules} c
                       WHERE s.latest = 1
                         AND s.status = 'submitted'
@@ -105,7 +105,7 @@ function block_completion_progress_course_submissions($courseid) {
                         AND m.name = 'assign'
                         AND m.id = c.module
                         AND c.instance = a.id",
-        'workshop' => "SELECT CONCAT(s.authorid, '-', c.id)
+        'workshop' => "SELECT ". $DB->sql_concat('s.userid', ''-'', 'c.id') ."
                          FROM {workshop_submissions} s, {workshop} w, {modules} m, {course_modules} c
                         WHERE s.workshopid = w.id
                           AND w.course = :courseid
