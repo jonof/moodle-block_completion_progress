@@ -58,16 +58,14 @@ class block_completion_progress_base_testcase extends advanced_testcase {
             array_push($this->students, $this->getDataGenerator()->create_user());
         }
 
-
-        $teacherrole = $DB->get_record('role', array('shortname'=>'teacher'));
+        $teacherrole = $DB->get_record('role', array('shortname' => 'teacher'));
         foreach ($this->teachers as $i => $teacher) {
             $this->getDataGenerator()->enrol_user($teacher->id,
               $this->course->id,
               $teacherrole->id);
         }
 
-
-        $studentrole = $DB->get_record('role', array('shortname'=>'student'));
+        $studentrole = $DB->get_record('role', array('shortname' => 'student'));
         foreach ($this->students as $i => $student) {
             $this->getDataGenerator()->enrol_user($student->id,
               $this->course->id,
@@ -93,19 +91,21 @@ class block_completion_progress_base_testcase extends advanced_testcase {
     public function test_assign_get_completion_state() {
         global $DB;
 
-        // Add a block
+        // Add a block.
         $context = CONTEXT_COURSE::instance($this->course->id);
-        $block_info = [
+        $blockinfo = [
           'blockname' => 'completion_progress',
           'parentcontextid' => $context->id,
           'pagetypepattern' => 'course-view-*',
           'showinsubcontexts' => 0,
           'defaultweight' => 5,
           'defaultregion' => 'side-post',
-          'configdata' => 'Tzo4OiJzdGRDbGFzcyI6Njp7czo3OiJvcmRlcmJ5IjtzOjExOiJvcmRlcmJ5dGltZSI7czo4OiJsb25nYmFycyI7czo3OiJzcXVlZXplIjtzOjE2OiJwcm9ncmVzc0Jhckljb25zIjtzOjE6IjEiO3M6MTQ6InNob3dwZXJjZW50YWdlIjtzOjE6IjAiO3M6MTM6InByb2dyZXNzVGl0bGUiO3M6MDoiIjtzOjE4OiJhY3Rpdml0aWVzaW5jbHVkZWQiO3M6MTg6ImFjdGl2aXR5Y29tcGxldGlvbiI7fQ=='
+          'configdata' => 'Tzo4OiJzdGRDbGFzcyI6Njp7czo3OiJvcmRlcmJ5IjtzOjExOiJvcmRlcmJ5dGltZSI7czo4OiJsb25nYmFycyI7czo3OiJzcXVlZXp'.
+                          'lIjtzOjE2OiJwcm9ncmVzc0Jhckljb25zIjtzOjE6IjEiO3M6MTQ6InNob3dwZXJjZW50YWdlIjtzOjE6IjAiO3M6MTM6InByb2dyZX'.
+                          'NzVGl0bGUiO3M6MDoiIjtzOjE4OiJhY3Rpdml0aWVzaW5jbHVkZWQiO3M6MTg6ImFjdGl2aXR5Y29tcGxldGlvbiI7fQ=='
         ];
 
-        $block_instance_id = $DB->insert_record('block_instances', (object) $block_info);
+        $blockinstanceid = $DB->insert_record('block_instances', (object) $blockinfo);
 
         $assign = $this->create_instance([
           'submissiondrafts' => 0,
@@ -124,7 +124,7 @@ class block_completion_progress_base_testcase extends advanced_testcase {
         $this->assertFalse($result);
 
         $submissions = block_completion_progress_student_submissions($this->course->id, $this->students[0]->id);
-        $config = unserialize(base64_decode($block_info['configdata']));
+        $config = unserialize(base64_decode($blockinfo['configdata']));
         $activities = block_completion_progress_get_activities($this->course->id, $config);
 
         $completions = block_completion_progress_completions($activities, $this->students[0]->id, $this->course,
@@ -136,12 +136,13 @@ class block_completion_progress_base_testcase extends advanced_testcase {
           $config,
           $this->students[0]->id,
           $this->course,
-          $block_instance_id
+          $blockinstanceid
         );
 
         $this->assertContains('assign', $text, '', true);
         $this->assertNotContains('quiz', $text, '', true);
-        // The status is futureNotCompleted
+
+        // The status is futureNotCompleted.
         $color1 = get_string('futureNotCompleted_colour', 'block_completion_progress');
         $this->assertContains('background-color:' . $color1, $text, '');
 
@@ -167,10 +168,10 @@ class block_completion_progress_base_testcase extends advanced_testcase {
           $config,
           $this->students[0]->id,
           $this->course,
-          $block_instance_id
+          $blockinstanceid
         );
 
-        // The status is send but not finished
+        // The status is send but not finished.
         $color2 = get_string('submittednotcomplete_colour', 'block_completion_progress');
         $this->assertContains('background-color:' . $color2, $text, '');
     }
