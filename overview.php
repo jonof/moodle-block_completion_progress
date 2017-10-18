@@ -257,6 +257,8 @@ if ($sortbyprogress) {
     $enduser = $enddisplay;
 }
 
+$modinfo = get_fast_modinfo($course->id);
+
 // Build array of user information.
 $rows = array();
 for ($i = $startuser; $i < $enduser; $i++) {
@@ -271,7 +273,9 @@ for ($i = $startuser; $i < $enduser; $i++) {
     } else {
         $lastonline = userdate($users[$i]->lastonlinetime);
     }
-    $useractivities = block_completion_progress_filter_visibility($activities, $users[$i]->id, $course->id);
+
+    $useractivities = block_completion_progress_filter_visibility($modinfo, $activities, $users[$i]->id, $course->id);
+
     if (!empty($useractivities)) {
         $completions = block_completion_progress_completions($useractivities, $users[$i]->id, $course, $users[$i]->submissions);
         $progressbar = block_completion_progress_bar($useractivities, $completions, $config, $users[$i]->id, $course->id,

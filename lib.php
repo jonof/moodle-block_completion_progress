@@ -250,15 +250,15 @@ function block_completion_progress_compare_times($a, $b) {
 /**
  * Filters activities that a user cannot see due to grouping constraints
  *
+ * @param mixed  $modinfo Information about the course modules
  * @param array  $activities The possible activities that can occur for modules
  * @param array  $userid The user's id
  * @param string $courseid the course for filtering visibility
  * @return array The array with restricted activities removed
  */
-function block_completion_progress_filter_visibility($activities, $userid, $courseid) {
+function block_completion_progress_filter_visibility($modinfo, $activities, $userid, $courseid) {
     global $CFG;
     $filteredactivities = array();
-    $modinfo = get_fast_modinfo($courseid, $userid);
     $coursecontext = CONTEXT_COURSE::instance($courseid);
 
     // Keep only activities that are visible.
