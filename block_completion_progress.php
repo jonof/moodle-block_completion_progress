@@ -105,6 +105,8 @@ class block_completion_progress extends block_base {
     public function get_content() {
         global $USER, $COURSE, $CFG, $OUTPUT, $DB;
 
+        $modinfo = get_fast_modinfo($COURSE->id);
+
         // If content has already been generated, don't waste time generating it again.
         if ($this->content !== null) {
             return $this->content;
@@ -160,7 +162,7 @@ class block_completion_progress extends block_base {
                     foreach ($blockinstances as $blockid => $blockinstance) {
                         $blockinstance->config = unserialize(base64_decode($blockinstance->configdata));
                         $blockinstance->activities = block_completion_progress_get_activities($course->id, $blockinstance->config);
-                        $blockinstance->activities = block_completion_progress_filter_visibility($blockinstance->activities,
+                        $blockinstance->activities = block_completion_progress_filter_visibility($modinfo, $blockinstance->activities,
                                                          $USER->id, $course->id);
                         $blockcontext = CONTEXT_BLOCK::instance($blockid);
                         if (
@@ -241,7 +243,7 @@ class block_completion_progress extends block_base {
 
             // Check if any activities/resources have been created.
             $activities = block_completion_progress_get_activities($COURSE->id, $this->config);
-            $activities = block_completion_progress_filter_visibility($activities, $USER->id, $COURSE->id);
+            $activities = block_completion_progress_filter_visibility($modinfo, $activities, $USER->id, $COURSE->id);
             if (empty($activities)) {
                 if (has_capability('moodle/block:edit', $this->context)) {
                     $this->content->text .= get_string('no_activities_config_message', 'block_completion_progress');
