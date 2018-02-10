@@ -205,7 +205,7 @@ echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'return
 // Setup submissions table.
 $table = new flexible_table('mod-block-completion-progress-overview');
 $table->pagesize($perpage, $numberofusers);
-/tablecolumns = array('picture', 'fullname', 'lastonline', 'progressbar', 'progress');
+$tablecolumns = array('picture', 'fullname', 'lastonline', 'progressbar', 'progress');
 $table->define_columns($tablecolumns);
 $tableheaders = array(
                     '',
@@ -229,8 +229,6 @@ $table->column_style('progressbar', 'padding', '0');
 $table->column_style('progress', 'text-align', 'center');
 $table->column_style('progress', 'width', '8%');
 
-// $table->no_sorting('select');
-$select = '';
 $table->no_sorting('picture');
 $table->no_sorting('progressbar');
 $table->define_baseurl($PAGE->url);
@@ -297,7 +295,6 @@ if ($sortbyprogress) {
 // Build the table content and output.
 if ($numberofusers > 0) {
     for ($i = $startdisplay; $i < $enddisplay; $i++) {
-        // $table->add_data(array($rows[$i]['select'], $rows[$i]['picture'],
         $table->add_data(array($rows[$i]['picture'],
             $rows[$i]['fullname'], $rows[$i]['lastonline'],
             $rows[$i]['progressbar'], $rows[$i]['progress']));
