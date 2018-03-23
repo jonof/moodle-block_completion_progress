@@ -94,7 +94,6 @@ class block_completion_progress_base_testcase extends advanced_testcase {
         // Add a block.
         $context = CONTEXT_COURSE::instance($this->course->id);
         $blockinfo = [
-          'blockname' => 'completion_progress',
           'parentcontextid' => $context->id,
           'pagetypepattern' => 'course-view-*',
           'showinsubcontexts' => 0,
@@ -105,7 +104,8 @@ class block_completion_progress_base_testcase extends advanced_testcase {
                           'NzVGl0bGUiO3M6MDoiIjtzOjE4OiJhY3Rpdml0aWVzaW5jbHVkZWQiO3M6MTg6ImFjdGl2aXR5Y29tcGxldGlvbiI7fQ=='
         ];
 
-        $blockinstanceid = $DB->insert_record('block_instances', (object) $blockinfo);
+        $blockinstance = $this->getDataGenerator()->create_block('completion_progress', $blockinfo);
+        $blockinstanceid = $blockinstance->id;
 
         $assign = $this->create_instance([
           'submissiondrafts' => 0,
