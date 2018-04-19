@@ -19,7 +19,7 @@
  * Completion Progress block overview page
  *
  * @package    block_completion_progress
- * @copyright  2016 Michael de Raadt
+ * @copyright  2018 Michael de Raadt
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -205,10 +205,9 @@ echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'return
 // Setup submissions table.
 $table = new flexible_table('mod-block-completion-progress-overview');
 $table->pagesize($perpage, $numberofusers);
-$tablecolumns = array('select', 'picture', 'fullname', 'lastonline', 'progressbar', 'progress');
+$tablecolumns = array('picture', 'fullname', 'lastonline', 'progressbar', 'progress');
 $table->define_columns($tablecolumns);
 $tableheaders = array(
-                    '',
                     '',
                     get_string('fullname'),
                     get_string('lastonline', 'block_completion_progress'),
@@ -221,9 +220,6 @@ $table->set_attribute('class', 'overviewTable');
 $table->column_style_all('padding', '5px');
 $table->column_style_all('text-align', 'left');
 $table->column_style_all('vertical-align', 'middle');
-$table->column_style('select', 'text-align', 'right');
-$table->column_style('select', 'padding', '5px 0 5px 5px');
-$table->column_style('select', 'width', '5%');
 $table->column_style('picture', 'width', '5%');
 $table->column_style('fullname', 'width', '15%');
 $table->column_style('lastonline', 'width', '15%');
@@ -233,8 +229,6 @@ $table->column_style('progressbar', 'padding', '0');
 $table->column_style('progress', 'text-align', 'center');
 $table->column_style('progress', 'width', '8%');
 
-$table->no_sorting('select');
-$select = '';
 $table->no_sorting('picture');
 $table->no_sorting('progressbar');
 $table->define_baseurl($PAGE->url);
@@ -259,11 +253,8 @@ if ($sortbyprogress) {
 
 // Build array of user information.
 $rows = array();
+$exclusions = block_completion_progress_exclusions($course->id);
 for ($i = $startuser; $i < $enduser; $i++) {
-    if ($CFG->enablenotes || $CFG->messaging) {
-        $selectattributes = array('type' => 'checkbox', 'class' => 'usercheckbox', 'name' => 'user'.$users[$i]->id);
-        $select = html_writer::empty_tag('input', $selectattributes);
-    }
     $picture = $OUTPUT->user_picture($users[$i], array('course' => $course->id));
     $namelink = html_writer::link($CFG->wwwroot.'/user/view.php?id='.$users[$i]->id.'&course='.$course->id, fullname($users[$i]));
     if (empty($users[$i]->lastonlinetime)) {
@@ -271,7 +262,7 @@ for ($i = $startuser; $i < $enduser; $i++) {
     } else {
         $lastonline = userdate($users[$i]->lastonlinetime);
     }
-    $useractivities = block_completion_progress_filter_visibility($activities, $users[$i]->id, $course->id);
+    $useractivities = block_completion_progress_filter_visibility($activities, $users[$i]->id, $course->id, $exclusions);
     if (!empty($useractivities)) {
         $completions = block_completion_progress_completions($useractivities, $users[$i]->id, $course, $users[$i]->submissions);
         $progressbar = block_completion_progress_bar($useractivities, $completions, $config, $users[$i]->id, $course->id,
@@ -287,7 +278,6 @@ for ($i = $startuser; $i < $enduser; $i++) {
     $rows[$i] = array(
         'firstname' => strtoupper($users[$i]->firstname),
         'lastname' => strtoupper($users[$i]->lastname),
-        'select' => $select,
         'picture' => $picture,
         'fullname' => $namelink,
         'lastonlinetime' => $users[$i]->lastonlinetime,
@@ -306,7 +296,7 @@ if ($sortbyprogress) {
 // Build the table content and output.
 if ($numberofusers > 0) {
     for ($i = $startdisplay; $i < $enddisplay; $i++) {
-        $table->add_data(array($rows[$i]['select'], $rows[$i]['picture'],
+        $table->add_data(array($rows[$i]['picture'],
             $rows[$i]['fullname'], $rows[$i]['lastonline'],
             $rows[$i]['progressbar'], $rows[$i]['progress']));
     }
@@ -322,34 +312,6 @@ if ($paged) {
     $perpageurl->param('perpage', DEFAULT_PAGE_SIZE);
     echo $OUTPUT->container(html_writer::link($perpageurl, get_string('showperpage', '', DEFAULT_PAGE_SIZE)), array(), 'showall');
 }
-
-// Output messaging controls.
-if ($CFG->enablenotes || $CFG->messaging) {
-    echo html_writer::start_tag('div', array('class' => 'buttons'));
-    echo html_writer::empty_tag('input', array('type' => 'button', 'id' => 'checkall', 'value' => get_string('selectall')));
-    echo html_writer::empty_tag('input', array('type' => 'button', 'id' => 'checknone', 'value' => get_string('deselectall')));
-    $displaylist = array();
-    if (!empty($CFG->messaging) && has_capability('moodle/course:bulkmessaging', $context)) {
-        $displaylist['messageselect.php'] = get_string('messageselectadd');
-    }
-    if (!empty($CFG->enablenotes) && has_capability('moodle/notes:manage', $context)) {
-        $displaylist['addnote.php'] = get_string('addnewnote', 'notes');
-        $displaylist['groupaddnote.php'] = get_string('groupaddnewnote', 'notes');
-    }
-    echo html_writer::tag('label', get_string("withselectedusers"), array('for' => 'formactionid'));
-    echo html_writer::select($displaylist, 'formaction', '', array('' => 'choosedots'), array('id' => 'formactionid'));
-    echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'id', 'value' => $course->id));
-    echo html_writer::start_tag('noscript', array('style' => 'display:inline;'));
-    echo html_writer::empty_tag('input', array('type' => 'submit', 'value' => get_string('ok')));
-    echo html_writer::end_tag('noscript');
-    echo $OUTPUT->help_icon('withselectedusers');
-    echo html_writer::end_tag('div');
-    echo html_writer::end_tag('form');
-}
-
-// Organise access to JS for messaging.
-$module = array('name' => 'core_user', 'fullpath' => '/user/module.js');
-$PAGE->requires->js_init_call('M.core_user.init_participation', null, false, $module);
 
 // Organise access to JS for progress bars.
 $jsmodule = array('name' => 'block_completion_progress', 'fullpath' => '/blocks/completion_progress/module.js');

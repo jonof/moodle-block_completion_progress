@@ -253,9 +253,10 @@ function block_completion_progress_compare_times($a, $b) {
  * @param array  $activities The possible activities that can occur for modules
  * @param array  $userid The user's id
  * @param string $courseid the course for filtering visibility
+ * @param array  $exclusions Assignment exemptions for students in the course
  * @return array The array with restricted activities removed
  */
-function block_completion_progress_filter_visibility($activities, $userid, $courseid) {
+function block_completion_progress_filter_visibility($activities, $userid, $courseid, $exclusions) {
     global $CFG;
     $filteredactivities = array();
     $modinfo = get_fast_modinfo($courseid, $userid);
@@ -292,6 +293,11 @@ function block_completion_progress_filter_visibility($activities, $userid, $cour
             } else if (!groups_course_module_visible($coursemodule, $userid)) {
                 continue;
             }
+        }
+
+        // Check for exclusions.
+        if (in_array($activity['type'].'-'.$activity['instance'].'-'.$userid, $exclusions)) {
+            continue;
         }
 
         // Save the visible event.
@@ -621,4 +627,27 @@ function block_completion_progress_on_site_page() {
     global $SCRIPT, $COURSE;
 
     return $SCRIPT === '/my/index.php' || $COURSE->id == 1;
+}
+
+/**
+ * Finds gradebook exclusions for students in a course
+ *
+ * @param int $courseid The ID of the course containing grade items
+ * @return array of exclusions as activity-user pairs
+ */
+function block_completion_progress_exclusions ($courseid) {
+    global $DB;
+
+    $query = "SELECT g.id, ". $DB->sql_concat('i.itemmodule', "'-'", 'i.iteminstance', "'-'", 'g.userid') ." as exclusion
+               FROM {grade_grades} g, {grade_items} i
+              WHERE i.courseid = :courseid
+                AND i.id = g.itemid
+                AND g.excluded <> 0";
+    $params = array ('courseid' => $courseid);
+    $results = $DB->get_records_sql($query, $params);
+    $exclusions = array();
+    foreach ($results as $key => $value) {
+        $exclusions[] = $value->exclusion;
+    }
+    return $exclusions;
 }

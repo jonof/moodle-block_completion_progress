@@ -157,11 +157,12 @@ class block_completion_progress extends block_base {
                     $context = CONTEXT_COURSE::instance($course->id);
                     $params = array('contextid' => $context->id, 'pagetype' => 'course-view-%');
                     $blockinstances = $DB->get_records_sql($sql, $params);
+                    $exclusions = block_completion_progress_exclusions($course->id);
                     foreach ($blockinstances as $blockid => $blockinstance) {
                         $blockinstance->config = unserialize(base64_decode($blockinstance->configdata));
                         $blockinstance->activities = block_completion_progress_get_activities($course->id, $blockinstance->config);
                         $blockinstance->activities = block_completion_progress_filter_visibility($blockinstance->activities,
-                                                         $USER->id, $course->id);
+                                                         $USER->id, $course->id, $exclusions);
                         $blockcontext = CONTEXT_BLOCK::instance($blockid);
                         if (
                             !has_capability('block/completion_progress:showbar', $blockcontext) ||
@@ -240,8 +241,9 @@ class block_completion_progress extends block_base {
             }
 
             // Check if any activities/resources have been created.
+            $exclusions = block_completion_progress_exclusions($COURSE->id);
             $activities = block_completion_progress_get_activities($COURSE->id, $this->config);
-            $activities = block_completion_progress_filter_visibility($activities, $USER->id, $COURSE->id);
+            $activities = block_completion_progress_filter_visibility($activities, $USER->id, $COURSE->id, $exclusions);
             if (empty($activities)) {
                 if (has_capability('moodle/block:edit', $this->context)) {
                     $this->content->text .= get_string('no_activities_config_message', 'block_completion_progress');
