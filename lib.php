@@ -171,6 +171,15 @@ function block_completion_progress_get_activities($courseid, $config = null, $fo
     $modinfo = get_fast_modinfo($courseid, -1);
     $sections = $modinfo->get_sections();
     $activities = array();
+
+// Praxis changes
+  if(isset($config)) {
+      if (!isset($config->selectactivities)) {
+          $config->selectactivities = array();
+      }
+  }
+// Praxis changes above
+
     foreach ($modinfo->instances as $module => $instances) {
         $modulename = get_string('pluginname', $module);
         foreach ($instances as $index => $cm) {
