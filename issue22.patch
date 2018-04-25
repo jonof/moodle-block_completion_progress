@@ -1,0 +1,26 @@
+commit 165589b6ff13d6ecf1916f60f7f9f3dad19a8330
+Author: Henrik Sune Pedersen <hsp@praxis.dk>
+Date:   Wed Apr 25 09:37:49 2018 +0200
+
+    Made check that kills enotice and warning on line 182 when no activities are selected
+
+diff --git a/lib.php b/lib.php
+index a5ca5fb..5449e1a 100644
+--- a/lib.php
++++ b/lib.php
+@@ -171,6 +171,15 @@ function block_completion_progress_get_activities($courseid, $config = null, $fo
+     $modinfo = get_fast_modinfo($courseid, -1);
+     $sections = $modinfo->get_sections();
+     $activities = array();
++
++// Praxis changes
++  if(isset($config)) {
++      if (!isset($config->selectactivities)) {
++          $config->selectactivities = array();
++      }
++  }
++// Praxis changes above
++
+     foreach ($modinfo->instances as $module => $instances) {
+         $modulename = get_string('pluginname', $module);
+         foreach ($instances as $index => $cm) {
