@@ -551,7 +551,7 @@ function block_completion_progress_bar($activities, $completions, $config, $user
         $text = '';
         $text .= html_writer::empty_tag('img',
                 array('src' => $activity['icon'], 'class' => 'moduleIcon', 'alt' => '', 'role' => 'presentation'));
-        $text .= s($activity['name']);
+        $text .= s(format_string($activity['name']));
         if (!empty($activity['link']) && (!empty($activity['available']) || $simple)) {
             $content .= $OUTPUT->action_link($activity['link'], $text);
         } else {
