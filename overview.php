@@ -200,7 +200,7 @@ if (!$paged) {
 $formattributes = array('action' => $CFG->wwwroot.'/user/action_redir.php', 'method' => 'post', 'id' => 'participantsform');
 echo html_writer::start_tag('form', $formattributes);
 echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()));
-echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'returnto', 'value' => s(format_string($PAGE->url->out(false))));
+echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'returnto', 'value' => s(format_string($PAGE->url->out(false)))));
 
 // Setup submissions table.
 $table = new flexible_table('mod-block-completion-progress-overview');
