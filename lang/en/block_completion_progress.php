@@ -77,6 +77,7 @@ $string['notCompleted_colour_descr'] = 'HTML colour code for current elements th
 $string['notCompleted_colour_title'] = 'Not-completed colour';
 $string['now_indicator'] = 'NOW';
 $string['overview'] = 'Overview of students';
+$string['pending'] = 'Awaiting mark';
 $string['pluginname'] = 'Completion Progress';
 $string['progress'] = 'Progress';
 $string['progressbar'] = 'Completion Progress';

@@ -541,6 +541,7 @@ function block_completion_progress_bar($activities, $completions, $config, $user
     $stringpassed = get_string('completion-pass', 'completion');
     $stringfailed = get_string('completion-fail', 'completion');
     $stringsubmitted = get_string('submitted', 'block_completion_progress');
+    $stringpending = get_string('pending', 'block_completion_progress');
     foreach ($activities as $activity) {
         $completed = $completions[$activity['id']];
         $divoptions = array('class' => 'progressEventInfo',
@@ -576,8 +577,9 @@ function block_completion_progress_bar($activities, $completions, $config, $user
             $icon = 'cross';
             $altattribute = $stringincomplete;
             if ($completed === 'submitted') {
-                $content .= '(' . $stringsubmitted . ')&nbsp;';
-                $altattribute .= '(' . $stringsubmitted . ')';
+                $content .= '(' . $stringpending . ')&nbsp;';
+                $icon = 'pending';
+                $altattribute .= '(' . $stringpending . ')';
             }
         }
         $content .= $OUTPUT->pix_icon($icon, $altattribute, 'block_completion_progress', array('class' => 'iconInInfo'));
