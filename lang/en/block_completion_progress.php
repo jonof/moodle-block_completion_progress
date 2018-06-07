@@ -80,6 +80,7 @@ $string['overview'] = 'Overview of students';
 $string['pluginname'] = 'Completion Progress';
 $string['progress'] = 'Progress';
 $string['progressbar'] = 'Completion Progress';
+$string['privacy:metadata'] = 'The Completion Progress block only displays existing completion data.';
 $string['shortname'] = 'Short course name';
 $string['showallinfo'] = 'Show all info';
 $string['showinactive'] = 'Show inactive students in Overview';
