@@ -257,42 +257,22 @@ function block_completion_progress_compare_times($a, $b) {
  * @return array The array with restricted activities removed
  */
 function block_completion_progress_filter_visibility($activities, $userid, $courseid, $exclusions) {
-    global $CFG;
     $filteredactivities = array();
     $modinfo = get_fast_modinfo($courseid, $userid);
-    $coursecontext = CONTEXT_COURSE::instance($courseid);
 
     // Keep only activities that are visible.
     foreach ($activities as $index => $activity) {
-
         $coursemodule = $modinfo->cms[$activity['id']];
 
-        // Check visibility in course.
-        if (!$coursemodule->visible && !has_capability('moodle/course:viewhiddenactivities', $coursecontext, $userid)) {
-            continue;
-        }
-
-        // Check availability, allowing for visible, but not accessible items.
-        if (!empty($CFG->enableavailability)) {
-            if (has_capability('moodle/course:viewhiddenactivities', $coursecontext, $userid)) {
-                $activity['available'] = true;
-            } else {
-                if (isset($coursemodule->available) && !$coursemodule->available && empty($coursemodule->availableinfo)) {
-                    continue;
-                }
-                $activity['available'] = $coursemodule->available;
-            }
-        }
-
-        // Check visibility by grouping constraints (includes capability check).
-        if (!empty($CFG->enablegroupmembersonly)) {
-            if (isset($coursemodule->uservisible)) {
-                if ($coursemodule->uservisible != 1 && empty($coursemodule->availableinfo)) {
-                    continue;
-                }
-            } else if (!groups_course_module_visible($coursemodule, $userid)) {
+        $parentsection = $modinfo->get_section_info($coursemodule->sectionnum);
+        // check parent section for visibility
+        if ($parentsection->uservisible) {
+            // Check availability, allowing for visible, but not accessible items.
+            if(!$coursemodule->uservisible && empty($coursemodule->availableinfo)){
                 continue;
             }
+        } else { // Hide all items in not visible sections
+            continue;
         }
 
         // Check for exclusions.
