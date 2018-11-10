@@ -99,6 +99,8 @@ class block_completion_progress_base_testcase extends advanced_testcase {
           'pagetypepattern' => 'course-view-*',
           'showinsubcontexts' => 0,
           'defaultweight' => 5,
+          'timecreated' => time(),
+          'timemodified' => time(),
           'defaultregion' => 'side-post',
           'configdata' => 'Tzo4OiJzdGRDbGFzcyI6Njp7czo3OiJvcmRlcmJ5IjtzOjExOiJvcmRlcmJ5dGltZSI7czo4OiJsb25nYmFycyI7czo3OiJzcXVlZXp'.
                           'lIjtzOjE2OiJwcm9ncmVzc0Jhckljb25zIjtzOjE6IjEiO3M6MTQ6InNob3dwZXJjZW50YWdlIjtzOjE6IjAiO3M6MTM6InByb2dyZX'.
