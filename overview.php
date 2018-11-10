@@ -302,6 +302,7 @@ if ($numberofusers > 0) {
     }
 }
 $table->print_html();
+echo html_writer::end_tag('form');
 
 // Output paging controls.
 $perpageurl = clone($PAGE->url);
