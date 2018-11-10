@@ -83,13 +83,13 @@ echo $OUTPUT->container_start('block_completion_progress');
 // Check if activities/resources have been selected in config.
 $activities = block_completion_progress_get_activities($courseid, $config);
 if ($activities == null) {
-    echo get_string('no_events_message', 'block_completion_progress');
+    echo get_string('no_activities_message', 'block_completion_progress');
     echo $OUTPUT->container_end();
     echo $OUTPUT->footer();
     die();
 }
 if (empty($activities)) {
-    echo get_string('no_visible_events_message', 'block_completion_progress');
+    echo get_string('no_visible_activities_message', 'block_completion_progress');
     echo $OUTPUT->container_end();
     echo $OUTPUT->footer();
     die();
@@ -270,7 +270,7 @@ for ($i = $startuser; $i < $enduser; $i++) {
         $progressvalue = block_completion_progress_percentage($useractivities, $completions);
         $progress = $progressvalue.'%';
     } else {
-        $progressbar = get_string('no_visible_events_message', 'block_completion_progress');
+        $progressbar = get_string('no_visible_activities_message', 'block_completion_progress');
         $progressvalue = 0;
         $progress = '?';
     }
