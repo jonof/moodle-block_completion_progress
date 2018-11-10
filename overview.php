@@ -44,6 +44,21 @@ $group    = optional_param('group', 0, PARAM_INT); // Group selected.
 $course = $DB->get_record('course', array('id' => $courseid), '*', MUST_EXIST);
 $context = CONTEXT_COURSE::instance($courseid);
 
+// Find the role to display, defaulting to students.
+$sql = "SELECT DISTINCT r.id, r.name, r.archetype
+          FROM {role} r, {role_assignments} a
+         WHERE a.contextid = :contextid
+           AND r.id = a.roleid
+           AND r.archetype = :archetype";
+$params = array('contextid' => $context->id, 'archetype' => 'student');
+$studentrole = $DB->get_record_sql($sql, $params);
+if ($studentrole) {
+    $studentroleid = $studentrole->id;
+} else {
+    $studentroleid = 0;
+}
+$roleselected = optional_param('role', $studentroleid, PARAM_INT);
+
 // Get specific block config and context.
 $block = $DB->get_record('block_instances', array('id' => $id), '*', MUST_EXIST);
 $config = unserialize(base64_decode($block->configdata));
@@ -61,6 +76,7 @@ $PAGE->set_url(
         'perpage'    => $perpage,
         'group'      => $group,
         'sesskey'    => sesskey(),
+        'role'       => $roleselected,
     )
 );
 $PAGE->set_context($context);
@@ -96,20 +112,7 @@ if (empty($activities)) {
 }
 $numactivities = count($activities);
 
-// Determine if a role has been selected.
-$sql = "SELECT DISTINCT r.id, r.name, r.archetype
-          FROM {role} r, {role_assignments} a
-         WHERE a.contextid = :contextid
-           AND r.id = a.roleid
-           AND r.archetype = :archetype";
-$params = array('contextid' => $context->id, 'archetype' => 'student');
-$studentrole = $DB->get_record_sql($sql, $params);
-if ($studentrole) {
-    $studentroleid = $studentrole->id;
-} else {
-    $studentroleid = 0;
-}
-$roleselected = optional_param('role', $studentroleid, PARAM_INT);
+// Limit to a specific role, if selected.
 $rolewhere = $roleselected != 0 ? "AND a.roleid = $roleselected" : '';
 
 // Output group selector if there are groups in the course.
