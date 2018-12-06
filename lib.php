@@ -633,9 +633,10 @@ function block_completion_progress_on_site_page() {
  * Finds gradebook exclusions for students in a course
  *
  * @param int $courseid The ID of the course containing grade items
+ * @param int $userid   The ID of the user whos grade items are being retrieved
  * @return array of exclusions as activity-user pairs
  */
-function block_completion_progress_exclusions ($courseid) {
+function block_completion_progress_exclusions ($courseid, $userid = null) {
     global $DB;
 
     $query = "SELECT g.id, ". $DB->sql_concat('i.itemmodule', "'-'", 'i.iteminstance', "'-'", 'g.userid') ." as exclusion
@@ -643,7 +644,12 @@ function block_completion_progress_exclusions ($courseid) {
               WHERE i.courseid = :courseid
                 AND i.id = g.itemid
                 AND g.excluded <> 0";
-    $params = array ('courseid' => $courseid);
+
+    $params = array('courseid' => $courseid);
+    if (!is_null($userid)) {
+        $query .= " AND g.userid = :userid";
+        $params['userid'] = $userid;
+    }
     $results = $DB->get_records_sql($query, $params);
     $exclusions = array();
     foreach ($results as $key => $value) {
