@@ -62,7 +62,7 @@ function block_completion_progress_student_submissions($courseid, $userid) {
                         AND m.name = 'assign'
                         AND m.id = c.module
                         AND c.instance = a.id",
-        'workshop' => "SELECT c.id
+        'workshop' => "SELECT DISTINCT c.id
                          FROM {workshop_submissions} s, {workshop} w, {modules} m, {course_modules} c
                         WHERE s.authorid = :userid
                           AND s.workshopid = w.id
@@ -186,7 +186,7 @@ function block_completion_progress_get_activities($courseid, $config = null, $fo
                     'modulename' => $modulename,
                     'id'         => $cm->id,
                     'instance'   => $cm->instance,
-                    'name'       => $cm->name,
+                    'name'       => format_string($cm->name),
                     'expected'   => $cm->completionexpected,
                     'section'    => $cm->sectionnum,
                     'position'   => array_search($cm->id, $sections[$cm->sectionnum]),
@@ -551,7 +551,7 @@ function block_completion_progress_bar($activities, $completions, $config, $user
         $text = '';
         $text .= html_writer::empty_tag('img',
                 array('src' => $activity['icon'], 'class' => 'moduleIcon', 'alt' => '', 'role' => 'presentation'));
-        $text .= s($activity['name']);
+        $text .= s(format_string($activity['name']));
         if (!empty($activity['link']) && (!empty($activity['available']) || $simple)) {
             $content .= $OUTPUT->action_link($activity['link'], $text);
         } else {

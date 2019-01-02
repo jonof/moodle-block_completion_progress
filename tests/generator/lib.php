@@ -14,19 +14,26 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-
 /**
- * Completion Progress block version details
+ * block_completion_progress data generator
  *
  * @package    block_completion_progress
- * @copyright  2018 Michael de Raadt
+ * @category   test
+ * @copyright  2018 Michael Aherne
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die;
+defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2018111000;
-$plugin->requires  = 2014111100; // Moodle 2.8.
-$plugin->maturity  = MATURITY_STABLE;
-$plugin->release   = 'Version for Moodle 2.8 onwards';
-$plugin->component = 'block_completion_progress';
+
+/**
+ * Completion progress block data generator class
+ *
+ * @package    block_completion_progress
+ * @category   test
+ * @copyright  2018 Michael Aherne
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class block_completion_progress_generator extends testing_block_generator {
+
+}

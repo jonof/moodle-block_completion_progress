@@ -182,7 +182,7 @@ class block_completion_progress extends block_base {
                     // Output the Progress Bar.
                     if (!empty($blockinstances)) {
                         $courselink = new moodle_url('/course/view.php', array('id' => $course->id));
-                        $linktext = HTML_WRITER::tag('h3', s($course->$coursenametoshow));
+                        $linktext = HTML_WRITER::tag('h3', s(format_string($course->$coursenametoshow)));
                         $this->content->text .= HTML_WRITER::link($courselink, $linktext);
                     }
                     foreach ($blockinstances as $blockid => $blockinstance) {
