@@ -44,6 +44,21 @@ $group    = optional_param('group', 0, PARAM_INT); // Group selected.
 $course = $DB->get_record('course', array('id' => $courseid), '*', MUST_EXIST);
 $context = CONTEXT_COURSE::instance($courseid);
 
+// Find the role to display, defaulting to students.
+$sql = "SELECT DISTINCT r.id, r.name, r.archetype
+          FROM {role} r, {role_assignments} a
+         WHERE a.contextid = :contextid
+           AND r.id = a.roleid
+           AND r.archetype = :archetype";
+$params = array('contextid' => $context->id, 'archetype' => 'student');
+$studentrole = $DB->get_record_sql($sql, $params);
+if ($studentrole) {
+    $studentroleid = $studentrole->id;
+} else {
+    $studentroleid = 0;
+}
+$roleselected = optional_param('role', $studentroleid, PARAM_INT);
+
 // Get specific block config and context.
 $block = $DB->get_record('block_instances', array('id' => $id), '*', MUST_EXIST);
 $config = unserialize(base64_decode($block->configdata));
@@ -61,6 +76,7 @@ $PAGE->set_url(
         'perpage'    => $perpage,
         'group'      => $group,
         'sesskey'    => sesskey(),
+        'role'       => $roleselected,
     )
 );
 $PAGE->set_context($context);
@@ -83,33 +99,20 @@ echo $OUTPUT->container_start('block_completion_progress');
 // Check if activities/resources have been selected in config.
 $activities = block_completion_progress_get_activities($courseid, $config);
 if ($activities == null) {
-    echo get_string('no_events_message', 'block_completion_progress');
+    echo get_string('no_activities_message', 'block_completion_progress');
     echo $OUTPUT->container_end();
     echo $OUTPUT->footer();
     die();
 }
 if (empty($activities)) {
-    echo get_string('no_visible_events_message', 'block_completion_progress');
+    echo get_string('no_visible_activities_message', 'block_completion_progress');
     echo $OUTPUT->container_end();
     echo $OUTPUT->footer();
     die();
 }
 $numactivities = count($activities);
 
-// Determine if a role has been selected.
-$sql = "SELECT DISTINCT r.id, r.name, r.archetype
-          FROM {role} r, {role_assignments} a
-         WHERE a.contextid = :contextid
-           AND r.id = a.roleid
-           AND r.archetype = :archetype";
-$params = array('contextid' => $context->id, 'archetype' => 'student');
-$studentrole = $DB->get_record_sql($sql, $params);
-if ($studentrole) {
-    $studentroleid = $studentrole->id;
-} else {
-    $studentroleid = 0;
-}
-$roleselected = optional_param('role', $studentroleid, PARAM_INT);
+// Limit to a specific role, if selected.
 $rolewhere = $roleselected != 0 ? "AND a.roleid = $roleselected" : '';
 
 // Output group selector if there are groups in the course.
@@ -200,7 +203,7 @@ if (!$paged) {
 $formattributes = array('action' => $CFG->wwwroot.'/user/action_redir.php', 'method' => 'post', 'id' => 'participantsform');
 echo html_writer::start_tag('form', $formattributes);
 echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()));
-echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'returnto', 'value' => s(format_string($PAGE->url->out(false)))));
+echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'returnto', 'value' => s($PAGE->url->out(false))));
 
 // Setup submissions table.
 $table = new flexible_table('mod-block-completion-progress-overview');
@@ -270,7 +273,7 @@ for ($i = $startuser; $i < $enduser; $i++) {
         $progressvalue = block_completion_progress_percentage($useractivities, $completions);
         $progress = $progressvalue.'%';
     } else {
-        $progressbar = get_string('no_visible_events_message', 'block_completion_progress');
+        $progressbar = get_string('no_visible_activities_message', 'block_completion_progress');
         $progressvalue = 0;
         $progress = '?';
     }
@@ -302,6 +305,7 @@ if ($numberofusers > 0) {
     }
 }
 $table->print_html();
+echo html_writer::end_tag('form');
 
 // Output paging controls.
 $perpageurl = clone($PAGE->url);

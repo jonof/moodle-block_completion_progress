@@ -1,6 +1,9 @@
 .block_completion_progress .content {
     text-align: left;
 }
+.dir-rtl .block_completion_progress .content {
+    text-align: right;
+}
 
 .block_completion_progress .barContainer {
     overflow: hidden;
@@ -65,6 +68,7 @@
 
 .dir-rtl .block_completion_progress .progressBarCell .firstNow {
     right: 0;
+    left: auto;
     text-align: right;
 }
 
@@ -134,7 +138,10 @@
     padding: 0;
     margin: 5px;
 }
-
+.dir-rtl .block_completion_progress .progressEventInfo,
+.dir-rtl .block_completion_progress .progressPercentage {
+    text-align: right;
+}
 .block_completion_progress .progressEventInfo .iconInInfo,
 #fitem_id_config_progressBarIcons .iconOnConfig {
     height: 1.2em;
@@ -154,6 +161,11 @@
     float: left;
     margin-right: 5px;
     max-width: 24px;
+}
+.dir-rtl .block_completion_progress .moduleIcon {
+    float: right;
+    margin-right: 0;
+    margin-left: 5px;
 }
 
 .block_completion_progress .progressBarHeader {
@@ -203,20 +215,33 @@
     margin-top: 20px;
     text-align: left;
 }
+.dir-rtl #page-blocks-completion_progress-overview .buttons {
+    text-align: right;
+}
 
 #page-blocks-completion_progress-overview .buttons label {
     display: inline;
     margin: 0 5px 0 10px;
 }
-
+.dir-rtl #page-blocks-completion_progress-overview .buttons label {
+    margin: 0 10px 0 5px;
+}
 #page-blocks-completion_progress-overview .progressoverviewmenus {
     text-align: left;
     margin-bottom: 5px;
+}
+.dir-rtl #page-blocks-completion_progress-overview .progressoverviewmenus {
+    text-align: right;
 }
 
 #page-blocks-completion_progress-overview .progressoverviewmenus .singleselect {
     text-align: left;
     margin-right: 10px;
+}
+.dir-rtl #page-blocks-completion_progress-overview .progressoverviewmenus .singleselect {
+    text-align: right;
+    margin-right: 0;
+    margin-left: 10px;
 }
 
 #page-blocks-completion_progress-overview .progressoverviewmenus form,
@@ -230,8 +255,15 @@
 #page-blocks-completion_progress-overview #showall {
     margin-left: 10px;
 }
-
+.dir-rtl #page-blocks-completion_progress-overview #showall {
+    margin-left: 0;
+    margin-right: 10px;
+}
 
 #page-blocks-completion_progress-overview .progressoverviewmenus select {
     margin-left: 2px;
+}
+#page-blocks-completion_progress-overview .progressoverviewmenus select {
+    margin-left: 0;
+    margin-right: 2px;
 }
