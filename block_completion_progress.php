@@ -196,8 +196,10 @@ class block_completion_progress extends block_base {
                         $submissions = block_completion_progress_student_submissions($course->id, $USER->id);
                         $completions = block_completion_progress_completions($blockinstance->activities, $USER->id, $course,
                             $submissions);
+                        $completiondates = block_completion_progress_completion_dates($blockinstance->activities, $USER->id, $course);
                         $this->content->text .= block_completion_progress_bar($blockinstance->activities,
                                                                     $completions,
+                                                                    $completiondates,
                                                                     $blockinstance->config,
                                                                     $USER->id,
                                                                     $course->id,
@@ -255,9 +257,11 @@ class block_completion_progress extends block_base {
             if (has_capability('block/completion_progress:showbar', $this->context)) {
                 $submissions = block_completion_progress_student_submissions($COURSE->id, $USER->id);
                 $completions = block_completion_progress_completions($activities, $USER->id, $COURSE, $submissions);
+                $completiondates = block_completion_progress_completion_dates($activities, $USER->id, $COURSE);
                 $this->content->text .= block_completion_progress_bar(
                     $activities,
                     $completions,
+                    $completiondates,
                     $this->config,
                     $USER->id,
                     $COURSE->id,

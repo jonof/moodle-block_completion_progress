@@ -89,6 +89,7 @@ $string['submittednotcomplete_colour'] = '#FFCC00';
 $string['submittednotcomplete_colour_descr'] = 'HTML colour code for elements that have been submitted, but are not yet complete';
 $string['submittednotcomplete_colour_title'] = 'Submitted but not complete colour';
 $string['time_expected'] = 'Expected';
+$string['completion-overdue'] = 'overdue by {$a}';
 $string['why_set_the_title'] = 'Why you might want to set the block instance title?';
 $string['why_set_the_title_help'] = '<p>There can be multiple instances of the Completion Progress block. You may use different Completion Progress blocks to monitor different sets of activities or resources. For instance you could track progress in assignments in one block and quizzes in another. For this reason you can override the default title and set a more appropriate block title for each instance.</p>';
 $string['why_show_precentage'] = 'Why show a progress percentage to students?';

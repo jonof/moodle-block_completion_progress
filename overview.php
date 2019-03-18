@@ -268,8 +268,9 @@ for ($i = $startuser; $i < $enduser; $i++) {
     $useractivities = block_completion_progress_filter_visibility($activities, $users[$i]->id, $course->id, $exclusions);
     if (!empty($useractivities)) {
         $completions = block_completion_progress_completions($useractivities, $users[$i]->id, $course, $users[$i]->submissions);
-        $progressbar = block_completion_progress_bar($useractivities, $completions, $config, $users[$i]->id, $course->id,
-            $block->id, true);
+        $completiondates = block_completion_progress_completion_dates($useractivities, $users[$i]->id, $course);
+        $progressbar = block_completion_progress_bar($useractivities, $completions, $completiondates, $config, $users[$i]->id, $course->id,
+            $block->id, true, true);
         $progressvalue = block_completion_progress_percentage($useractivities, $completions);
         $progress = $progressvalue.'%';
     } else {

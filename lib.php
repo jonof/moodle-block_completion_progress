@@ -333,18 +333,44 @@ function block_completion_progress_completions($activities, $userid, $course, $s
 }
 
 /**
+ * Finds all completion dates for the given user.
+ *
+ * @param array $activities  The activities with completion in the course
+ * @param int   $userid      The user's id
+ * @param int   $course      The course instance
+ * @return array An array of all existing completion dates by activity id for the given user.
+ */
+function block_completion_progress_completion_dates($activities, $userid, $course) {
+    $dates = [];
+    $completion = new completion_info($course);
+    $cm = new stdClass();
+
+    foreach ($activities as $activity) {
+        $cm->id = $activity['id'];
+        $activitycompletion = $completion->get_data($cm, true, $userid);
+        if($activitycompletion->timemodified > 0) {
+            $dates[$activity['id']] = $activitycompletion->timemodified;
+        }
+    }
+
+    return $dates;
+}
+
+/**
  * Draws a progress bar
  *
  * @param array    $activities  The activities with completion in the course
- * @param array    $completions The user's completion of course activities
+ * @param array    $completions The user's completion state of course activities
+ * @param array    $completiondates The user's completion dates of course activities
  * @param stdClass $config      The blocks instance configuration settings
  * @param int      $userid      The user's id
  * @param int      $courseid    The course id
  * @param int      instance     The block instance (to identify it on page)
+ * @param bool     $showoverdue Whether the progress bar should render information about overdue completions
  * @param bool     $simple      Controls whether instructions are shown below a progress bar
  * @return string  Progress Bar HTML content
  */
-function block_completion_progress_bar($activities, $completions, $config, $userid, $courseid, $instance, $simple = false) {
+function block_completion_progress_bar($activities, $completions, $completiondates, $config, $userid, $courseid, $instance, $showoverdue = false, $simple = false) {
     global $OUTPUT, $CFG, $USER;
     $content = '';
     $now = time();
@@ -449,10 +475,12 @@ function block_completion_progress_bar($activities, $completions, $config, $user
     $content .= HTML_WRITER::start_div('barRow', $rowoptions);
     $counter = 1;
     foreach ($activities as $activity) {
-        $complete = $completions[$activity['id']];
+        $activityid = $activity['id'];
+        $complete = $completions[$activityid];
+        $completiondate = isset($completiondates[$activityid]) ? $completiondates[$activityid] : 0;
 
         // A cell in the progress bar.
-        $showinfojs = 'M.block_completion_progress.showInfo('.$instance.','.$userid.','.$activity['id'].');';
+        $showinfojs = 'M.block_completion_progress.showInfo('.$instance.','.$userid.','.$activityid.');';
         $celloptions = array(
             'class' => 'progressBarCell',
             'ontouchstart' => $showinfojs . ' return false;',
@@ -461,11 +489,11 @@ function block_completion_progress_bar($activities, $completions, $config, $user
         if ($complete === 'submitted') {
             $celloptions['style'] .= $colours['submittednotcomplete_colour'].';';
             $cellcontent = $OUTPUT->pix_icon('blank', '', 'block_completion_progress');
-
         } else if ($complete == COMPLETION_COMPLETE || $complete == COMPLETION_COMPLETE_PASS) {
+            $overdue = $activity['expected'] > 0 && $activity['expected'] < $completiondate;
             $celloptions['style'] .= $colours['completed_colour'].';';
-            $cellcontent = $OUTPUT->pix_icon($useicons == 1 ? 'tick' : 'blank', '', 'block_completion_progress');
-
+            $icon = ($showoverdue && $overdue) ? 'overdue' : 'tick';
+            $cellcontent = $OUTPUT->pix_icon($useicons == 1 ? $icon : 'blank', '', 'block_completion_progress');
         } else if (
             $complete == COMPLETION_COMPLETE_FAIL ||
             (!isset($config->orderby) || $config->orderby == 'orderbytime') &&
@@ -541,8 +569,12 @@ function block_completion_progress_bar($activities, $completions, $config, $user
     $stringpassed = get_string('completion-pass', 'completion');
     $stringfailed = get_string('completion-fail', 'completion');
     $stringsubmitted = get_string('submitted', 'block_completion_progress');
+
     foreach ($activities as $activity) {
-        $completed = $completions[$activity['id']];
+        $activityid = $activity['id'];
+        $completed = $completions[$activityid];
+        $completiondate = isset($completiondates[$activityid]) ? $completiondates[$activityid] : 0;
+
         $divoptions = array('class' => 'progressEventInfo',
                             'id' => 'progressBarInfo'.$instance.'-'.$userid.'-'.$activity['id'],
                             'style' => 'display: none;');
@@ -561,11 +593,35 @@ function block_completion_progress_bar($activities, $completions, $config, $user
         $altattribute = '';
         if ($completed == COMPLETION_COMPLETE) {
             $content .= $stringcomplete.'&nbsp;';
-            $icon = 'tick';
+            $overdue = $showoverdue && $activity['expected'] > 0 && $activity['expected'] < $completiondate;
+            if($overdue) {
+                $overduetime = $completiondate - $activity['expected'];
+                if($overduetime < 86400) {// less than 1 day
+                    $overduetimestr = get_string('numhours', 'moodle', round($overduetime / 3600));
+                } else {// 1 day or more
+                    $overduedays = round($overduetime / 86400);
+                    $overduetimestr = get_string('numday' . ($overduedays > 1 ? 's' : ''), 'moodle', $overduedays);
+                }
+                $stringoverduetime = get_string('completion-overdue', 'block_completion_progress', $overduetimestr);
+                $content .= '(' . $stringoverduetime . ') ';
+            }
+            $icon = $overdue ? 'overdue' : 'tick';
             $altattribute = $stringcomplete;
         } else if ($completed == COMPLETION_COMPLETE_PASS) {
             $content .= $stringpassed.'&nbsp;';
-            $icon = 'tick';
+            $overdue = $showoverdue && $activity['expected'] > 0 && $activity['expected'] < $completiondate;
+            if($overdue) {
+                $overduetime = $completiondate - $activity['expected'];
+                if($overduetime < 86400) {// less than 1 day
+                    $overduetimestr = get_string('numhours', 'moodle', round($overduetime / 3600));
+                } else {// 1 day or more
+                    $overduedays = round($overduetime / 86400);
+                    $overduetimestr = get_string('numday' . ($overduedays > 1 ? 's' : ''), 'moodle', $overduedays);
+                }
+                $stringoverduetime = get_string('completion-overdue', 'block_completion_progress', $overduetimestr);
+                $content .= '(' . $stringoverduetime . ') ';
+            }
+            $icon = $overdue ? 'overdue' : 'tick';
             $altattribute = $stringpassed;
         } else if ($completed == COMPLETION_COMPLETE_FAIL) {
             $content .= $stringfailed.'&nbsp;';

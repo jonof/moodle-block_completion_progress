@@ -131,10 +131,12 @@ class block_completion_progress_base_testcase extends advanced_testcase {
 
         $completions = block_completion_progress_completions($activities, $this->students[0]->id, $this->course,
           $submissions);
+        $completiondates = block_completion_progress_completion_dates($activities, $this->students[0]->id, $this->course);
 
         $text = block_completion_progress_bar(
           $activities,
           $completions,
+          $completiondates,
           $config,
           $this->students[0]->id,
           $this->course,
@@ -163,10 +165,12 @@ class block_completion_progress_base_testcase extends advanced_testcase {
         $submissions = block_completion_progress_student_submissions($this->course->id, $this->students[0]->id);
         $completions = block_completion_progress_completions($activities, $this->students[0]->id, $this->course,
           $submissions);
+        $completiondates = block_completion_progress_completion_dates($activities, $this->students[0]->id, $this->course);
 
         $text = block_completion_progress_bar(
           $activities,
           $completions,
+          $completiondates,
           $config,
           $this->students[0]->id,
           $this->course,

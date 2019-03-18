@@ -145,6 +145,7 @@
 .block_completion_progress .progressEventInfo .iconInInfo,
 #fitem_id_config_progressBarIcons .iconOnConfig {
     height: 1.2em;
+    width: 1.2em;
 }
 
 #page-blocks-completion_progress-overview .overviewTable {
