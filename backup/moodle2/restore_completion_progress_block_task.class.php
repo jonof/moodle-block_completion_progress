@@ -41,21 +41,23 @@ class restore_completion_progress_block_task extends restore_block_task {
             $config = (array)unserialize(base64_decode($configdata));
             $newactivities = array();
 
-            // Translate the old config information to the target course values.
-            foreach ($config['selectactivities'] as $index => $value) {
-                $matches = array();
-                preg_match('/(.+)-(\d+)/', $value, $matches);
-                if (!empty($matches)) {
-                    $module = $matches[1];
-                    $instance = $matches[2];
+			if (isset($config['selectactivities'])) {
+				// Translate the old config information to the target course values.
+				foreach ($config['selectactivities'] as $index => $value) {
+					$matches = array();
+					preg_match('/(.+)-(\d+)/', $value, $matches);
+					if (!empty($matches)) {
+						$module = $matches[1];
+						$instance = $matches[2];
 
-                    // Find the mapped instance ID.
-                    if ($newinstance = restore_dbops::get_backup_ids_record($this->get_restoreid(), $module, $instance)) {
-                        $newinstanceid = $newinstance->newitemid;
-                        $newactivities[] = "$module-$newinstanceid";
-                    }
-                }
-            }
+						// Find the mapped instance ID.
+						if ($newinstance = restore_dbops::get_backup_ids_record($this->get_restoreid(), $module, $instance)) {
+							$newinstanceid = $newinstance->newitemid;
+							$newactivities[] = "$module-$newinstanceid";
+						}
+					}
+				}
+			}
 
             // Save everything back to DB.
             $config['selectactivities'] = $newactivities;
