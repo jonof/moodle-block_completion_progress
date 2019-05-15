@@ -73,6 +73,13 @@ if ($ADMIN->fulltree) {
         null )
     );
 
+    $settings->add(new admin_setting_configcolourpicker('block_completion_progress/resubmittednotcomplete_colour',
+        get_string('resubmittednotcomplete_colour_title', 'block_completion_progress'),
+        get_string('resubmittednotcomplete_colour_descr', 'block_completion_progress'),
+        get_string('resubmittednotcomplete_colour', 'block_completion_progress'),
+        null )
+    );
+
     $settings->add(new admin_setting_configcolourpicker('block_completion_progress/notCompleted_colour',
         get_string('notCompleted_colour_title', 'block_completion_progress'),
         get_string('notCompleted_colour_descr', 'block_completion_progress'),

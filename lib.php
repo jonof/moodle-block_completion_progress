@@ -83,6 +83,34 @@ function block_completion_progress_student_submissions($courseid, $userid) {
 }
 
 /**
+ * Returns attempts number for given activity
+ *
+ * @param int    modid ID of the activity
+ * @param int    userid   ID of user in the course
+ * @return int   attempt number
+ */
+function block_completion_progress_attempt_number($modid, $userid) {
+    global $DB;
+
+    $params = array('assignment' => $modid, 'userid' => $userid);
+
+    // Queries to deliver attempt number for given activity by user.
+    $query = "SELECT s.attemptnumber
+                       FROM {assign_submission} s, {assign} a, {modules} m, {course_modules} c
+                      WHERE s.userid = :userid
+                        AND c.id = :assignment
+                        AND c.module = m.id
+                        AND c.instance = a.id
+                        AND m.name = 'assign'
+                        AND s.assignment = a.id
+                        AND s.latest = 1
+                        AND s.status = 'submitted'";
+    $attemptnumber = $DB->get_field_sql($query, $params, IGNORE_MISSING)+1;
+
+    return $attemptnumber;
+}
+
+/**
  * Finds submissions for users in a course
  *
  * @param int    courseid   ID of the course
@@ -357,6 +385,7 @@ function block_completion_progress_bar($activities, $completions, $config, $user
     $colournames = array(
         'completed_colour' => 'completed_colour',
         'submittednotcomplete_colour' => 'submittednotcomplete_colour',
+        'resubmittednotcomplete_colour' => 'resubmittednotcomplete_colour',
         'notCompleted_colour' => 'notCompleted_colour',
         'futureNotCompleted_colour' => 'futureNotCompleted_colour'
     );
@@ -450,6 +479,7 @@ function block_completion_progress_bar($activities, $completions, $config, $user
     $counter = 1;
     foreach ($activities as $activity) {
         $complete = $completions[$activity['id']];
+        $attempts = block_completion_progress_attempt_number($activity['id'], $userid);
 
         // A cell in the progress bar.
         $showinfojs = 'M.block_completion_progress.showInfo('.$instance.','.$userid.','.$activity['id'].');';
@@ -461,11 +491,12 @@ function block_completion_progress_bar($activities, $completions, $config, $user
         if ($complete === 'submitted') {
             $celloptions['style'] .= $colours['submittednotcomplete_colour'].';';
             $cellcontent = $OUTPUT->pix_icon('blank', '', 'block_completion_progress');
-
+        } else if ($complete == COMPLETION_COMPLETE_FAIL && $attempts != '1') { 
+            $celloptions['style'] .= $colours['resubmittednotcomplete_colour'].';';
+            $cellcontent = $OUTPUT->pix_icon($useicons == 1 ? 'cross' : 'blank', '', 'block_completion_progress');
         } else if ($complete == COMPLETION_COMPLETE || $complete == COMPLETION_COMPLETE_PASS) {
             $celloptions['style'] .= $colours['completed_colour'].';';
             $cellcontent = $OUTPUT->pix_icon($useicons == 1 ? 'tick' : 'blank', '', 'block_completion_progress');
-
         } else if (
             $complete == COMPLETION_COMPLETE_FAIL ||
             (!isset($config->orderby) || $config->orderby == 'orderbytime') &&
@@ -541,6 +572,7 @@ function block_completion_progress_bar($activities, $completions, $config, $user
     $stringpassed = get_string('completion-pass', 'completion');
     $stringfailed = get_string('completion-fail', 'completion');
     $stringsubmitted = get_string('submitted', 'block_completion_progress');
+    $stringresubmitted = get_string('resubmitted', 'block_completion_progress');
     foreach ($activities as $activity) {
         $completed = $completions[$activity['id']];
         $divoptions = array('class' => 'progressEventInfo',
@@ -563,6 +595,10 @@ function block_completion_progress_bar($activities, $completions, $config, $user
             $content .= $stringcomplete.'&nbsp;';
             $icon = 'tick';
             $altattribute = $stringcomplete;
+        } else if ($complete == COMPLETION_COMPLETE_FAIL && $attempts != '1') {
+            $content .= '(' . $stringresubmitted . ')&nbsp;';
+            $icon = 'cross';
+            $altattribute .= '(' . $stringresubmitted . ')';
         } else if ($completed == COMPLETION_COMPLETE_PASS) {
             $content .= $stringpassed.'&nbsp;';
             $icon = 'tick';
