@@ -32,7 +32,7 @@ const DEFAULT_COMPLETIONPROGRESS_LONGBARS = 'squeeze';
 const DEFAULT_COMPLETIONPROGRESS_SCROLLCELLWIDTH = 25;
 const DEFAULT_COMPLETIONPROGRESS_COURSENAMETOSHOW = 'shortname';
 const DEFAULT_COMPLETIONPROGRESS_SHOWINACTIVE = 0;
-const DEFAULT_COMPLETIONPROGRESS_PROGRESSBARICONS = 0;
+const DEFAULT_COMPLETIONPROGRESS_PROGRESSBARICONS = 1;
 const DEFAULT_COMPLETIONPROGRESS_ORDERBY = 'orderbytime';
 const DEFAULT_COMPLETIONPROGRESS_SHOWPERCENTAGE = 0;
 const DEFAULT_COMPLETIONPROGRESS_ACTIVITIESINCLUDED = 'activitycompletion';
@@ -460,7 +460,7 @@ function block_completion_progress_bar($activities, $completions, $config, $user
              'style' => 'display:' . $celldisplay .'; width:' . $cellwidth . $cellunit . ';background-color:');
         if ($complete === 'submitted') {
             $celloptions['style'] .= $colours['submittednotcomplete_colour'].';';
-            $cellcontent = $OUTPUT->pix_icon('blank', '', 'block_completion_progress');
+            $cellcontent = $OUTPUT->pix_icon($useicons == 1 ? 'cross' : 'blank', '', 'block_completion_progress');
 
         } else if ($complete == COMPLETION_COMPLETE || $complete == COMPLETION_COMPLETE_PASS) {
             $celloptions['style'] .= $colours['completed_colour'].';';
@@ -476,7 +476,7 @@ function block_completion_progress_bar($activities, $completions, $config, $user
 
         } else {
             $celloptions['style'] .= $colours['futureNotCompleted_colour'].';';
-            $cellcontent = $OUTPUT->pix_icon('blank', '', 'block_completion_progress');
+            $cellcontent = $OUTPUT->pix_icon($useicons == 1 ? 'cross' : 'blank', '', 'block_completion_progress');
         }
         if (!empty($activity['available']) || $simple) {
             $celloptions['onclick'] = 'document.location=\''.$activity['link'].'\';';
