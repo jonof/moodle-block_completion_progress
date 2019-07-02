@@ -44,6 +44,9 @@ $group    = optional_param('group', 0, PARAM_INT); // Group selected.
 $course = $DB->get_record('course', array('id' => $courseid), '*', MUST_EXIST);
 $context = CONTEXT_COURSE::instance($courseid);
 
+$bulkoperations = ($CFG->version >= 2017111300.00) &&
+    has_capability('moodle/course:bulkmessaging', $context);
+
 // Find the role to display, defaulting to students.
 $sql = "SELECT DISTINCT r.id, r.name, r.archetype
           FROM {role} r, {role_assignments} a
@@ -209,7 +212,6 @@ echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'return
 $table = new flexible_table('mod-block-completion-progress-overview');
 $table->pagesize($perpage, $numberofusers);
 $tablecolumns = array('picture', 'fullname', 'lastonline', 'progressbar', 'progress');
-$table->define_columns($tablecolumns);
 $tableheaders = array(
                     '',
                     get_string('fullname'),
@@ -217,6 +219,11 @@ $tableheaders = array(
                     get_string('progressbar', 'block_completion_progress'),
                     get_string('progress', 'block_completion_progress')
                 );
+if ($bulkoperations) {
+    array_unshift($tablecolumns, 'select');
+    array_unshift($tableheaders, get_string('select'));
+}
+$table->define_columns($tablecolumns);
 $table->define_headers($tableheaders);
 $table->sortable(true);
 $table->set_attribute('class', 'overviewTable');
@@ -232,6 +239,11 @@ $table->column_style('progressbar', 'padding', '0');
 $table->column_style('progress', 'text-align', 'center');
 $table->column_style('progress', 'width', '8%');
 
+if ($bulkoperations) {
+    $table->column_style('select', 'width', '5%');
+    $table->column_style('select', 'text-align', 'center');
+    $table->no_sorting('select');
+}
 $table->no_sorting('picture');
 $table->no_sorting('progressbar');
 $table->define_baseurl($PAGE->url);
@@ -279,6 +291,7 @@ for ($i = $startuser; $i < $enduser; $i++) {
     }
 
     $rows[$i] = array(
+        'userid' => $users[$i]->id,
         'firstname' => strtoupper($users[$i]->firstname),
         'lastname' => strtoupper($users[$i]->lastname),
         'picture' => $picture,
@@ -299,12 +312,52 @@ if ($sortbyprogress) {
 // Build the table content and output.
 if ($numberofusers > 0) {
     for ($i = $startdisplay; $i < $enddisplay; $i++) {
-        $table->add_data(array($rows[$i]['picture'],
+        $rowdata = array($rows[$i]['picture'],
             $rows[$i]['fullname'], $rows[$i]['lastonline'],
-            $rows[$i]['progressbar'], $rows[$i]['progress']));
+            $rows[$i]['progressbar'], $rows[$i]['progress']);
+        if ($bulkoperations) {
+            array_unshift($rowdata, html_writer::empty_tag('input', [
+                'type' => 'checkbox',
+                'class' => 'usercheckbox',
+                'name' => 'user' . $rows[$i]['userid'],
+            ]));
+        }
+        $table->add_data($rowdata);
     }
 }
 $table->print_html();
+
+if ($bulkoperations) {
+    echo '<br /><div class="buttons">';
+
+    echo html_writer::start_tag('div', array('class' => 'btn-group'));
+    echo html_writer::tag('input', "", array('type' => 'button', 'id' => 'checkallonpage', 'class' => 'btn btn-secondary',
+    'value' => get_string('selectall')));
+    echo html_writer::tag('input', "", array('type' => 'button', 'id' => 'checknone', 'class' => 'btn btn-secondary',
+        'value' => get_string('deselectall')));
+    echo html_writer::end_tag('div');
+    $displaylist = array();
+    $displaylist['#messageselect'] = get_string('messageselectadd');
+    if (!empty($CFG->enablenotes) && has_capability('moodle/notes:manage', $context) && $context->id != $frontpagectx->id) {
+        $displaylist['#addgroupnote'] = get_string('addnewnote', 'notes');
+    }
+
+    echo $OUTPUT->help_icon('withselectedusers');
+    echo html_writer::tag('label', get_string("withselectedusers"), array('for' => 'formactionid'));
+    echo html_writer::select($displaylist, 'formaction', '', array('' => 'choosedots'), array('id' => 'formactionid'));
+
+    echo '<input type="hidden" name="id" value="'.$course->id.'" />';
+    echo '<noscript style="display:inline">';
+    echo '<div><input type="submit" value="'.get_string('ok').'" /></div>';
+    echo '</noscript>';
+    echo '</div>';
+
+    $options = new stdClass();
+    $options->courseid = $course->id;
+    $options->noteStateNames = note_get_state_names();
+    $options->stateHelpIcon = $OUTPUT->help_icon('publishstate', 'notes');
+    $PAGE->requires->js_call_amd('core_user/participants', 'init', [$options]);
+}
 echo html_writer::end_tag('form');
 
 // Output paging controls.
