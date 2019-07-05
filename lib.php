@@ -179,6 +179,7 @@ function block_completion_progress_get_activities($courseid, $config = null, $fo
                     $config == null || (
                         !isset($config->activitiesincluded) || (
                             $config->activitiesincluded != 'selectedactivities' ||
+                                !empty($config->selectactivities) &&
                                 in_array($module.'-'.$cm->instance, $config->selectactivities))))
             ) {
                 $activities[] = array (

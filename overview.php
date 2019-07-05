@@ -44,8 +44,12 @@ $group    = optional_param('group', 0, PARAM_INT); // Group selected.
 $course = $DB->get_record('course', array('id' => $courseid), '*', MUST_EXIST);
 $context = CONTEXT_COURSE::instance($courseid);
 
+$notesallowed = !empty($CFG->enablenotes) && has_capability('moodle/notes:manage', $context);
+$messagingallowed = !empty($CFG->messaging) && has_capability('moodle/site:sendmessage', $context);
 $bulkoperations = ($CFG->version >= 2017111300.00) &&
-    has_capability('moodle/course:bulkmessaging', $context);
+    has_capability('moodle/course:bulkmessaging', $context) && (
+        $notesallowed || $messagingallowed
+    );
 
 // Find the role to display, defaulting to students.
 $sql = "SELECT DISTINCT r.id, r.name, r.archetype
@@ -137,7 +141,7 @@ if (!empty($groups)) {
         $group = 0;
         $PAGE->url->param('group', $group);
     }
-    echo get_string('groupsvisible');
+    echo get_string('groupsvisible') . '&nbsp;';
     echo $OUTPUT->single_select($PAGE->url, 'group', $groupstodisplay, $group);
 }
 
@@ -152,7 +156,7 @@ $rolestodisplay = array(0 => get_string('allparticipants'));
 foreach ($roles as $role) {
     $rolestodisplay[$role->id] = $role->localname;
 }
-echo '&nbsp;'.get_string('role');
+echo '&nbsp;' . get_string('role') . '&nbsp;';
 echo $OUTPUT->single_select($PAGE->url, 'role', $rolestodisplay, $roleselected);
 echo $OUTPUT->container_end();
 
@@ -238,7 +242,6 @@ $table->column_style('progressbar', 'width', '*');
 $table->column_style('progressbar', 'padding', '0');
 $table->column_style('progress', 'text-align', 'center');
 $table->column_style('progress', 'width', '8%');
-
 if ($bulkoperations) {
     $table->column_style('select', 'width', '5%');
     $table->column_style('select', 'text-align', 'center');
@@ -337,12 +340,13 @@ if ($bulkoperations) {
         'value' => get_string('deselectall')));
     echo html_writer::end_tag('div');
     $displaylist = array();
-    $displaylist['#messageselect'] = get_string('messageselectadd');
-    if (!empty($CFG->enablenotes) && has_capability('moodle/notes:manage', $context) && $context->id != $frontpagectx->id) {
+    if ($messagingallowed) {
+        $displaylist['#messageselect'] = get_string('messageselectadd');
+    }
+    if ($notesallowed) {
         $displaylist['#addgroupnote'] = get_string('addnewnote', 'notes');
     }
 
-    echo $OUTPUT->help_icon('withselectedusers');
     echo html_writer::tag('label', get_string("withselectedusers"), array('for' => 'formactionid'));
     echo html_writer::select($displaylist, 'formaction', '', array('' => 'choosedots'), array('id' => 'formactionid'));
 

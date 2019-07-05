@@ -88,7 +88,7 @@ class block_completion_progress_edit_form extends block_edit_form {
         // Allow icons to be turned on/off on the block.
         $mform->addElement('selectyesno', 'config_progressBarIcons',
                            get_string('config_icons', 'block_completion_progress').' '.
-                           $OUTPUT->pix_icon('tick', '', 'block_completion_progress', array('class' => 'iconOnConfig')).'&nbsp;'.
+                           $OUTPUT->pix_icon('tick', '', 'block_completion_progress', array('class' => 'iconOnConfig')).
                            $OUTPUT->pix_icon('cross', '', 'block_completion_progress', array('class' => 'iconOnConfig')));
         $mform->setDefault('config_progressBarIcons', DEFAULT_COMPLETIONPROGRESS_PROGRESSBARICONS);
         $mform->addHelpButton('config_progressBarIcons', 'why_use_icons', 'block_completion_progress');
