@@ -171,7 +171,7 @@ class block_completion_progress extends block_base {
                             (
                                 !empty($blockinstance->config->group) &&
                                 !has_capability('moodle/site:accessallgroups', $context) &&
-                                !groups_is_member($blockinstance->config->group, $USER->id)
+                                !block_completion_progress_group_membership($blockinstance->config->group, $course->id, $USER->id)
                             )
                         ) {
                             unset($blockinstances[$blockid]);
@@ -218,7 +218,7 @@ class block_completion_progress extends block_base {
             if (
                 !empty($this->config->group) &&
                 !has_capability('moodle/site:accessallgroups', $this->context) &&
-                !groups_is_member($this->config->group, $USER->id)
+                !block_completion_progress_group_membership($this->config->group, $COURSE->id, $USER->id)
             ) {
                 return $this->content;
             }

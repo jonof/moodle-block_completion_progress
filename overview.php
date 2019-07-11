@@ -38,7 +38,7 @@ $id       = required_param('instanceid', PARAM_INT);
 $courseid = required_param('courseid', PARAM_INT);
 $page     = optional_param('page', 0, PARAM_INT); // Which page to show.
 $perpage  = optional_param('perpage', DEFAULT_PAGE_SIZE, PARAM_INT); // How many per page.
-$group    = optional_param('group', 0, PARAM_INT); // Group selected.
+$group    = optional_param('group', 0, PARAM_ALPHANUMEXT); // Group selected.
 
 // Determine course and context.
 $course = $DB->get_record('course', array('id' => $courseid), '*', MUST_EXIST);
@@ -130,15 +130,23 @@ if (has_capability('moodle/site:accessallgroups', $context)) {
     $groupuserid = 0;
 }
 $groupids = array();
+$groupingids = array();
 $groups = groups_get_all_groups($course->id, $groupuserid);
-if (!empty($groups)) {
+$groupings = groups_get_all_groupings($course->id);
+if (!empty($groups) || !empty($groupings)) {
     $groupstodisplay = array(0 => get_string('allparticipants'));
-    foreach ($groups as $groupid => $groupobject) {
-        $groupstodisplay[$groupid] = $groupobject->name;
+    foreach ($groups as $groupidnum => $groupobject) {
+        $groupid = 'group-'.$groupidnum;
+        $groupstodisplay[$groupid] = format_string($groupobject->name);
         $groupids[] = $groupid;
     }
+    foreach ($groupings as $groupingidnum => $groupingobject) {
+        $groupingid = 'grouping-'.$groupingidnum;
+        $groupstodisplay[$groupingid] = format_string($groupingobject->name);
+        $groupids[] = $groupingid;
+    }
     if (!in_array($group, $groupids)) {
-        $group = 0;
+        $group = '0';
         $PAGE->url->param('group', $group);
     }
     echo get_string('groupsvisible') . '&nbsp;';
@@ -163,12 +171,18 @@ echo $OUTPUT->container_end();
 // Apply group restrictions.
 $params = array();
 $groupjoin = '';
-if ($group && $group != 0) {
+if ((substr($group, 0, 6) == 'group-') && ($groupid = intval(substr($group, 6)))) {
     $groupjoin = 'JOIN {groups_members} g ON (g.groupid = :groupselected AND g.userid = u.id)';
-    $params['groupselected'] = $group;
+    $params['groupselected'] = $groupid;
+} else if ((substr($group, 0, 9) == 'grouping-') && ($groupingid = intval(substr($group, 9)))) {
+    $groupjoin = 'JOIN {groups_members} g ON '.
+                 '(g.groupid IN (SELECT DISTINCT groupid FROM {groupings_groups} WHERE groupingid = :groupingselected) '.
+                 'AND g.userid = u.id)';
+    $params['groupingselected'] = $groupingid;
 } else if ($groupuserid != 0 && !empty($groupids)) {
     $groupjoin = 'JOIN {groups_members} g ON (g.groupid IN ('.implode(',', $groupids).') AND g.userid = u.id)';
 }
+
 
 // Get the list of users enrolled in the course.
 $picturefields = user_picture::fields('u');

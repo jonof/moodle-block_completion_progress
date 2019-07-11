@@ -99,13 +99,17 @@ class block_completion_progress_edit_form extends block_edit_form {
         $mform->setDefault('config_showpercentage', DEFAULT_COMPLETIONPROGRESS_SHOWPERCENTAGE);
         $mform->addHelpButton('config_showpercentage', 'why_show_precentage', 'block_completion_progress');
 
-        // Allow the block to be visible to a single group.
+        // Allow the block to be visible to a single group or grouping.
         $groups = groups_get_all_groups($COURSE->id);
-        if (!empty($groups)) {
+        $groupings = groups_get_all_groupings($COURSE->id);
+        if (!empty($groups) || !empty($groupings)) {
             $groupsmenu = array();
             $groupsmenu[0] = get_string('allparticipants');
             foreach ($groups as $group) {
-                $groupsmenu[$group->id] = format_string($group->name);
+                $groupsmenu['group-' . $group->id] = format_string($group->name);
+            }
+            foreach ($groupings as $grouping) {
+                $groupsmenu['grouping-' . $grouping->id] = format_string($grouping->name);
             }
             $grouplabel = get_string('config_group', 'block_completion_progress');
             $mform->addElement('select', 'config_group', $grouplabel, $groupsmenu);
