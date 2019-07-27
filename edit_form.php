@@ -23,10 +23,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(__FILE__) . '/../../config.php');
-require_once($CFG->dirroot.'/blocks/completion_progress/lib.php');
-
 defined('MOODLE_INTERNAL') || die;
+
+require_once($CFG->dirroot.'/blocks/completion_progress/lib.php');
 
 /**
  * Completion Progress block config form class
