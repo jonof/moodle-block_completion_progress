@@ -25,6 +25,7 @@
 defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->libdir.'/completionlib.php');
+require_once($CFG->dirroot.'/mod/assign/locallib.php');
 
 /**
  * Default number of cells per row in wrap mode.
@@ -84,42 +85,20 @@ const DEFAULT_COMPLETIONPROGRESS_ACTIVITIESINCLUDED = 'activitycompletion';
 /**
  * Finds submissions for a user in a course
  *
- * @param int    $courseid ID of the course
- * @param int    $userid   ID of user in the course
- * @return array Course module IDs submissions
+ * @param int    courseid ID of the course
+ * @param int    userid   ID of user in the course
+ * @param mixed  context  the course module context
+ * @param array  activities  course activities
+ * @return array Course module IDS submissions
  */
-function block_completion_progress_student_submissions($courseid, $userid) {
-    global $DB;
-
+function block_completion_progress_student_submissions($courseid, $userid, $context, $activities) {
     $submissions = array();
-    $params = array('courseid' => $courseid, 'userid' => $userid);
 
-    // Queries to deliver instance IDs of activities with submissions by user.
-    $queries = array (
-        'assign' => "SELECT c.id
-                       FROM {assign_submission} s, {assign} a, {modules} m, {course_modules} c
-                      WHERE s.userid = :userid
-                        AND s.latest = 1
-                        AND s.status = 'submitted'
-                        AND s.assignment = a.id
-                        AND a.course = :courseid
-                        AND m.name = 'assign'
-                        AND m.id = c.module
-                        AND c.instance = a.id",
-        'workshop' => "SELECT DISTINCT c.id
-                         FROM {workshop_submissions} s, {workshop} w, {modules} m, {course_modules} c
-                        WHERE s.authorid = :userid
-                          AND s.workshopid = w.id
-                          AND w.course = :courseid
-                          AND m.name = 'workshop'
-                          AND m.id = c.module
-                          AND c.instance = w.id",
-    );
-
-    foreach ($queries as $moduletype => $query) {
-        $results = $DB->get_records_sql($query, $params);
-        foreach ($results as $cmid => $obj) {
-            $submissions[] = $cmid;
+    foreach ($activities as $activity) {
+        $cm = get_coursemodule_from_instance($activity['type'], $activity['instance'], $courseid);
+        $assign = new assign($context, $cm, $courseid);
+        if ($assign->get_user_submission($userid, false)) {
+            array_push($submissions, $cm->id);
         }
     }
 

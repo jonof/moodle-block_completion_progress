@@ -252,7 +252,7 @@ class block_completion_progress extends block_base {
 
             // Display progress bar.
             if (has_capability('block/completion_progress:showbar', $this->context)) {
-                $submissions = block_completion_progress_student_submissions($COURSE->id, $USER->id);
+                $submissions = block_completion_progress_student_submissions($COURSE->id, $USER->id, $this->context, $activities);
                 $completions = block_completion_progress_completions($activities, $USER->id, $COURSE, $submissions);
                 $this->content->text .= block_completion_progress_bar(
                     $activities,
