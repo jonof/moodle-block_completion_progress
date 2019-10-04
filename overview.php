@@ -217,7 +217,7 @@ $numberofusers = count($users);
 for ($i = 0; $i < $numberofusers; $i++) {
     $users[$i]->submissions = array();
 }
-$submissions = block_completion_progress_course_submissions($course->id);
+$submissions = block_completion_progress_course_submissions($course->id, $userids, $context, $activities);
 foreach ($submissions as $mapping) {
     $mapvalues = explode('-', $mapping);
     $index = 0;

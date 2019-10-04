@@ -108,39 +108,22 @@ function block_completion_progress_student_submissions($courseid, $userid, $cont
 /**
  * Finds submissions for users in a course
  *
- * @param int    $courseid   ID of the course
+ * @param int    courseid   ID of the course
+ * @param int    $userids   ID of users in the course
+ * @param mixed  context    the course module context
+ * @param array  activities course activities
  * @return array Mapping of userid-cmid pairs for submissions
  */
-function block_completion_progress_course_submissions($courseid) {
-    global $DB;
-
+function block_completion_progress_course_submissions($courseid, $userids, $context, $activities) {
     $submissions = array();
-    $params = array('courseid' => $courseid);
-
-    // Queries to deliver instance IDs of activities with submissions by user.
-    $queries = array (
-        'assign' => "SELECT ". $DB->sql_concat('s.userid', "'-'", 'c.id') ."
-                       FROM {assign_submission} s, {assign} a, {modules} m, {course_modules} c
-                      WHERE s.latest = 1
-                        AND s.status = 'submitted'
-                        AND s.assignment = a.id
-                        AND a.course = :courseid
-                        AND m.name = 'assign'
-                        AND m.id = c.module
-                        AND c.instance = a.id",
-        'workshop' => "SELECT ". $DB->sql_concat('s.authorid', "'-'", 'c.id') ."
-                         FROM {workshop_submissions} s, {workshop} w, {modules} m, {course_modules} c
-                        WHERE s.workshopid = w.id
-                          AND w.course = :courseid
-                          AND m.name = 'workshop'
-                          AND m.id = c.module
-                          AND c.instance = w.id",
-    );
-
-    foreach ($queries as $moduletype => $query) {
-        $results = $DB->get_records_sql($query, $params);
-        foreach ($results as $mapping => $obj) {
-            $submissions[] = $mapping;
+    
+    foreach ($activities as $activity) {
+        $cm = get_coursemodule_from_instance($activity['type'], $activity['instance'], $courseid);
+        $assign = new assign($context, $cm, $courseid);
+        foreach ($userids as $userid) {
+            if ($assign->get_user_submission($userid, false)) {
+                array_push($submissions, $userid . '-' . $cm->id);
+            }
         }
     }
 
