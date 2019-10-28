@@ -81,6 +81,7 @@ const DEFAULT_COMPLETIONPROGRESS_SHOWPERCENTAGE = 0;
  * Default choice of activites included: activitycompletion or selectedactivities.
  */
 const DEFAULT_COMPLETIONPROGRESS_ACTIVITIESINCLUDED = 'activitycompletion';
+const DEFAULT_COMPLETIONPROGRESS_ACTIVITIESTYPES = ['assign', 'workshop'];
 
 /**
  * Finds submissions for a user in a course
@@ -95,10 +96,12 @@ function block_completion_progress_student_submissions($courseid, $userid, $cont
     $submissions = array();
 
     foreach ($activities as $activity) {
-        $cm = get_coursemodule_from_instance($activity['type'], $activity['instance'], $courseid);
-        $assign = new assign($context, $cm, $courseid);
-        if ($assign->get_user_submission($userid, false)) {
-            array_push($submissions, $cm->id);
+        if (in_array($activity['type'], DEFAULT_COMPLETIONPROGRESS_ACTIVITIESTYPES)) {
+            $cm = get_coursemodule_from_instance($activity['type'], $activity['instance'], $courseid);
+            $assign = new assign($context, $cm, $courseid);
+            if ($assign->get_user_submission($userid, false)) {
+                array_push($submissions, $cm->id);
+            }
         }
     }
 
@@ -118,11 +121,13 @@ function block_completion_progress_course_submissions($courseid, $userids, $cont
     $submissions = array();
     
     foreach ($activities as $activity) {
-        $cm = get_coursemodule_from_instance($activity['type'], $activity['instance'], $courseid);
-        $assign = new assign($context, $cm, $courseid);
-        foreach ($userids as $userid) {
-            if ($assign->get_user_submission($userid, false)) {
-                array_push($submissions, $userid . '-' . $cm->id);
+        if (in_array($activity['type'], DEFAULT_COMPLETIONPROGRESS_ACTIVITIESTYPES)) {
+            $cm = get_coursemodule_from_instance($activity['type'], $activity['instance'], $courseid);
+            $assign = new assign($context, $cm, $courseid);
+            foreach ($userids as $userid) {
+                if ($assign->get_user_submission($userid, false)) {
+                    array_push($submissions, $userid . '-' . $cm->id);
+                }
             }
         }
     }
