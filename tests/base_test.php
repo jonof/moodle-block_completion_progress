@@ -136,10 +136,9 @@ class block_completion_progress_base_testcase extends advanced_testcase {
         );
         $this->assertFalse($result);
 
-        $submissions = block_completion_progress_student_submissions($this->course->id, $this->students[0]->id);
         $config = unserialize(base64_decode($blockinfo['configdata']));
         $activities = block_completion_progress_get_activities($this->course->id, $config);
-
+        $submissions = block_completion_progress_student_submissions($this->course->id, $this->students[0]->id, $context, $activities);
         $completions = block_completion_progress_completions($activities, $this->students[0]->id, $this->course,
           $submissions);
 
@@ -171,7 +170,7 @@ class block_completion_progress_base_testcase extends advanced_testcase {
         );
         $this->assertTrue($result);
 
-        $submissions = block_completion_progress_student_submissions($this->course->id, $this->students[0]->id);
+        $submissions = block_completion_progress_student_submissions($this->course->id, $this->students[0]->id, $context, $activities);
         $completions = block_completion_progress_completions($activities, $this->students[0]->id, $this->course,
           $submissions);
 
