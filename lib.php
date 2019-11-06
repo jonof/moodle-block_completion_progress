@@ -26,6 +26,7 @@ defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->libdir.'/completionlib.php');
 require_once($CFG->dirroot.'/mod/assign/locallib.php');
+require_once($CFG->dirroot.'/mod/workshop/locallib.php');
 
 /**
  * Default number of cells per row in wrap mode.
@@ -93,14 +94,24 @@ const DEFAULT_COMPLETIONPROGRESS_ACTIVITIESTYPES = ['assign', 'workshop'];
  * @return array Course module IDS submissions
  */
 function block_completion_progress_student_submissions($courseid, $userid, $context, $activities) {
+    global $DB;
+
     $submissions = array();
 
     foreach ($activities as $activity) {
         if (in_array($activity['type'], DEFAULT_COMPLETIONPROGRESS_ACTIVITIESTYPES)) {
             $cm = get_coursemodule_from_instance($activity['type'], $activity['instance'], $courseid);
-            $assign = new assign($context, $cm, $courseid);
-            $submission = $assign->get_user_submission($userid, false);
-            if ($submission && $submission->status === 'submitted') {
+
+            if ($cm->modname === 'assign') {
+                $assign = new assign($context, $cm, $courseid);
+                $submission = $assign->get_user_submission($userid, false);
+            } else if ($cm->modname == 'workshop') {
+                $workshoprecord = $DB->get_record('workshop', array('id' => $cm->instance), '*', MUST_EXIST);
+                $workshop = new workshop($workshoprecord, $cm, $courseid);
+                $submission = $workshop->get_submission_by_author($userid);
+            }
+
+            if ((isset($submission->status) && $submission->status === 'submitted') || isset($submission->workshopid)) {
                 array_push($submissions, $cm->id);
             }
         }
@@ -119,15 +130,31 @@ function block_completion_progress_student_submissions($courseid, $userid, $cont
  * @return array Mapping of userid-cmid pairs for submissions
  */
 function block_completion_progress_course_submissions($courseid, $userids, $context, $activities) {
+    global $DB;
+
     $submissions = array();
-    
+
     foreach ($activities as $activity) {
         if (in_array($activity['type'], DEFAULT_COMPLETIONPROGRESS_ACTIVITIESTYPES)) {
             $cm = get_coursemodule_from_instance($activity['type'], $activity['instance'], $courseid);
-            $assign = new assign($context, $cm, $courseid);
+            $assign = null;
+            $workshop = null;
+
+            if ($cm->modname === 'assign') {
+                $assign = new assign($context, $cm, $courseid);
+            } else if ($cm->modname == 'workshop') {
+                $workshoprecord = $DB->get_record('workshop', array('id' => $cm->instance), '*', MUST_EXIST);
+                $workshop = new workshop($workshoprecord, $cm, $courseid);
+            }
+
             foreach ($userids as $userid) {
-                $submission = $assign->get_user_submission($userid, false);
-                if ($submission && $submission->status === 'submitted') {
+                if ($assign) {
+                    $submission = $assign->get_user_submission($userid, false);
+                } else if ($workshop) {
+                    $submission = $workshop->get_submission_by_author($userid);
+                }
+    
+                if ((isset($submission->status) && $submission->status === 'submitted') || isset($submission->workshopid)) {
                     array_push($submissions, $userid . '-' . $cm->id);
                 }
             }
