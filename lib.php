@@ -99,7 +99,8 @@ function block_completion_progress_student_submissions($courseid, $userid, $cont
         if (in_array($activity['type'], DEFAULT_COMPLETIONPROGRESS_ACTIVITIESTYPES)) {
             $cm = get_coursemodule_from_instance($activity['type'], $activity['instance'], $courseid);
             $assign = new assign($context, $cm, $courseid);
-            if ($assign->get_user_submission($userid, false)) {
+            $submission = $assign->get_user_submission($userid, false);
+            if ($submission && $submission->status === 'submitted') {
                 array_push($submissions, $cm->id);
             }
         }
@@ -125,7 +126,8 @@ function block_completion_progress_course_submissions($courseid, $userids, $cont
             $cm = get_coursemodule_from_instance($activity['type'], $activity['instance'], $courseid);
             $assign = new assign($context, $cm, $courseid);
             foreach ($userids as $userid) {
-                if ($assign->get_user_submission($userid, false)) {
+                $submission = $assign->get_user_submission($userid, false);
+                if ($submission && $submission->status === 'submitted') {
                     array_push($submissions, $userid . '-' . $cm->id);
                 }
             }
