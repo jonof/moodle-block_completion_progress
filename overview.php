@@ -197,7 +197,7 @@ $sql = "SELECT DISTINCT $picturefields, COALESCE(l.timeaccess, 0) AS lastonlinet
 $params['contextid'] = $context->id;
 $params['courseid'] = $course->id;
 $userrecords = $DB->get_records_sql($sql, $params);
-if (get_config('block_completion_progress', 'showinactive') !== 1) {
+if (get_config('block_completion_progress', 'showinactive') !== "1") {
     extract_suspended_users($context, $userrecords);
 }
 $userids = array_keys($userrecords);
