@@ -92,4 +92,14 @@ if ($ADMIN->fulltree) {
         '',
         DEFAULT_COMPLETIONPROGRESS_SHOWINACTIVE)
     );
+    $settings->add(new admin_setting_configcheckbox('block_completion_progress/showlastincourse',
+        get_string('showlastincourse', 'block_completion_progress'),
+        '',
+        DEFAULT_COMPLETIONPROGRESS_SHOWLASTINCOURSE)
+    );
+    $settings->add(new admin_setting_configcheckbox('block_completion_progress/forceiconsinbar',
+        get_string('forceiconsinbar', 'block_completion_progress'),
+        '',
+        DEFAULT_COMPLETIONPROGRESS_FORCEICONSINBAR)
+    );
 }

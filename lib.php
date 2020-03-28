@@ -32,6 +32,8 @@ const DEFAULT_COMPLETIONPROGRESS_LONGBARS = 'squeeze';
 const DEFAULT_COMPLETIONPROGRESS_SCROLLCELLWIDTH = 25;
 const DEFAULT_COMPLETIONPROGRESS_COURSENAMETOSHOW = 'shortname';
 const DEFAULT_COMPLETIONPROGRESS_SHOWINACTIVE = 0;
+const DEFAULT_COMPLETIONPROGRESS_SHOWLASTINCOURSE = 1;
+const DEFAULT_COMPLETIONPROGRESS_FORCEICONSINBAR = 0;
 const DEFAULT_COMPLETIONPROGRESS_PROGRESSBARICONS = 0;
 const DEFAULT_COMPLETIONPROGRESS_ORDERBY = 'orderbytime';
 const DEFAULT_COMPLETIONPROGRESS_SHOWPERCENTAGE = 0;
@@ -367,7 +369,11 @@ function block_completion_progress_bar($activities, $completions, $config, $user
     }
 
     // Get relevant block instance settings or use defaults.
-    $useicons = isset($config->progressBarIcons) ? $config->progressBarIcons : DEFAULT_COMPLETIONPROGRESS_PROGRESSBARICONS;
+    if (get_config('block_completion_progress', 'forceiconsinbar') !== "1") {
+        $useicons = isset($config->progressBarIcons) ? $config->progressBarIcons : DEFAULT_COMPLETIONPROGRESS_PROGRESSBARICONS;
+    } else {
+        $useicons = true;
+    }
     $orderby = isset($config->orderby) ? $config->orderby : DEFAULT_COMPLETIONPROGRESS_ORDERBY;
     $defaultlongbars = get_config('block_completion_progress', 'defaultlongbars') ?: DEFAULT_COMPLETIONPROGRESS_LONGBARS;
     $longbars = isset($config->longbars) ? $config->longbars : $defaultlongbars;

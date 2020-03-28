@@ -85,12 +85,14 @@ class block_completion_progress_edit_form extends block_edit_form {
         $mform->addHelpButton('config_longbars', 'how_longbars_works', 'block_completion_progress');
 
         // Allow icons to be turned on/off on the block.
-        $mform->addElement('selectyesno', 'config_progressBarIcons',
-                           get_string('config_icons', 'block_completion_progress').' '.
-                           $OUTPUT->pix_icon('tick', '', 'block_completion_progress', array('class' => 'iconOnConfig')).
-                           $OUTPUT->pix_icon('cross', '', 'block_completion_progress', array('class' => 'iconOnConfig')));
-        $mform->setDefault('config_progressBarIcons', DEFAULT_COMPLETIONPROGRESS_PROGRESSBARICONS);
-        $mform->addHelpButton('config_progressBarIcons', 'why_use_icons', 'block_completion_progress');
+        if (get_config('block_completion_progress', 'forceiconsinbar') !== "1") {
+            $mform->addElement('selectyesno', 'config_progressBarIcons',
+                               get_string('config_icons', 'block_completion_progress').' '.
+                               $OUTPUT->pix_icon('tick', '', 'block_completion_progress', array('class' => 'iconOnConfig')).
+                               $OUTPUT->pix_icon('cross', '', 'block_completion_progress', array('class' => 'iconOnConfig')));
+            $mform->setDefault('config_progressBarIcons', DEFAULT_COMPLETIONPROGRESS_PROGRESSBARICONS);
+            $mform->addHelpButton('config_progressBarIcons', 'why_use_icons', 'block_completion_progress');
+        }
 
         // Allow progress percentage to be turned on for students.
         $mform->addElement('selectyesno', 'config_showpercentage',

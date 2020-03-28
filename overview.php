@@ -232,14 +232,24 @@ echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'return
 // Setup submissions table.
 $table = new flexible_table('mod-block-completion-progress-overview');
 $table->pagesize($perpage, $numberofusers);
-$tablecolumns = array('picture', 'fullname', 'lastonline', 'progressbar', 'progress');
-$tableheaders = array(
-                    '',
-                    get_string('fullname'),
-                    get_string('lastonline', 'block_completion_progress'),
-                    get_string('progressbar', 'block_completion_progress'),
-                    get_string('progress', 'block_completion_progress')
-                );
+if (get_config('block_completion_progress', 'showlastincourse') !== "0") {
+    $tablecolumns = array('picture', 'fullname', 'lastonline', 'progressbar', 'progress');
+    $tableheaders = array(
+                        '',
+                        get_string('fullname'),
+                        get_string('lastonline', 'block_completion_progress'),
+                        get_string('progressbar', 'block_completion_progress'),
+                        get_string('progress', 'block_completion_progress')
+                    );
+} else {
+    $tablecolumns = array('picture', 'fullname', 'progressbar', 'progress');
+    $tableheaders = array(
+                        '',
+                        get_string('fullname'),
+                        get_string('progressbar', 'block_completion_progress'),
+                        get_string('progress', 'block_completion_progress')
+                    );
+}
 if ($bulkoperations) {
     array_unshift($tablecolumns, 'select');
     array_unshift($tableheaders, get_string('select'));
@@ -332,9 +342,11 @@ if ($sortbyprogress) {
 // Build the table content and output.
 if ($numberofusers > 0) {
     for ($i = $startdisplay; $i < $enddisplay; $i++) {
-        $rowdata = array($rows[$i]['picture'],
-            $rows[$i]['fullname'], $rows[$i]['lastonline'],
-            $rows[$i]['progressbar'], $rows[$i]['progress']);
+        if (get_config('block_completion_progress', 'showlastincourse') !== "0") {
+            $rowdata = array($rows[$i]['picture'], $rows[$i]['fullname'], $rows[$i]['lastonline'], $rows[$i]['progressbar'], $rows[$i]['progress']);
+        } else {
+            $rowdata = array($rows[$i]['picture'], $rows[$i]['fullname'], $rows[$i]['progressbar'], $rows[$i]['progress']);
+        }
         if ($bulkoperations) {
             array_unshift($rowdata, html_writer::empty_tag('input', [
                 'type' => 'checkbox',
