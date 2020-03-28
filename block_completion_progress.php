@@ -41,7 +41,7 @@ class block_completion_progress extends block_base {
      * @return void
      */
     public function init() {
-        $this->title = get_string('config_default_title', 'block_completion_progress');
+        $this->title = '';
     }
 
     /**
