@@ -479,7 +479,9 @@ function block_completion_progress_bar($activities, $completions, $config, $user
             $celloptions['style'] .= $colours['futureNotCompleted_colour'].';';
             $cellcontent = $OUTPUT->pix_icon('blank', '', 'block_completion_progress');
         }
-        if (!empty($activity['available']) || $simple) {
+        if (empty($activity['link'])) {
+            $celloptions['style'] .= 'cursor: unset;';
+        } else if (!empty($activity['available']) || $simple) {
             $celloptions['onclick'] = 'document.location=\''.$activity['link'].'\';';
         } else if (!empty($activity['link'])) {
             $celloptions['style'] .= 'cursor: not-allowed;';
