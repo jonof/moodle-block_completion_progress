@@ -44,7 +44,7 @@ Feature: Using block completion progress for a quiz
     And I follow "Course 1"
     And I turn editing mode on
     And I follow "Quiz 1A No deadline"
-    And I navigate to "Edit settings" node in "Quiz administration"
+    And I navigate to "Edit settings" in current page administration
     And I set the following fields to these values:
       | Completion tracking | Show activity as complete when conditions are met |
       | Require view | 1 |
@@ -58,11 +58,13 @@ Feature: Using block completion progress for a quiz
 
   Scenario: Basic functionning of the block
     Given I log in as "student1"
+    And I am on site homepage
     And I follow "Course 1"
     Then I should see "Progress: 0%" in the "Completion Progress" "block"
 
   Scenario: Submit the quizzes
     Given I log in as "student1"
+    And I am on site homepage
     And I follow "Course 1"
     And I follow "Quiz 1A No deadline"
     And I press "Attempt quiz now"
