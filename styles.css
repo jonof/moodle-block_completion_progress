@@ -139,6 +139,9 @@
     padding: 0;
     margin: 5px;
 }
+.block_completion_progress .progressEventInfo {
+    white-space: pre-wrap;
+}
 .dir-rtl .block_completion_progress .progressEventInfo,
 .dir-rtl .block_completion_progress .progressPercentage {
     text-align: right;
