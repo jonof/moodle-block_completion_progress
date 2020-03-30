@@ -41,7 +41,7 @@ class block_completion_progress extends block_base {
      * @return void
      */
     public function init() {
-        $this->title = '';
+        $this->title = get_string('pluginname', 'block_completion_progress');
     }
 
     /**
