@@ -32,6 +32,8 @@ const DEFAULT_COMPLETIONPROGRESS_LONGBARS = 'squeeze';
 const DEFAULT_COMPLETIONPROGRESS_SCROLLCELLWIDTH = 25;
 const DEFAULT_COMPLETIONPROGRESS_COURSENAMETOSHOW = 'shortname';
 const DEFAULT_COMPLETIONPROGRESS_SHOWINACTIVE = 0;
+const DEFAULT_COMPLETIONPROGRESS_SHOWLASTINCOURSE = 1;
+const DEFAULT_COMPLETIONPROGRESS_FORCEICONSINBAR = 0;
 const DEFAULT_COMPLETIONPROGRESS_PROGRESSBARICONS = 0;
 const DEFAULT_COMPLETIONPROGRESS_ORDERBY = 'orderbytime';
 const DEFAULT_COMPLETIONPROGRESS_SHOWPERCENTAGE = 0;
@@ -179,6 +181,7 @@ function block_completion_progress_get_activities($courseid, $config = null, $fo
                     $config == null || (
                         !isset($config->activitiesincluded) || (
                             $config->activitiesincluded != 'selectedactivities' ||
+                                !empty($config->selectactivities) &&
                                 in_array($module.'-'.$cm->instance, $config->selectactivities))))
             ) {
                 $activities[] = array (
@@ -392,7 +395,11 @@ function block_completion_progress_bar($activities, $completions, $completiondat
     }
 
     // Get relevant block instance settings or use defaults.
-    $useicons = isset($config->progressBarIcons) ? $config->progressBarIcons : DEFAULT_COMPLETIONPROGRESS_PROGRESSBARICONS;
+    if (get_config('block_completion_progress', 'forceiconsinbar') !== "1") {
+        $useicons = isset($config->progressBarIcons) ? $config->progressBarIcons : DEFAULT_COMPLETIONPROGRESS_PROGRESSBARICONS;
+    } else {
+        $useicons = true;
+    }
     $orderby = isset($config->orderby) ? $config->orderby : DEFAULT_COMPLETIONPROGRESS_ORDERBY;
     $defaultlongbars = get_config('block_completion_progress', 'defaultlongbars') ?: DEFAULT_COMPLETIONPROGRESS_LONGBARS;
     $longbars = isset($config->longbars) ? $config->longbars : $defaultlongbars;
@@ -506,7 +513,9 @@ function block_completion_progress_bar($activities, $completions, $completiondat
             $celloptions['style'] .= $colours['futureNotCompleted_colour'].';';
             $cellcontent = $OUTPUT->pix_icon('blank', '', 'block_completion_progress');
         }
-        if (!empty($activity['available']) || $simple) {
+        if (empty($activity['link'])) {
+            $celloptions['style'] .= 'cursor: unset;';
+        } else if (!empty($activity['available']) || $simple) {
             $celloptions['onclick'] = 'document.location=\''.$activity['link'].'\';';
         } else if (!empty($activity['link'])) {
             $celloptions['style'] .= 'cursor: not-allowed;';
@@ -706,4 +715,23 @@ function block_completion_progress_exclusions ($courseid) {
         $exclusions[] = $value->exclusion;
     }
     return $exclusions;
+}
+
+/**
+ * Determines whether a user is a member of a given group or grouping
+ *
+ * @param string $group    The group or grouping identifier starting with 'group-' or 'grouping-'
+ * @param int    $courseid The ID of the course containing the block instance
+ * @return boolean value indicating membership
+ */
+function block_completion_progress_group_membership ($group, $courseid, $userid) {
+    if ($group === '0') {
+        return true;
+    } else if ((substr($group, 0, 6) == 'group-') && ($groupid = intval(substr($group, 6)))) {
+        return groups_is_member($groupid, $userid);
+    } else if ((substr($group, 0, 9) == 'grouping-') && ($groupingid = intval(substr($group, 9)))) {
+        return array_key_exists($groupingid, groups_get_user_groups($courseid, $userid));
+    }
+
+    return false;
 }

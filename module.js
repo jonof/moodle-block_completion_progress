@@ -52,8 +52,8 @@ M.block_completion_progress = {
             rightArrows = barContainers[i].getElementsByClassName('right-arrow-svg');
             if(leftArrows.length > 0) {
                 this.checkArrows(barContainers[i]);
-                this.addEvent(leftArrows[0].firstChild, 'click', function(e) {M.block_completion_progress.scrollContainer(e.target.parentNode, -1); e.target.stopPagination();})
-                this.addEvent(rightArrows[0].firstChild, 'click', function(e) {M.block_completion_progress.scrollContainer(e.target.parentNode, 1); e.target.stopPagination();})
+                this.addEvent(leftArrows[0].firstChild, 'click', function(e) {M.block_completion_progress.scrollContainer(e.target.parentNode, -1); e.stopPropagation();})
+                this.addEvent(rightArrows[0].firstChild, 'click', function(e) {M.block_completion_progress.scrollContainer(e.target.parentNode, 1); e.stopPropagation();})
             }
         }
     },

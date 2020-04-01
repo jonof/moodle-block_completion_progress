@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Privacy Subsystem implementation for block_calendar_month.
+ * Privacy Subsystem implementation for block_completion_progress.
  *
  * @package    block_completion_progress
  * @copyright  2018 Michael de Raadt
@@ -27,7 +27,7 @@ namespace block_completion_progress\privacy;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Privacy Subsystem for block_calendar_month implementing null_provider.
+ * Privacy Subsystem for block_completion_progress implementing null_provider.
  *
  * @copyright  2018 Michael de Raadt
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later

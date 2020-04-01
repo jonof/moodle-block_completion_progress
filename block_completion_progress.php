@@ -23,10 +23,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(__FILE__) . '/../../config.php');
-require_once($CFG->dirroot.'/blocks/completion_progress/lib.php');
-
 defined('MOODLE_INTERNAL') || die;
+
+require_once($CFG->dirroot.'/blocks/completion_progress/lib.php');
 
 /**
  * Completion Progress block class
@@ -42,7 +41,7 @@ class block_completion_progress extends block_base {
      * @return void
      */
     public function init() {
-        $this->title = get_string('config_default_title', 'block_completion_progress');
+        $this->title = get_string('pluginname', 'block_completion_progress');
     }
 
     /**
@@ -171,7 +170,7 @@ class block_completion_progress extends block_base {
                             (
                                 !empty($blockinstance->config->group) &&
                                 !has_capability('moodle/site:accessallgroups', $context) &&
-                                !groups_is_member($blockinstance->config->group, $USER->id)
+                                !block_completion_progress_group_membership($blockinstance->config->group, $course->id, $USER->id)
                             )
                         ) {
                             unset($blockinstances[$blockid]);
@@ -220,7 +219,7 @@ class block_completion_progress extends block_base {
             if (
                 !empty($this->config->group) &&
                 !has_capability('moodle/site:accessallgroups', $this->context) &&
-                !groups_is_member($this->config->group, $USER->id)
+                !block_completion_progress_group_membership($this->config->group, $COURSE->id, $USER->id)
             ) {
                 return $this->content;
             }

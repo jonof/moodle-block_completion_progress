@@ -23,10 +23,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once(dirname(__FILE__) . '/../../config.php');
-require_once($CFG->dirroot.'/blocks/completion_progress/lib.php');
-
 defined('MOODLE_INTERNAL') || die;
+
+require_once($CFG->dirroot.'/blocks/completion_progress/lib.php');
 
 /**
  * Completion Progress block config form class
@@ -86,12 +85,14 @@ class block_completion_progress_edit_form extends block_edit_form {
         $mform->addHelpButton('config_longbars', 'how_longbars_works', 'block_completion_progress');
 
         // Allow icons to be turned on/off on the block.
-        $mform->addElement('selectyesno', 'config_progressBarIcons',
-                           get_string('config_icons', 'block_completion_progress').' '.
-                           $OUTPUT->pix_icon('tick', '', 'block_completion_progress', array('class' => 'iconOnConfig')).'&nbsp;'.
-                           $OUTPUT->pix_icon('cross', '', 'block_completion_progress', array('class' => 'iconOnConfig')));
-        $mform->setDefault('config_progressBarIcons', DEFAULT_COMPLETIONPROGRESS_PROGRESSBARICONS);
-        $mform->addHelpButton('config_progressBarIcons', 'why_use_icons', 'block_completion_progress');
+        if (get_config('block_completion_progress', 'forceiconsinbar') !== "1") {
+            $mform->addElement('selectyesno', 'config_progressBarIcons',
+                               get_string('config_icons', 'block_completion_progress').' '.
+                               $OUTPUT->pix_icon('tick', '', 'block_completion_progress', array('class' => 'iconOnConfig')).
+                               $OUTPUT->pix_icon('cross', '', 'block_completion_progress', array('class' => 'iconOnConfig')));
+            $mform->setDefault('config_progressBarIcons', DEFAULT_COMPLETIONPROGRESS_PROGRESSBARICONS);
+            $mform->addHelpButton('config_progressBarIcons', 'why_use_icons', 'block_completion_progress');
+        }
 
         // Allow progress percentage to be turned on for students.
         $mform->addElement('selectyesno', 'config_showpercentage',
@@ -99,13 +100,17 @@ class block_completion_progress_edit_form extends block_edit_form {
         $mform->setDefault('config_showpercentage', DEFAULT_COMPLETIONPROGRESS_SHOWPERCENTAGE);
         $mform->addHelpButton('config_showpercentage', 'why_show_precentage', 'block_completion_progress');
 
-        // Allow the block to be visible to a single group.
+        // Allow the block to be visible to a single group or grouping.
         $groups = groups_get_all_groups($COURSE->id);
-        if (!empty($groups)) {
+        $groupings = groups_get_all_groupings($COURSE->id);
+        if (!empty($groups) || !empty($groupings)) {
             $groupsmenu = array();
             $groupsmenu[0] = get_string('allparticipants');
             foreach ($groups as $group) {
-                $groupsmenu[$group->id] = format_string($group->name);
+                $groupsmenu['group-' . $group->id] = format_string($group->name);
+            }
+            foreach ($groupings as $grouping) {
+                $groupsmenu['grouping-' . $grouping->id] = format_string($grouping->name);
             }
             $grouplabel = get_string('config_group', 'block_completion_progress');
             $mform->addElement('select', 'config_group', $grouplabel, $groupsmenu);

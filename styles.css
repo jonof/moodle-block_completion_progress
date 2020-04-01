@@ -14,8 +14,9 @@
 .block_completion_progress .left-arrow-svg,
 .block_completion_progress .right-arrow-svg {
     position: absolute;
-    top: calc(50% - 15px);
+    top: calc(50% - 10px);
     display: none;
+    z-index: 10;
 }
 
 .block_completion_progress .triangle-polygon {
@@ -137,6 +138,9 @@
     overflow: hidden;
     padding: 0;
     margin: 5px;
+}
+.block_completion_progress .progressEventInfo {
+    white-space: pre-wrap;
 }
 .dir-rtl .block_completion_progress .progressEventInfo,
 .dir-rtl .block_completion_progress .progressPercentage {
