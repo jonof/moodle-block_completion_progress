@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+defined('MOODLE_INTERNAL') || die;
+
 /**
  * Backup task for the Completion Progress block
  *
@@ -40,19 +42,21 @@ class restore_completion_progress_block_task extends restore_block_task {
         if ($configdata = $DB->get_field('block_instances', 'configdata', array('id' => $id))) {
             $config = (array)unserialize(base64_decode($configdata));
             $newactivities = array();
+            if (isset($config['selectactivities'])) {
 
-            // Translate the old config information to the target course values.
-            foreach ($config['selectactivities'] as $index => $value) {
-                $matches = array();
-                preg_match('/(.+)-(\d+)/', $value, $matches);
-                if (!empty($matches)) {
-                    $module = $matches[1];
-                    $instance = $matches[2];
+                // Translate the old config information to the target course values.
+                foreach ($config['selectactivities'] as $index => $value) {
+                    $matches = array();
+                    preg_match('/(.+)-(\d+)/', $value, $matches);
+                    if (!empty($matches)) {
+                        $module = $matches[1];
+                        $instance = $matches[2];
 
-                    // Find the mapped instance ID.
-                    if ($newinstance = restore_dbops::get_backup_ids_record($this->get_restoreid(), $module, $instance)) {
-                        $newinstanceid = $newinstance->newitemid;
-                        $newactivities[] = "$module-$newinstanceid";
+                        // Find the mapped instance ID.
+                        if ($newinstance = restore_dbops::get_backup_ids_record($this->get_restoreid(), $module, $instance)) {
+                            $newinstanceid = $newinstance->newitemid;
+                            $newactivities[] = "$module-$newinstanceid";
+                        }
                     }
                 }
             }
