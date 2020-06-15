@@ -108,13 +108,13 @@ echo $OUTPUT->container_start('block_completion_progress');
 
 // Check if activities/resources have been selected in config.
 $activities = block_completion_progress_get_activities($courseid, $config, $section);
-if ($activities == null) {
+if ($activities == null && empty($section)) {
     echo get_string('no_activities_message', 'block_completion_progress');
     echo $OUTPUT->container_end();
     echo $OUTPUT->footer();
     die();
 }
-if (empty($activities)) {
+if (empty($activities) && empty($section)) {
     echo get_string('no_visible_activities_message', 'block_completion_progress');
     echo $OUTPUT->container_end();
     echo $OUTPUT->footer();
