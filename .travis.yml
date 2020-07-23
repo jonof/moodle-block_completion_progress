@@ -46,6 +46,8 @@ script:
   - moodle-plugin-ci codechecker
   - moodle-plugin-ci validate
   - moodle-plugin-ci savepoints
-  - moodle-plugin-ci grunt
+  # Ignore grunt step outcome on versions before 3.8 because it complains about
+  # stale minified JS which is perfectly fine on the newer releases.
+  - "moodle-plugin-ci grunt || test $(expr $MOODLE_BRANCH : 'MOODLE_3[567]') -gt 0"
   - moodle-plugin-ci phpdoc
   - moodle-plugin-ci phpunit
