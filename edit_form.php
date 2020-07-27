@@ -34,7 +34,11 @@ require_once($CFG->dirroot.'/blocks/completion_progress/lib.php');
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class block_completion_progress_edit_form extends block_edit_form {
-
+    /**
+     * Settings specific to this block.
+     *
+     * @param moodleform $mform
+     */
     protected function specific_definition($mform) {
         global $COURSE, $OUTPUT;
         $activities = block_completion_progress_get_activities($COURSE->id, null, 'orderbycourse');

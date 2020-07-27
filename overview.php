@@ -29,9 +29,14 @@ require_once($CFG->dirroot.'/blocks/completion_progress/lib.php');
 require_once($CFG->dirroot.'/notes/lib.php');
 require_once($CFG->libdir.'/tablelib.php');
 
-const USER_SMALL_CLASS = 20;   // Below this is considered small.
-const USER_LARGE_CLASS = 200;  // Above this is considered large.
+/**
+ * Default number of participants per page.
+ */
 const DEFAULT_PAGE_SIZE = 20;
+
+/**
+ * An impractically high number of participants indicating 'all' are to be shown.
+ */
 const SHOW_ALL_PAGE_SIZE = 5000;
 
 // Gather form data.

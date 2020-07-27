@@ -14,10 +14,18 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+/**
+ * Restore task for the Completion Progress block
+ *
+ * @package    block_completion_progress
+ * @copyright  2016 Michael de Raadt
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 defined('MOODLE_INTERNAL') || die;
 
 /**
- * Backup task for the Completion Progress block
+ * Restore task for the Completion Progress block
  *
  * @package    block_completion_progress
  * @copyright  2016 Michael de Raadt
@@ -27,8 +35,6 @@ class restore_completion_progress_block_task extends restore_block_task {
 
     /**
      * Translates the backed up configuration data for the target course modules.
-     *
-     * @global type $DB
      */
     public function after_restore() {
         global $DB;

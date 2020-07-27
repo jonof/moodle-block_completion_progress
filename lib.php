@@ -26,25 +26,67 @@ defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->libdir.'/completionlib.php');
 
-// Global defaults.
+/**
+ * Default number of cells per row in wrap mode.
+ */
 const DEFAULT_COMPLETIONPROGRESS_WRAPAFTER = 16;
+
+/**
+ * Default presentation mode for long bars: squeeze, scroll, or wrap.
+ */
 const DEFAULT_COMPLETIONPROGRESS_LONGBARS = 'squeeze';
+
+/**
+ * Width of cells when in scroll mode.
+ */
 const DEFAULT_COMPLETIONPROGRESS_SCROLLCELLWIDTH = 25;
+
+/**
+ * Default course name (long/short) to show on Dashboard pages.
+ */
 const DEFAULT_COMPLETIONPROGRESS_COURSENAMETOSHOW = 'shortname';
+
+/**
+ * Default display of inactive students on the overview page.
+ */
 const DEFAULT_COMPLETIONPROGRESS_SHOWINACTIVE = 0;
+
+/**
+ * Default display of student 'last in course' time on overview page.
+ */
 const DEFAULT_COMPLETIONPROGRESS_SHOWLASTINCOURSE = 1;
+
+/**
+ * Default forcing the display of status icons in bar cells.
+ */
 const DEFAULT_COMPLETIONPROGRESS_FORCEICONSINBAR = 0;
+
+/**
+ * Default display of status icons in bar cells.
+ */
 const DEFAULT_COMPLETIONPROGRESS_PROGRESSBARICONS = 0;
+
+/**
+ * Default cell sort order mode: orderbytime or orderbycourse.
+ */
 const DEFAULT_COMPLETIONPROGRESS_ORDERBY = 'orderbytime';
+
+/**
+ * Default display of progress percentage in block.
+ */
 const DEFAULT_COMPLETIONPROGRESS_SHOWPERCENTAGE = 0;
+
+/**
+ * Default choice of activites included: activitycompletion or selectedactivities.
+ */
 const DEFAULT_COMPLETIONPROGRESS_ACTIVITIESINCLUDED = 'activitycompletion';
 
 /**
  * Finds submissions for a user in a course
  *
- * @param int    courseid ID of the course
- * @param int    userid   ID of user in the course
- * @return array Course module IDS submissions
+ * @param int    $courseid ID of the course
+ * @param int    $userid   ID of user in the course
+ * @return array Course module IDs submissions
  */
 function block_completion_progress_student_submissions($courseid, $userid) {
     global $DB;
@@ -87,7 +129,7 @@ function block_completion_progress_student_submissions($courseid, $userid) {
 /**
  * Finds submissions for users in a course
  *
- * @param int    courseid   ID of the course
+ * @param int    $courseid   ID of the course
  * @return array Mapping of userid-cmid pairs for submissions
  */
 function block_completion_progress_course_submissions($courseid) {
@@ -164,9 +206,9 @@ function block_completion_progress_modules_with_alternate_links() {
 /**
  * Returns the activities with completion set in current course
  *
- * @param int    courseid   ID of the course
- * @param int    config     The block instance configuration
- * @param string forceorder An override for the course order setting
+ * @param int    $courseid   ID of the course
+ * @param int    $config     The block instance configuration
+ * @param string $forceorder An override for the course order setting
  * @return array Activities with completion settings in the course
  */
 function block_completion_progress_get_activities($courseid, $config = null, $forceorder = null) {
@@ -343,7 +385,7 @@ function block_completion_progress_completions($activities, $userid, $course, $s
  * @param stdClass $config      The blocks instance configuration settings
  * @param int      $userid      The user's id
  * @param int      $courseid    The course id
- * @param int      instance     The block instance (to identify it on page)
+ * @param int      $instance    The block instance (to identify it on page)
  * @param bool     $simple      Controls whether instructions are shown below a progress bar
  * @return string  Progress Bar HTML content
  */
@@ -666,6 +708,7 @@ function block_completion_progress_exclusions ($courseid) {
  *
  * @param string $group    The group or grouping identifier starting with 'group-' or 'grouping-'
  * @param int    $courseid The ID of the course containing the block instance
+ * @param int    $userid   The ID of the user
  * @return boolean value indicating membership
  */
 function block_completion_progress_group_membership ($group, $courseid, $userid) {
