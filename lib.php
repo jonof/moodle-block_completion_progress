@@ -37,11 +37,6 @@ const DEFAULT_COMPLETIONPROGRESS_WRAPAFTER = 16;
 const DEFAULT_COMPLETIONPROGRESS_LONGBARS = 'squeeze';
 
 /**
- * Width of cells when in scroll mode.
- */
-const DEFAULT_COMPLETIONPROGRESS_SCROLLCELLWIDTH = 25;
-
-/**
  * Default course name (long/short) to show on Dashboard pages.
  */
 const DEFAULT_COMPLETIONPROGRESS_COURSENAMETOSHOW = 'shortname';
@@ -412,6 +407,7 @@ function block_completion_progress_bar($activities, $completions, $config, $user
     $showpercentage = isset($config->showpercentage) ? $config->showpercentage : DEFAULT_COMPLETIONPROGRESS_SHOWPERCENTAGE;
     $rowoptions = array();
     $rowoptions['style'] = '';
+    $barclasses = array('barRow');
     $content .= html_writer::start_div('barContainer', ['data-instanceid' => $instance]);
 
     // Determine the segment width.
@@ -427,37 +423,27 @@ function block_completion_progress_bar($activities, $completions, $config, $user
         if ($rows <= 1) {
             $rows = 1;
         }
-        $cellwidth = floor(100 / ceil($numactivities / $rows));
-        $cellunit = '%';
-        $celldisplay = 'inline-block';
+        $rowoptions['style'] = 'flex-basis: calc(100% / ' . ceil($numactivities / $rows) . ');';
         $displaynow = false;
     }
     if ($longbars == 'scroll') {
-        $cellwidth = DEFAULT_COMPLETIONPROGRESS_SCROLLCELLWIDTH;
-        $cellunit = 'px';
-        $celldisplay = 'inline-block';
-        $rowoptions['style'] .= 'white-space: nowrap;';
         $leftpoly = HTML_WRITER::tag('polygon', '', array('points' => '30,0 0,15 30,30', 'class' => 'triangle-polygon'));
         $rightpoly = HTML_WRITER::tag('polygon', '', array('points' => '0,0 30,15 0,30', 'class' => 'triangle-polygon'));
         $content .= HTML_WRITER::tag('svg', $leftpoly, array('class' => 'left-arrow-svg', 'height' => '30', 'width' => '30'));
         $content .= HTML_WRITER::tag('svg', $rightpoly, array('class' => 'right-arrow-svg', 'height' => '30', 'width' => '30'));
     }
-    if ($longbars == 'squeeze') {
-        $cellwidth = $numactivities > 0 ? floor(100 / $numactivities) : 1;
-        $cellunit = '%';
-        $celldisplay = 'table-cell';
-    }
+    $barclasses[] = 'barMode' . ucfirst($longbars);
 
     // Determine where to put the NOW indicator.
     $nowpos = -1;
     if ($orderby == 'orderbytime' && $longbars != 'wrap' && $displaynow == 1 && !$simple) {
+        $barclasses[] = 'barWithNow';
 
         // Find where to put now arrow.
         $nowpos = 0;
         while ($nowpos < $numactivities && $now > $activities[$nowpos]['expected'] && $activities[$nowpos]['expected'] != 0) {
             $nowpos++;
         }
-        $rowoptions['style'] .= 'margin-top: 25px;';
         $nowstring = get_string('now_indicator', 'block_completion_progress');
         $leftarrowimg = $OUTPUT->pix_icon('left', $nowstring, 'block_completion_progress', array('class' => 'nowicon'));
         $rightarrowimg = $OUTPUT->pix_icon('right', $nowstring, 'block_completion_progress', array('class' => 'nowicon'));
@@ -484,7 +470,7 @@ function block_completion_progress_bar($activities, $completions, $config, $user
     }
 
     // Start progress bar.
-    $content .= HTML_WRITER::start_div('barRow', $rowoptions);
+    $content .= html_writer::start_div(implode(' ', $barclasses), $rowoptions);
     $counter = 1;
     foreach ($activities as $activity) {
         $complete = $completions[$activity['id']];
@@ -493,7 +479,7 @@ function block_completion_progress_bar($activities, $completions, $config, $user
         $celloptions = array(
             'class' => 'progressBarCell',
             'data-info-ref' => 'progressBarInfo'.$instance.'-'.$userid.'-'.$activity['id'],
-            'style' => 'display:' . $celldisplay .'; width:' . $cellwidth . $cellunit . ';background-color:'
+            'style' => 'background-color:'
         );
         if ($complete === 'submitted') {
             $celloptions['style'] .= $colours['submittednotcomplete_colour'].';';
@@ -521,12 +507,6 @@ function block_completion_progress_bar($activities, $completions, $config, $user
             $celloptions['data-haslink'] = 'true';
         } else if (!empty($activity['link'])) {
             $celloptions['data-haslink'] = 'not-allowed';
-        }
-        if ($longbars != 'wrap' && $counter == 1) {
-            $celloptions['class'] .= ' firstProgressBarCell';
-        }
-        if ($longbars != 'wrap' && $counter == $numactivities) {
-            $celloptions['class'] .= ' lastProgressBarCell';
         }
 
         // Place the NOW indicator.
