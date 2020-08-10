@@ -157,6 +157,28 @@
     width: 100%;
     table-layout: fixed;
 }
+#page-blocks-completion_progress-overview .overviewTable th,
+#page-blocks-completion_progress-overview .overviewTable td {
+    padding: 4px;
+    vertical-align: middle;
+}
+#page-blocks-completion_progress-overview .overviewTable .col-select {
+    width: 2rem;
+    text-align: center;
+}
+#page-blocks-completion_progress-overview .overviewTable .col-fullname {
+    width: 15%;
+}
+#page-blocks-completion_progress-overview .overviewTable .col-lastonline {
+    width: 15%;
+}
+#page-blocks-completion_progress-overview .overviewTable .col-progressbar {
+    min-width: 200px;
+}
+#page-blocks-completion_progress-overview .overviewTable .col-progress {
+    width: 6rem;
+    text-align: center;
+}
 
 .block_completion_progress .progressEventInfo img {
     vertical-align: middle;

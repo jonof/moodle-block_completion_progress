@@ -254,18 +254,16 @@ echo html_writer::start_div('', $tabledivattributes);
 $table = new flexible_table('mod-block-completion-progress-overview');
 $table->pagesize($perpage, $numberofusers);
 if (get_config('block_completion_progress', 'showlastincourse') !== "0") {
-    $tablecolumns = array('picture', 'fullname', 'lastonline', 'progressbar', 'progress');
+    $tablecolumns = array('fullname', 'lastonline', 'progressbar', 'progress');
     $tableheaders = array(
-                        '',
                         get_string('fullname'),
                         get_string('lastonline', 'block_completion_progress'),
                         get_string('progressbar', 'block_completion_progress'),
                         get_string('progress', 'block_completion_progress')
                     );
 } else {
-    $tablecolumns = array('picture', 'fullname', 'progressbar', 'progress');
+    $tablecolumns = array('fullname', 'progressbar', 'progress');
     $tableheaders = array(
-                        '',
                         get_string('fullname'),
                         get_string('progressbar', 'block_completion_progress'),
                         get_string('progress', 'block_completion_progress')
@@ -286,23 +284,14 @@ $table->define_columns($tablecolumns);
 $table->define_headers($tableheaders);
 $table->sortable(true);
 $table->set_attribute('class', 'overviewTable');
-$table->column_style_all('padding', '5px');
-$table->column_style_all('text-align', 'left');
-$table->column_style_all('vertical-align', 'middle');
-$table->column_style('picture', 'width', '5%');
-$table->column_style('fullname', 'width', '15%');
-$table->column_style('lastonline', 'width', '15%');
-$table->column_style('progressbar', 'min-width', '200px');
-$table->column_style('progressbar', 'width', '*');
-$table->column_style('progressbar', 'padding', '0');
-$table->column_style('progress', 'text-align', 'center');
-$table->column_style('progress', 'width', '8%');
+$table->column_class('fullname', 'col-fullname');
+$table->column_class('lastonline', 'col-lastonline');
+$table->column_class('progressbar', 'col-progressbar');
+$table->column_class('progress', 'col-progress');
 if ($bulkoperations) {
-    $table->column_style('select', 'width', '5%');
-    $table->column_style('select', 'text-align', 'center');
+    $table->column_class('select', 'col-select');
     $table->no_sorting('select');
 }
-$table->no_sorting('picture');
 $table->no_sorting('progressbar');
 $table->define_baseurl($PAGE->url);
 $table->setup();
@@ -328,8 +317,7 @@ if ($sortbyprogress) {
 $rows = array();
 $exclusions = block_completion_progress_exclusions($course->id);
 for ($i = $startuser; $i < $enduser; $i++) {
-    $picture = $OUTPUT->user_picture($users[$i], array('course' => $course->id));
-    $namelink = html_writer::link($CFG->wwwroot.'/user/view.php?id='.$users[$i]->id.'&course='.$course->id, fullname($users[$i]));
+    $picture = $OUTPUT->user_picture($users[$i], array('course' => $course->id, 'includefullname' => true));
     if (empty($users[$i]->lastonlinetime)) {
         $lastonline = get_string('never');
     } else {
@@ -352,8 +340,7 @@ for ($i = $startuser; $i < $enduser; $i++) {
         'userid' => $users[$i]->id,
         'firstname' => strtoupper($users[$i]->firstname),
         'lastname' => strtoupper($users[$i]->lastname),
-        'picture' => $picture,
-        'fullname' => $namelink,
+        'fullname' => $picture,
         'fullnametext' => fullname($users[$i]),
         'lastonlinetime' => $users[$i]->lastonlinetime,
         'lastonline' => $lastonline,
@@ -372,9 +359,9 @@ if ($sortbyprogress) {
 if ($numberofusers > 0) {
     for ($i = $startdisplay; $i < $enddisplay; $i++) {
         if (get_config('block_completion_progress', 'showlastincourse') !== "0") {
-            $rowdata = array($rows[$i]['picture'], $rows[$i]['fullname'], $rows[$i]['lastonline'], $rows[$i]['progressbar'], $rows[$i]['progress']);
+            $rowdata = array($rows[$i]['fullname'], $rows[$i]['lastonline'], $rows[$i]['progressbar'], $rows[$i]['progress']);
         } else {
-            $rowdata = array($rows[$i]['picture'], $rows[$i]['fullname'], $rows[$i]['progressbar'], $rows[$i]['progress']);
+            $rowdata = array($rows[$i]['fullname'], $rows[$i]['progressbar'], $rows[$i]['progress']);
         }
         if ($bulkoperations) {
             $checkbox = new core\output\checkbox_toggleall('participants-table', false, [
