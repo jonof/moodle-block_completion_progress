@@ -15,10 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Base class for unit tests for mod_assign.
+ * Basic unit tests for block_completion_progress.
  *
- * @package    blocks_completion_progress
- * @category   phpunit
+ * @package    block_completion_progress
  * @copyright  2017 onwards Nelson Moller  {@link http://moodle.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -30,11 +29,23 @@ global $CFG;
 require_once($CFG->dirroot . '/mod/assign/locallib.php');
 require_once($CFG->dirroot.'/blocks/completion_progress/lib.php');
 
+/**
+ * Basic unit tests for block_completion_progress.
+ *
+ * @package    block_completion_progress
+ * @copyright  2017 onwards Nelson Moller  {@link http://moodle.com}
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class block_completion_progress_base_testcase extends advanced_testcase {
 
-    /** @const Default number of students to create */
+    /**
+     * Default number of students to create.
+     */
     const DEFAULT_STUDENT_COUNT = 3;
-    /** @const Default number of teachers to create */
+
+    /**
+     * Default number of teachers to create.
+     */
     const DEFAULT_TEACHER_COUNT = 1;
 
     /**

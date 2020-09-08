@@ -1,4 +1,3 @@
-<?php
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -14,19 +13,24 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-
 /**
- * Completion Progress block version details
+ * Completion Progress compatibility shim for 3.6 and below.
  *
+ * Moodle 3.7 provides core/checkbox-toggleall, so this implements just
+ * enough functionality to fill in the gaps for older versions.
+ *
+ * @module     block_completion_progress/checkbox_toggleall_compat
  * @package    block_completion_progress
- * @copyright  2018 Michael de Raadt
+ * @copyright  2020 Jonathon Fowler <fowlerj@usq.edu.au>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-defined('MOODLE_INTERNAL') || die;
-
-$plugin->version   = 2020081000;
-$plugin->requires  = 2018051700; // Moodle 3.5.0
-$plugin->maturity  = MATURITY_STABLE;
-$plugin->release   = 'Version for Moodle 3.5 onwards';
-$plugin->component = 'block_completion_progress';
+define(['jquery'],
+    function($) {
+        var masters = $('input[type=checkbox][data-action=toggle][data-toggle=master]');
+        masters.click(function() {
+            var master = $(this);
+            var subords = $('input[type=checkbox][data-action=toggle][data-toggle=slave]' +
+                '[data-togglegroup=' + master.data('togglegroup') + ']');
+            subords.prop('checked', master.prop('checked'));
+        });
+    });

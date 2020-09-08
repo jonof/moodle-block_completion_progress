@@ -29,9 +29,18 @@ require_once($CFG->dirroot.'/blocks/completion_progress/lib.php');
 require_once($CFG->dirroot.'/notes/lib.php');
 require_once($CFG->libdir.'/tablelib.php');
 
-const USER_SMALL_CLASS = 20;   // Below this is considered small.
-const USER_LARGE_CLASS = 200;  // Above this is considered large.
+if (!class_exists('core\output\checkbox_toggleall')) {
+    class_alias('block_completion_progress\checkbox_toggleall_compat', 'core\output\checkbox_toggleall');
+}
+
+/**
+ * Default number of participants per page.
+ */
 const DEFAULT_PAGE_SIZE = 20;
+
+/**
+ * An impractically high number of participants indicating 'all' are to be shown.
+ */
 const SHOW_ALL_PAGE_SIZE = 5000;
 
 // Gather form data.
@@ -43,7 +52,7 @@ $group    = optional_param('group', 0, PARAM_ALPHANUMEXT); // Group selected.
 
 // Determine course and context.
 $course = $DB->get_record('course', array('id' => $courseid), '*', MUST_EXIST);
-$context = CONTEXT_COURSE::instance($courseid);
+$context = context_course::instance($courseid);
 
 $notesallowed = !empty($CFG->enablenotes) && has_capability('moodle/notes:manage', $context);
 $messagingallowed = !empty($CFG->messaging) && has_capability('moodle/site:sendmessage', $context);
@@ -70,7 +79,7 @@ $roleselected = optional_param('role', $studentroleid, PARAM_INT);
 // Get specific block config and context.
 $block = $DB->get_record('block_instances', array('id' => $id), '*', MUST_EXIST);
 $config = unserialize(base64_decode($block->configdata));
-$blockcontext = CONTEXT_BLOCK::instance($id);
+$blockcontext = context_block::instance($id);
 
 // Set up page parameters.
 $PAGE->set_course($course);
@@ -98,6 +107,8 @@ $PAGE->set_pagelayout('report');
 require_login($course, false);
 require_capability('block/completion_progress:overview', $blockcontext);
 confirm_sesskey();
+
+$output = $PAGE->get_renderer('block_completion_progress');
 
 // Start page output.
 echo $OUTPUT->header();
@@ -225,56 +236,62 @@ if (!$paged) {
 
 // Form for messaging selected participants.
 $formattributes = array('action' => $CFG->wwwroot.'/user/action_redir.php', 'method' => 'post', 'id' => 'participantsform');
+$formattributes['data-course-id'] = $course->id;
+$formattributes['data-table-unique-id'] = 'block-completion_progress-overview-' . $course->id;
 echo html_writer::start_tag('form', $formattributes);
 echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()));
 echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'returnto', 'value' => s($PAGE->url->out(false))));
+
+// Imitate a 3.9 dynamic table enough to fool the core_user/participants JS code, until
+// next time it changes again.
+$tabledivattributes = [
+    'data-region' => 'core_table/dynamic',
+    'data-table-uniqueid' => $formattributes['data-table-unique-id'],
+];
+echo html_writer::start_div('', $tabledivattributes);
 
 // Setup submissions table.
 $table = new flexible_table('mod-block-completion-progress-overview');
 $table->pagesize($perpage, $numberofusers);
 if (get_config('block_completion_progress', 'showlastincourse') !== "0") {
-    $tablecolumns = array('picture', 'fullname', 'lastonline', 'progressbar', 'progress');
+    $tablecolumns = array('fullname', 'lastonline', 'progressbar', 'progress');
     $tableheaders = array(
-                        '',
                         get_string('fullname'),
                         get_string('lastonline', 'block_completion_progress'),
                         get_string('progressbar', 'block_completion_progress'),
                         get_string('progress', 'block_completion_progress')
                     );
 } else {
-    $tablecolumns = array('picture', 'fullname', 'progressbar', 'progress');
+    $tablecolumns = array('fullname', 'progressbar', 'progress');
     $tableheaders = array(
-                        '',
                         get_string('fullname'),
                         get_string('progressbar', 'block_completion_progress'),
                         get_string('progress', 'block_completion_progress')
                     );
 }
 if ($bulkoperations) {
+    $checkbox = new core\output\checkbox_toggleall('participants-table', true, [
+        'id' => 'select-all-participants',
+        'name' => 'select-all-participants',
+        'label' => get_string('selectall'),
+        'labelclasses' => 'sr-only',
+        'checked' => false,
+    ]);
     array_unshift($tablecolumns, 'select');
-    array_unshift($tableheaders, get_string('select'));
+    array_unshift($tableheaders, $output->render($checkbox));
 }
 $table->define_columns($tablecolumns);
 $table->define_headers($tableheaders);
 $table->sortable(true);
 $table->set_attribute('class', 'overviewTable');
-$table->column_style_all('padding', '5px');
-$table->column_style_all('text-align', 'left');
-$table->column_style_all('vertical-align', 'middle');
-$table->column_style('picture', 'width', '5%');
-$table->column_style('fullname', 'width', '15%');
-$table->column_style('lastonline', 'width', '15%');
-$table->column_style('progressbar', 'min-width', '200px');
-$table->column_style('progressbar', 'width', '*');
-$table->column_style('progressbar', 'padding', '0');
-$table->column_style('progress', 'text-align', 'center');
-$table->column_style('progress', 'width', '8%');
+$table->column_class('fullname', 'col-fullname');
+$table->column_class('lastonline', 'col-lastonline');
+$table->column_class('progressbar', 'col-progressbar');
+$table->column_class('progress', 'col-progress');
 if ($bulkoperations) {
-    $table->column_style('select', 'width', '5%');
-    $table->column_style('select', 'text-align', 'center');
+    $table->column_class('select', 'col-select');
     $table->no_sorting('select');
 }
-$table->no_sorting('picture');
 $table->no_sorting('progressbar');
 $table->define_baseurl($PAGE->url);
 $table->setup();
@@ -300,8 +317,7 @@ if ($sortbyprogress) {
 $rows = array();
 $exclusions = block_completion_progress_exclusions($course->id);
 for ($i = $startuser; $i < $enduser; $i++) {
-    $picture = $OUTPUT->user_picture($users[$i], array('course' => $course->id));
-    $namelink = html_writer::link($CFG->wwwroot.'/user/view.php?id='.$users[$i]->id.'&course='.$course->id, fullname($users[$i]));
+    $picture = $OUTPUT->user_picture($users[$i], array('course' => $course->id, 'includefullname' => true));
     if (empty($users[$i]->lastonlinetime)) {
         $lastonline = get_string('never');
     } else {
@@ -324,8 +340,8 @@ for ($i = $startuser; $i < $enduser; $i++) {
         'userid' => $users[$i]->id,
         'firstname' => strtoupper($users[$i]->firstname),
         'lastname' => strtoupper($users[$i]->lastname),
-        'picture' => $picture,
-        'fullname' => $namelink,
+        'fullname' => $picture,
+        'fullnametext' => fullname($users[$i]),
         'lastonlinetime' => $users[$i]->lastonlinetime,
         'lastonline' => $lastonline,
         'progressbar' => $progressbar,
@@ -343,31 +359,30 @@ if ($sortbyprogress) {
 if ($numberofusers > 0) {
     for ($i = $startdisplay; $i < $enddisplay; $i++) {
         if (get_config('block_completion_progress', 'showlastincourse') !== "0") {
-            $rowdata = array($rows[$i]['picture'], $rows[$i]['fullname'], $rows[$i]['lastonline'], $rows[$i]['progressbar'], $rows[$i]['progress']);
+            $rowdata = array($rows[$i]['fullname'], $rows[$i]['lastonline'], $rows[$i]['progressbar'], $rows[$i]['progress']);
         } else {
-            $rowdata = array($rows[$i]['picture'], $rows[$i]['fullname'], $rows[$i]['progressbar'], $rows[$i]['progress']);
+            $rowdata = array($rows[$i]['fullname'], $rows[$i]['progressbar'], $rows[$i]['progress']);
         }
         if ($bulkoperations) {
-            array_unshift($rowdata, html_writer::empty_tag('input', [
-                'type' => 'checkbox',
-                'class' => 'usercheckbox',
+            $checkbox = new core\output\checkbox_toggleall('participants-table', false, [
+                'classes' => 'usercheckbox',
+                'id' => 'user' . $rows[$i]['userid'],
                 'name' => 'user' . $rows[$i]['userid'],
-            ]));
+                'checked' => false,
+                'label' => get_string('selectitem', 'block_completion_progress', $rows[$i]['fullnametext']),
+                'labelclasses' => 'accesshide',
+            ]);
+            array_unshift($rowdata, $output->render($checkbox));
         }
         $table->add_data($rowdata);
     }
 }
 $table->print_html();
+echo html_writer::end_div();    // Closes the 3.9 imitation table wrapper.
 
 if ($bulkoperations) {
     echo '<br /><div class="buttons">';
 
-    echo html_writer::start_tag('div', array('class' => 'btn-group'));
-    echo html_writer::tag('input', "", array('type' => 'button', 'id' => 'checkallonpage', 'class' => 'btn btn-secondary',
-    'value' => get_string('selectall')));
-    echo html_writer::tag('input', "", array('type' => 'button', 'id' => 'checknone', 'class' => 'btn btn-secondary',
-        'value' => get_string('deselectall')));
-    echo html_writer::end_tag('div');
     $displaylist = array();
     if ($messagingallowed) {
         $displaylist['#messageselect'] = get_string('messageselectadd');
@@ -386,10 +401,17 @@ if ($bulkoperations) {
     echo '</div>';
 
     $options = new stdClass();
-    $options->courseid = $course->id;
-    $options->noteStateNames = note_get_state_names();
-    $options->stateHelpIcon = $OUTPUT->help_icon('publishstate', 'notes');
-    $PAGE->requires->js_call_amd('core_user/participants', 'init', [$options]);
+    $options->moodleBranch = $CFG->branch;
+    if ($CFG->branch < 39) {
+        $options->courseid = $course->id;
+        $options->noteStateNames = note_get_state_names();
+        $options->stateHelpIcon = $OUTPUT->help_icon('publishstate', 'notes');
+    } else {
+        $options->uniqueid = $formattributes['data-table-unique-id'];
+        $options->noteStateNames = note_get_state_names();
+        echo '<div class="d-none" data-region="state-help-icon">' . $OUTPUT->help_icon('publishstate', 'notes') . '</div>';
+    }
+    $PAGE->requires->js_call_amd('block_completion_progress/overview', 'init', [$options]);
 }
 echo html_writer::end_tag('form');
 
