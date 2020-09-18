@@ -728,3 +728,30 @@ function block_completion_progress_group_membership ($group, $courseid, $userid)
 
     return false;
 }
+
+/**
+ * Draws a progress bar ready to embed in any screen
+ *
+ * @param int      $userid      The user's id
+ * @param int      $course      The course instance
+ * @param int      $instance    The block instance (to identify it on page)
+ * @return string  Progress Bar HTML content
+ */
+function block_completion_embedded_progress_bar ($course, $userid, $instance) {
+    global $PAGE;
+    $exclusions = block_completion_progress_exclusions($course->id, $userid);
+    $instance->config = unserialize(base64_decode($instance->configdata));
+    $instance->activities = block_completion_progress_get_activities($course->id, $instance->config);
+    $instance->activities = block_completion_progress_filter_visibility($instance->activities, $userid, $course->id, $exclusions);
+    $submissions = block_completion_progress_student_submissions($course->id, $userid);
+    $completions = block_completion_progress_completions($instance->activities, $userid, $course, $submissions);
+
+    $percent = block_completion_progress_percentage($instance->activities, $completions);
+
+    // Move to external mustache file
+    $output = $PAGE->get_renderer('block_completion_progress');
+
+    return $output->render_progress_bar(['state' => $course->comp_state, 'percent' => $percent]);
+//    return '<div class="block_aprendeoverview"><div class="progress rounded ' . $course->comp_state . '-bg-transparent" style="height: 4px;"> <div class="progress-bar ' . $course->comp_state . '-bg " style="width: '.$percent.'%" role="progressbar" aria-valuenow="' . $percent . '" aria-valuemin="0" aria-valuemax="100"></div> </div> <p class="percent ' . $course->comp_state . '-text">' . $percent . '%</p></div>';
+
+}

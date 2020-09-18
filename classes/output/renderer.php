@@ -70,4 +70,15 @@ class renderer extends plugin_renderer_base {
         return html_writer::empty_tag('input', $inputattribs) .
             html_writer::tag('label', $renderable->options['label'], $labelattribs);
     }
+
+    /**
+     * Generate HTML to represent a completion pogress bar.
+     *
+     * @param array $payload
+     * @return string
+     */
+
+    public function render_progress_bar (array $payload) {
+        return $this->render_from_template('block_completion_progress/progress-bar', $payload);
+    }
 }
