@@ -24,7 +24,8 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-require_once($CFG->libdir.'/completionlib.php');
+require_once($CFG->libdir . '/completionlib.php');
+
 
 /**
  * Default number of cells per row in wrap mode.
@@ -79,23 +80,24 @@ const DEFAULT_COMPLETIONPROGRESS_SHOWPERCENTAGE = 0;
 /**
  * Default choice of activites included: activitycompletion or selectedactivities.
  */
-const DEFAULT_COMPLETIONPROGRESS_ACTIVITIESINCLUDED = 'activitycompletion';
+const DEFAULT_COMPLETIONPROGRESS_ACTIVITIESINCLUDED = 'selectedactivities';
 
 /**
  * Finds submissions for a user in a course
  *
- * @param int    $courseid ID of the course
- * @param int    $userid   ID of user in the course
+ * @param int $courseid ID of the course
+ * @param int $userid ID of user in the course
  * @return array Course module IDs submissions
  */
-function block_completion_progress_student_submissions($courseid, $userid) {
+function block_completion_progress_student_submissions($courseid, $userid)
+{
     global $DB;
 
     $submissions = array();
     $params = array('courseid' => $courseid, 'userid' => $userid);
 
     // Queries to deliver instance IDs of activities with submissions by user.
-    $queries = array (
+    $queries = array(
         'assign' => "SELECT c.id
                        FROM {assign_submission} s, {assign} a, {modules} m, {course_modules} c
                       WHERE s.userid = :userid
@@ -129,18 +131,19 @@ function block_completion_progress_student_submissions($courseid, $userid) {
 /**
  * Finds submissions for users in a course
  *
- * @param int    $courseid   ID of the course
+ * @param int $courseid ID of the course
  * @return array Mapping of userid-cmid pairs for submissions
  */
-function block_completion_progress_course_submissions($courseid) {
+function block_completion_progress_course_submissions($courseid)
+{
     global $DB;
 
     $submissions = array();
     $params = array('courseid' => $courseid);
 
     // Queries to deliver instance IDs of activities with submissions by user.
-    $queries = array (
-        'assign' => "SELECT ". $DB->sql_concat('s.userid', "'-'", 'c.id') ."
+    $queries = array(
+        'assign' => "SELECT " . $DB->sql_concat('s.userid', "'-'", 'c.id') . "
                        FROM {assign_submission} s, {assign} a, {modules} m, {course_modules} c
                       WHERE s.latest = 1
                         AND s.status = 'submitted'
@@ -149,7 +152,7 @@ function block_completion_progress_course_submissions($courseid) {
                         AND m.name = 'assign'
                         AND m.id = c.module
                         AND c.instance = a.id",
-        'workshop' => "SELECT ". $DB->sql_concat('s.authorid', "'-'", 'c.id') ."
+        'workshop' => "SELECT " . $DB->sql_concat('s.authorid', "'-'", 'c.id') . "
                          FROM {workshop_submissions} s, {workshop} w, {modules} m, {course_modules} c
                         WHERE s.workshopid = w.id
                           AND w.course = :courseid
@@ -173,7 +176,8 @@ function block_completion_progress_course_submissions($courseid) {
  *
  * @return array URLs and associated capabilities, per activity
  */
-function block_completion_progress_modules_with_alternate_links() {
+function block_completion_progress_modules_with_alternate_links()
+{
     global $CFG;
 
     $alternatelinks = array(
@@ -206,12 +210,13 @@ function block_completion_progress_modules_with_alternate_links() {
 /**
  * Returns the activities with completion set in current course
  *
- * @param int    $courseid   ID of the course
- * @param int    $config     The block instance configuration
+ * @param int $courseid ID of the course
+ * @param int $config The block instance configuration
  * @param string $forceorder An override for the course order setting
  * @return array Activities with completion settings in the course
  */
-function block_completion_progress_get_activities($courseid, $config = null, $forceorder = null) {
+function block_completion_progress_get_activities($courseid, $config = null, $forceorder = null)
+{
     $modinfo = get_fast_modinfo($courseid, -1);
     $sections = $modinfo->get_sections();
     $activities = array();
@@ -223,22 +228,22 @@ function block_completion_progress_get_activities($courseid, $config = null, $fo
                     $config == null || (
                         !isset($config->activitiesincluded) || (
                             $config->activitiesincluded != 'selectedactivities' ||
-                                !empty($config->selectactivities) &&
-                                in_array($module.'-'.$cm->instance, $config->selectactivities))))
+                            !empty($config->selectactivities) &&
+                            in_array($module . '-' . $cm->instance, $config->selectactivities))))
             ) {
-                $activities[] = array (
-                    'type'       => $module,
+                $activities[] = array(
+                    'type' => $module,
                     'modulename' => $modulename,
-                    'id'         => $cm->id,
-                    'instance'   => $cm->instance,
-                    'name'       => format_string($cm->name),
-                    'expected'   => $cm->completionexpected,
-                    'section'    => $cm->sectionnum,
-                    'position'   => array_search($cm->id, $sections[$cm->sectionnum]),
-                    'url'        => method_exists($cm->url, 'out') ? $cm->url->out() : '',
-                    'context'    => $cm->context,
-                    'icon'       => $cm->get_icon_url(),
-                    'available'  => $cm->available,
+                    'id' => $cm->id,
+                    'instance' => $cm->instance,
+                    'name' => format_string($cm->name),
+                    'expected' => $cm->completionexpected,
+                    'section' => $cm->sectionnum,
+                    'position' => array_search($cm->id, $sections[$cm->sectionnum]),
+                    'url' => method_exists($cm->url, 'out') ? $cm->url->out() : '',
+                    'context' => $cm->context,
+                    'icon' => $cm->get_icon_url(),
+                    'available' => $cm->available,
                 );
             }
         }
@@ -261,7 +266,8 @@ function block_completion_progress_get_activities($courseid, $config = null, $fo
  * @param array $b array of event information
  * @return <0, 0 or >0 depending on order of activities/resources on course page
  */
-function block_completion_progress_compare_events($a, $b) {
+function block_completion_progress_compare_events($a, $b)
+{
     if ($a['section'] != $b['section']) {
         return $a['section'] - $b['section'];
     } else {
@@ -276,7 +282,8 @@ function block_completion_progress_compare_events($a, $b) {
  * @param array $b array of event information
  * @return <0, 0 or >0 depending on time then order of activities/resources
  */
-function block_completion_progress_compare_times($a, $b) {
+function block_completion_progress_compare_times($a, $b)
+{
     if (
         $a['expected'] != 0 &&
         $b['expected'] != 0 &&
@@ -295,13 +302,14 @@ function block_completion_progress_compare_times($a, $b) {
 /**
  * Filters activities that a user cannot see due to grouping constraints
  *
- * @param array  $activities The possible activities that can occur for modules
- * @param array  $userid The user's id
+ * @param array $activities The possible activities that can occur for modules
+ * @param array $userid The user's id
  * @param string $courseid the course for filtering visibility
- * @param array  $exclusions Assignment exemptions for students in the course
+ * @param array $exclusions Assignment exemptions for students in the course
  * @return array The array with restricted activities removed
  */
-function block_completion_progress_filter_visibility($activities, $userid, $courseid, $exclusions) {
+function block_completion_progress_filter_visibility($activities, $userid, $courseid, $exclusions)
+{
     global $CFG;
     $filteredactivities = array();
     $modinfo = get_fast_modinfo($courseid, $userid);
@@ -341,7 +349,7 @@ function block_completion_progress_filter_visibility($activities, $userid, $cour
         }
 
         // Check for exclusions.
-        if (in_array($activity['type'].'-'.$activity['instance'].'-'.$userid, $exclusions)) {
+        if (in_array($activity['type'] . '-' . $activity['instance'] . '-' . $userid, $exclusions)) {
             continue;
         }
 
@@ -354,13 +362,14 @@ function block_completion_progress_filter_visibility($activities, $userid, $cour
 /**
  * Checked if a user has completed an activity/resource
  *
- * @param array $activities  The activities with completion in the course
- * @param int   $userid      The user's id
- * @param int   $course      The course instance
+ * @param array $activities The activities with completion in the course
+ * @param int $userid The user's id
+ * @param int $course The course instance
  * @param array $submissions Submissions by the user
  * @return array   an describing the user's attempts based on module+instance identifiers
  */
-function block_completion_progress_completions($activities, $userid, $course, $submissions) {
+function block_completion_progress_completions($activities, $userid, $course, $submissions)
+{
     $completions = array();
     $completion = new completion_info($course);
     $cm = new stdClass();
@@ -380,207 +389,37 @@ function block_completion_progress_completions($activities, $userid, $course, $s
 /**
  * Draws a progress bar
  *
- * @param array    $activities  The activities with completion in the course
- * @param array    $completions The user's completion of course activities
- * @param stdClass $config      The blocks instance configuration settings
- * @param int      $userid      The user's id
- * @param int      $courseid    The course id
- * @param int      $instance    The block instance (to identify it on page)
- * @param bool     $simple      Controls whether instructions are shown below a progress bar
+ * @param array $activities The activities with completion in the course
+ * @param array $completions The user's completion of course activities
+ * @param stdClass $config The blocks instance configuration settings
+ * @param int $userid The user's id
+ * @param int $courseid The course id
+ * @param int $instance The block instance (to identify it on page)
+ * @param bool $simple Controls whether instructions are shown below a progress bar
  * @return string  Progress Bar HTML content
  */
-function block_completion_progress_bar($activities, $completions, $config, $userid, $courseid, $instance, $simple = false) {
+function block_completion_progress_bar($activities, $completions, $config, $userid, $courseid, $instance, $simple = false)
+{
     global $OUTPUT, $CFG, $USER;
     $content = '';
     $now = time();
     $usingrtl = right_to_left();
     $numactivities = count($activities);
     $dateformat = get_string('strftimedate', 'langconfig');
-    $alternatelinks = block_completion_progress_modules_with_alternate_links();
 
-    // Get colours and use defaults if they are not set in global settings.
-    $colournames = array(
-        'completed_colour' => 'completed_colour',
-        'submittednotcomplete_colour' => 'submittednotcomplete_colour',
-        'notCompleted_colour' => 'notCompleted_colour',
-        'futureNotCompleted_colour' => 'futureNotCompleted_colour'
-    );
-    $colours = array();
-    foreach ($colournames as $name => $stringkey) {
-        $colours[$name] = get_config('block_completion_progress', $name) ?: get_string('block_completion_progress', $stringkey);
-    }
-
-    // Get relevant block instance settings or use defaults.
-    if (get_config('block_completion_progress', 'forceiconsinbar') !== "1") {
-        $useicons = isset($config->progressBarIcons) ? $config->progressBarIcons : DEFAULT_COMPLETIONPROGRESS_PROGRESSBARICONS;
-    } else {
-        $useicons = true;
-    }
-    $orderby = isset($config->orderby) ? $config->orderby : DEFAULT_COMPLETIONPROGRESS_ORDERBY;
-    $defaultlongbars = get_config('block_completion_progress', 'defaultlongbars') ?: DEFAULT_COMPLETIONPROGRESS_LONGBARS;
-    $longbars = isset($config->longbars) ? $config->longbars : $defaultlongbars;
-    $displaynow = $orderby == 'orderbytime';
-    $showpercentage = isset($config->showpercentage) ? $config->showpercentage : DEFAULT_COMPLETIONPROGRESS_SHOWPERCENTAGE;
-    $rowoptions = array();
-    $rowoptions['style'] = '';
-    $content .= HTML_WRITER::start_div('barContainer');
-
-    // Determine the segment width.
-    $wrapafter = get_config('block_completion_progress', 'wrapafter') ?: DEFAULT_COMPLETIONPROGRESS_WRAPAFTER;
-    if ($wrapafter <= 1) {
-        $wrapafter = 1;
-    }
-    if ($numactivities <= $wrapafter) {
-        $longbars = 'squeeze';
-    }
-    if ($longbars == 'wrap') {
-        $rows = ceil($numactivities / $wrapafter);
-        if ($rows <= 1) {
-            $rows = 1;
-        }
-        $cellwidth = floor(100 / ceil($numactivities / $rows));
-        $cellunit = '%';
-        $celldisplay = 'inline-block';
-        $displaynow = false;
-    }
-    if ($longbars == 'scroll') {
-        $cellwidth = DEFAULT_COMPLETIONPROGRESS_SCROLLCELLWIDTH;
-        $cellunit = 'px';
-        $celldisplay = 'inline-block';
-        $rowoptions['style'] .= 'white-space: nowrap;';
-        $leftpoly = HTML_WRITER::tag('polygon', '', array('points' => '30,0 0,15 30,30', 'class' => 'triangle-polygon'));
-        $rightpoly = HTML_WRITER::tag('polygon', '', array('points' => '0,0 30,15 0,30', 'class' => 'triangle-polygon'));
-        $content .= HTML_WRITER::tag('svg', $leftpoly, array('class' => 'left-arrow-svg', 'height' => '30', 'width' => '30'));
-        $content .= HTML_WRITER::tag('svg', $rightpoly, array('class' => 'right-arrow-svg', 'height' => '30', 'width' => '30'));
-    }
-    if ($longbars == 'squeeze') {
-        $cellwidth = $numactivities > 0 ? floor(100 / $numactivities) : 1;
-        $cellunit = '%';
-        $celldisplay = 'table-cell';
-    }
-
-    // Determine where to put the NOW indicator.
-    $nowpos = -1;
-    if ($orderby == 'orderbytime' && $longbars != 'wrap' && $displaynow == 1 && !$simple) {
-
-        // Find where to put now arrow.
-        $nowpos = 0;
-        while ($nowpos < $numactivities && $now > $activities[$nowpos]['expected'] && $activities[$nowpos]['expected'] != 0) {
-            $nowpos++;
-        }
-        $rowoptions['style'] .= 'margin-top: 25px;';
-        $nowstring = get_string('now_indicator', 'block_completion_progress');
-        $leftarrowimg = $OUTPUT->pix_icon('left', $nowstring, 'block_completion_progress', array('class' => 'nowicon'));
-        $rightarrowimg = $OUTPUT->pix_icon('right', $nowstring, 'block_completion_progress', array('class' => 'nowicon'));
-    }
-
-    // Determine links to activities.
-    for ($i = 0; $i < $numactivities; $i++) {
-        if ($userid != $USER->id &&
-            array_key_exists($activities[$i]['type'], $alternatelinks) &&
-            has_capability($alternatelinks[$activities[$i]['type']]['capability'], $activities[$i]['context'])
-        ) {
-            $substitutions = array(
-                '/:courseid/' => $courseid,
-                '/:eventid/'  => $activities[$i]['instance'],
-                '/:cmid/'     => $activities[$i]['id'],
-                '/:userid/'   => $userid,
-            );
-            $link = $alternatelinks[$activities[$i]['type']]['url'];
-            $link = preg_replace(array_keys($substitutions), array_values($substitutions), $link);
-            $activities[$i]['link'] = $CFG->wwwroot.$link;
-        } else {
-            $activities[$i]['link'] = $activities[$i]['url'];
-        }
-    }
-
-    // Start progress bar.
-    $content .= HTML_WRITER::start_div('barRow', $rowoptions);
-    $counter = 1;
-    foreach ($activities as $activity) {
-        $complete = $completions[$activity['id']];
-
-        // A cell in the progress bar.
-        $showinfojs = 'M.block_completion_progress.showInfo('.$instance.','.$userid.','.$activity['id'].');';
-        $celloptions = array(
-            'class' => 'progressBarCell',
-            'ontouchstart' => $showinfojs . ' return false;',
-            'onmouseover' => $showinfojs,
-             'style' => 'display:' . $celldisplay .'; width:' . $cellwidth . $cellunit . ';background-color:');
-        if ($complete === 'submitted') {
-            $celloptions['style'] .= $colours['submittednotcomplete_colour'].';';
-            $cellcontent = $OUTPUT->pix_icon('blank', '', 'block_completion_progress');
-
-        } else if ($complete == COMPLETION_COMPLETE || $complete == COMPLETION_COMPLETE_PASS) {
-            $celloptions['style'] .= $colours['completed_colour'].';';
-            $cellcontent = $OUTPUT->pix_icon($useicons == 1 ? 'tick' : 'blank', '', 'block_completion_progress');
-
-        } else if (
-            $complete == COMPLETION_COMPLETE_FAIL ||
-            (!isset($config->orderby) || $config->orderby == 'orderbytime') &&
-            (isset($activity['expected']) && $activity['expected'] > 0 && $activity['expected'] < $now)
-        ) {
-            $celloptions['style'] .= $colours['notCompleted_colour'].';';
-            $cellcontent = $OUTPUT->pix_icon($useicons == 1 ? 'cross' : 'blank', '', 'block_completion_progress');
-
-        } else {
-            $celloptions['style'] .= $colours['futureNotCompleted_colour'].';';
-            $cellcontent = $OUTPUT->pix_icon('blank', '', 'block_completion_progress');
-        }
-        if (empty($activity['link'])) {
-            $celloptions['style'] .= 'cursor: unset;';
-        } else if (!empty($activity['available']) || $simple) {
-            $celloptions['onclick'] = 'document.location=\''.$activity['link'].'\';';
-        } else if (!empty($activity['link'])) {
-            $celloptions['style'] .= 'cursor: not-allowed;';
-        }
-        if ($longbars != 'wrap' && $counter == 1) {
-            $celloptions['class'] .= ' firstProgressBarCell';
-        }
-        if ($longbars != 'wrap' && $counter == $numactivities) {
-            $celloptions['class'] .= ' lastProgressBarCell';
-        }
-
-        // Place the NOW indicator.
-        if ($nowpos >= 0) {
-            if ($nowpos == 0 && $counter == 1) {
-                $nowcontent = $usingrtl ? $rightarrowimg.$nowstring : $leftarrowimg.$nowstring;
-                $cellcontent .= HTML_WRITER::div($nowcontent, 'nowDiv firstNow');
-            } else if ($nowpos == $counter) {
-                if ($nowpos < $numactivities / 2) {
-                    $nowcontent = $usingrtl ? $rightarrowimg.$nowstring : $leftarrowimg.$nowstring;
-                    $cellcontent .= HTML_WRITER::div($nowcontent, 'nowDiv firstHalfNow');
-                } else {
-                    $nowcontent = $usingrtl ? $nowstring.$leftarrowimg : $nowstring.$rightarrowimg;
-                    $cellcontent .= HTML_WRITER::div($nowcontent, 'nowDiv lastHalfNow');
-                }
-            }
-        }
-
-        $counter++;
-        $content .= HTML_WRITER::div($cellcontent, null, $celloptions);
-    }
-    $content .= HTML_WRITER::end_div();
-    $content .= HTML_WRITER::end_div();
-
-    // Add the percentage below the progress bar.
-    if ($showpercentage == 1 && !$simple) {
-        $progress = block_completion_progress_percentage($activities, $completions);
-        $percentagecontent = get_string('progress', 'block_completion_progress').': '.$progress.'%';
-        $percentageoptions = array('class' => 'progressPercentage');
-        $content .= HTML_WRITER::tag('div', $percentagecontent, $percentageoptions);
-    }
+    $progress = block_completion_progress_percentage($activities, $completions);
+    $content .= '<div class="block_aprendeoverview"><div class="progress rounded --green-bg-transparent" style="height: 4px;"> <div class="progress-bar --green-bg w-' . $progress . '" role="progressbar" aria-valuenow="' . $progress . '" aria-valuemin="0" aria-valuemax="100"></div> </div> <p class="percent --green-text">' . $progress . '%</p></div>';
 
     // Add the info box below the table.
     $divoptions = array('class' => 'progressEventInfo',
-                        'id' => 'progressBarInfo'.$instance.'-'.$userid.'-info');
+        'id' => 'progressBarInfo' . $instance . '-' . $userid . '-info');
     $content .= HTML_WRITER::start_tag('div', $divoptions);
     if (!$simple) {
         $content .= get_string('mouse_over_prompt', 'block_completion_progress');
         $content .= ' ';
-        $attributes = array (
+        $attributes = array(
             'class' => 'accesshide',
-            'onclick' => 'M.block_completion_progress.showAll('.$instance.','.$userid.')'
+            'onclick' => 'M.block_completion_progress.showAll(' . $instance . ',' . $userid . ')'
         );
         $content .= HTML_WRITER::link('#', get_string('showallinfo', 'block_completion_progress'), $attributes);
     }
@@ -595,13 +434,13 @@ function block_completion_progress_bar($activities, $completions, $config, $user
     foreach ($activities as $activity) {
         $completed = $completions[$activity['id']];
         $divoptions = array('class' => 'progressEventInfo',
-                            'id' => 'progressBarInfo'.$instance.'-'.$userid.'-'.$activity['id'],
-                            'style' => 'display: none;');
+            'id' => 'progressBarInfo' . $instance . '-' . $userid . '-' . $activity['id'],
+            'style' => 'display: none;');
         $content .= HTML_WRITER::start_tag('div', $divoptions);
 
         $text = '';
         $text .= html_writer::empty_tag('img',
-                array('src' => $activity['icon'], 'class' => 'moduleIcon', 'alt' => '', 'role' => 'presentation'));
+            array('src' => $activity['icon'], 'class' => 'moduleIcon', 'alt' => '', 'role' => 'presentation'));
         $text .= s(format_string($activity['name']));
         if (!empty($activity['link']) && (!empty($activity['available']) || $simple)) {
             $content .= $OUTPUT->action_link($activity['link'], $text);
@@ -611,19 +450,19 @@ function block_completion_progress_bar($activities, $completions, $config, $user
         $content .= HTML_WRITER::empty_tag('br');
         $altattribute = '';
         if ($completed == COMPLETION_COMPLETE) {
-            $content .= $stringcomplete.'&nbsp;';
+            $content .= $stringcomplete . '&nbsp;';
             $icon = 'tick';
             $altattribute = $stringcomplete;
         } else if ($completed == COMPLETION_COMPLETE_PASS) {
-            $content .= $stringpassed.'&nbsp;';
+            $content .= $stringpassed . '&nbsp;';
             $icon = 'tick';
             $altattribute = $stringpassed;
         } else if ($completed == COMPLETION_COMPLETE_FAIL) {
-            $content .= $stringfailed.'&nbsp;';
+            $content .= $stringfailed . '&nbsp;';
             $icon = 'cross';
             $altattribute = $stringfailed;
         } else {
-            $content .= $stringincomplete .'&nbsp;';
+            $content .= $stringincomplete . '&nbsp;';
             $icon = 'cross';
             $altattribute = $stringincomplete;
             if ($completed === 'submitted') {
@@ -635,7 +474,7 @@ function block_completion_progress_bar($activities, $completions, $config, $user
         $content .= HTML_WRITER::empty_tag('br');
         if ($activity['expected'] != 0) {
             $content .= HTML_WRITER::start_tag('div', array('class' => 'expectedBy'));
-            $content .= get_string('time_expected', 'block_completion_progress').': ';
+            $content .= get_string('time_expected', 'block_completion_progress') . ': ';
             $content .= userdate($activity['expected'], $dateformat, $CFG->timezone);
             $content .= HTML_WRITER::end_tag('div');
         }
@@ -648,11 +487,12 @@ function block_completion_progress_bar($activities, $completions, $config, $user
 /**
  * Calculates an overall percentage of progress
  *
- * @param array $activities   The possible events that can occur for modules
+ * @param array $activities The possible events that can occur for modules
  * @param array $completions The user's attempts on course activities
  * @return int  Progress value as a percentage
  */
-function block_completion_progress_percentage($activities, $completions) {
+function block_completion_progress_percentage($activities, $completions)
+{
     $completecount = 0;
 
     foreach ($activities as $activity) {
@@ -674,7 +514,8 @@ function block_completion_progress_percentage($activities, $completions) {
  *
  * @return bool True when on the My home page.
  */
-function block_completion_progress_on_site_page() {
+function block_completion_progress_on_site_page()
+{
     global $SCRIPT, $COURSE;
 
     return $SCRIPT === '/my/index.php' || $COURSE->id == 1;
@@ -684,13 +525,14 @@ function block_completion_progress_on_site_page() {
  * Finds gradebook exclusions for students in a course
  *
  * @param int $courseid The ID of the course containing grade items
- * @param int $userid   The ID of the user whos grade items are being retrieved
+ * @param int $userid The ID of the user whos grade items are being retrieved
  * @return array of exclusions as activity-user pairs
  */
-function block_completion_progress_exclusions ($courseid, $userid = null) {
+function block_completion_progress_exclusions($courseid, $userid = null)
+{
     global $DB;
 
-    $query = "SELECT g.id, ". $DB->sql_concat('i.itemmodule', "'-'", 'i.iteminstance', "'-'", 'g.userid') ." as exclusion
+    $query = "SELECT g.id, " . $DB->sql_concat('i.itemmodule', "'-'", 'i.iteminstance', "'-'", 'g.userid') . " as exclusion
                FROM {grade_grades} g, {grade_items} i
               WHERE i.courseid = :courseid
                 AND i.id = g.itemid
@@ -712,12 +554,13 @@ function block_completion_progress_exclusions ($courseid, $userid = null) {
 /**
  * Determines whether a user is a member of a given group or grouping
  *
- * @param string $group    The group or grouping identifier starting with 'group-' or 'grouping-'
- * @param int    $courseid The ID of the course containing the block instance
- * @param int    $userid   The ID of the user
+ * @param string $group The group or grouping identifier starting with 'group-' or 'grouping-'
+ * @param int $courseid The ID of the course containing the block instance
+ * @param int $userid The ID of the user
  * @return boolean value indicating membership
  */
-function block_completion_progress_group_membership ($group, $courseid, $userid) {
+function block_completion_progress_group_membership($group, $courseid, $userid)
+{
     if ($group === '0') {
         return true;
     } else if ((substr($group, 0, 6) == 'group-') && ($groupid = intval(substr($group, 6)))) {
@@ -732,26 +575,63 @@ function block_completion_progress_group_membership ($group, $courseid, $userid)
 /**
  * Draws a progress bar ready to embed in any screen
  *
- * @param int      $userid      The user's id
- * @param int      $course      The course instance
- * @param int      $instance    The block instance (to identify it on page)
+ * @param int $userid The user's id
+ * @param int $course The course instance
+ * @param int $instance The block instance (to identify it on page)
  * @return string  Progress Bar HTML content
  */
-function block_completion_embedded_progress_bar ($course, $userid, $instance) {
+function block_completion_embedded_progress_bar($course, $userid, $instance)
+{
     global $PAGE;
-    $exclusions = block_completion_progress_exclusions($course->id, $userid);
     $instance->config = unserialize(base64_decode($instance->configdata));
-    $instance->activities = block_completion_progress_get_activities($course->id, $instance->config);
-    $instance->activities = block_completion_progress_filter_visibility($instance->activities, $userid, $course->id, $exclusions);
-    $submissions = block_completion_progress_student_submissions($course->id, $userid);
-    $completions = block_completion_progress_completions($instance->activities, $userid, $course, $submissions);
+    $showpercentage = isset($instance->config->showpercentage) ? $instance->config->showpercentage : DEFAULT_COMPLETIONPROGRESS_SHOWPERCENTAGE;
+    if ($showpercentage == 1) {
+        $exclusions = block_completion_progress_exclusions($course->id, $userid);
 
-    $percent = block_completion_progress_percentage($instance->activities, $completions);
+        $instance->activities = block_completion_progress_get_activities($course->id, $instance->config);
+        $instance->activities = block_completion_progress_filter_visibility($instance->activities, $userid, $course->id, $exclusions);
+        $submissions = block_completion_progress_student_submissions($course->id, $userid);
+        $completions = block_completion_progress_completions($instance->activities, $userid, $course, $submissions);
 
-    // Move to external mustache file
-    $output = $PAGE->get_renderer('block_completion_progress');
+        $percent = block_completion_progress_percentage($instance->activities, $completions);
 
-    return $output->render_progress_bar(['state' => $course->comp_state, 'percent' => $percent]);
-//    return '<div class="block_aprendeoverview"><div class="progress rounded ' . $course->comp_state . '-bg-transparent" style="height: 4px;"> <div class="progress-bar ' . $course->comp_state . '-bg " style="width: '.$percent.'%" role="progressbar" aria-valuenow="' . $percent . '" aria-valuemin="0" aria-valuemax="100"></div> </div> <p class="percent ' . $course->comp_state . '-text">' . $percent . '%</p></div>';
+        // Move to external mustache file
+        $output = $PAGE->get_renderer('block_completion_progress');
 
+        return $output->render_progress_bar(['state' => $course->comp_state, 'percent' => $percent]);
+    }
+    return null;
+}
+
+/**
+ * Hook function to extend the course settings navigation. Call all context functions
+ */
+function block_completion_progress_extend_navigation_course($parentnode, $_extend_navigation_coursecourse, $context)
+{
+    global $PAGE;
+    $bui_editid = null;
+    $blocks = $PAGE->blocks;
+    if ($blocks->is_block_present('completion_progress') && has_capability('moodle/course:create', $context)) {
+        foreach ($blocks->get_blocks_for_region('side-pre') as $block) {
+            if ($block instanceof block_completion_progress) {
+                $bui_editid = $block->instance->id;
+            }
+        }
+
+        $strmetadata = get_string('settings_title', 'block_completion_progress');
+        $actionurl = $PAGE->url->out(false, array('sesskey' => sesskey(), 'bui_editid' => $bui_editid));
+        $url = new \moodle_url(
+            $actionurl
+//            ['id' => $course->id, 'action' => 'coursedata', 'contextlevel' => CONTEXT_COURSE]
+        );
+        $metadatanode = \navigation_node::create(
+            $strmetadata,
+            $url,
+            \navigation_node::NODETYPE_LEAF,
+            'metadata',
+            'metadata',
+            new \pix_icon('i/settings', $strmetadata)
+        );
+        $parentnode->add_node($metadatanode);
+    }
 }
