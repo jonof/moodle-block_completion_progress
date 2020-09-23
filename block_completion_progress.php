@@ -95,4 +95,13 @@ class block_completion_progress extends block_base {
             'my'             => true
         );
     }
+
+    /**
+     * Creates the blocks main content
+     *
+     * @return string
+     */
+    public function get_content() {
+        return null;
+    }
 }
