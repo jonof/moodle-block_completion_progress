@@ -28,6 +28,7 @@ $string['config_selectedactivities'] = 'Selected activities';
 $string['pluginname'] = 'Completion Progress';
 $string['progress'] = 'Progress';
 $string['progressbar'] = 'Completion Progress';
+$string['settings_title'] = 'Progress bar settings';
 $string['privacy:metadata'] = 'The Completion Progress block only displays existing completion data.';
 $string['selectitem'] = 'Select \'{$a}\'';
 $string['why_show_precentage'] = 'Why show a progress percentage to students?';

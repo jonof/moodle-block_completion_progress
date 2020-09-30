@@ -58,6 +58,8 @@ class block_completion_progress_edit_form extends block_edit_form {
         $mform->setDefault('config_showpercentage', DEFAULT_COMPLETIONPROGRESS_SHOWPERCENTAGE);
         $mform->addHelpButton('config_showpercentage', 'why_show_precentage', 'block_completion_progress');
 
+        $mform->addElement('hidden', 'config_activitiesincluded', $activitieslabel);
+        $mform->setDefault('config_activitiesincluded', DEFAULT_COMPLETIONPROGRESS_ACTIVITIESINCLUDED);
 
         // Check that there are activities to monitor.
         if (empty($activities)) {

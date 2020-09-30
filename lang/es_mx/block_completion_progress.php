@@ -28,6 +28,7 @@ $string['config_selectedactivities'] = 'Actividades Seleccionadas';
 $string['pluginname'] = 'Completion Progress';
 $string['progress'] = 'Progres0';
 $string['progressbar'] = 'Completion Progress';
+$string['settings_title'] = 'Configuración de la barra de progreso';
 $string['privacy:metadata'] = 'El bloque de barra de progreso solo muestra información de progreso ya existente.';
 $string['selectitem'] = 'Seleccionar \'{$a}\'';
 $string['why_show_precentage'] = '¿Por qué mostrar una barra de progreso a los estudiantes?';
