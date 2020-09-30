@@ -270,3 +270,73 @@
     margin-left: 0;
     margin-right: 2px;
 }
+
+
+/* Modifiers */
+
+/* Text modifiers */
+.block_completion_progress .start-text {
+    color: #00CC6F;
+}
+.block_completion_progress .continue-text {
+    color: #FC1244;
+}
+.block_completion_progress .restart-text {
+    color: #666BD3;
+}
+
+/* Bg modifiers */
+.block_completion_progress .start-bg {
+    background: #00CC6F !important;
+}
+.block_completion_progress .continue-bg {
+    background: #FC1244 !important;
+}
+.block_completion_progress .restart-bg {
+    background: #666BD3 !important;
+}
+
+/* Bg transparent modifiers */
+.block_completion_progress .start-bg-transparent {
+    background: rgba(0, 204, 111, 0.2) !important;
+}
+.block_completion_progress .continue-bg-transparent {
+    background: rgba(252, 18, 68, 0.2) !important;
+}
+.block_completion_progress .restart-bg-transparent {
+    background: rgba(102, 107, 211, 0.2) !important;
+}
+
+/* Shadow modifiers */
+.block_completion_progress .start-shadow {
+    box-shadow: 0px 8px 12px rgba(0, 204, 111, 0.1);
+}
+.block_completion_progress .continue-shadow {
+    box-shadow: 0px 8px 12px rgba(252, 18, 68, 0.1);
+}
+.block_completion_progress .restart-shadow {
+    box-shadow: 0px 8px 12px rgba(4, 10, 96, 0.1);
+}
+
+/* Hover modifiers */
+.block_completion_progress .start-shadow:hover {
+    box-shadow: 0px 8px 12px rgba(0, 204, 111, 0.2);
+
+}
+.block_completion_progress .continue-shadow:hover {
+    box-shadow: 0px 8px 12px rgba(252, 18, 68, 0.2);
+}
+.block_completion_progress .restart-shadow:hover {
+    box-shadow: 0px 8px 12px rgba(4, 10, 96, 0.2);
+}
+.block_completion_progress .start-bg:hover {
+    background: #05A85C !important;
+}
+.block_completion_progress .continue-bg:hover {
+    background: #E90233 !important;
+}
+.block_completion_progress .restart-bg:hover {
+    background: #494FCB !important;
+}
+
+
