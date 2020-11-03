@@ -14,19 +14,32 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-
 /**
- * Completion Progress block version details
+ * Compatibility shim for newer PHPunit versions.
  *
  * @package    block_completion_progress
- * @copyright  2018 Michael de Raadt
+ * @copyright  2020 Jonathon Fowler <fowlerj@usq.edu.au>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die;
+namespace block_completion_progress\tests;
 
-$plugin->version   = 2020081000;
-$plugin->requires  = 2018051700;
-$plugin->maturity  = MATURITY_STABLE;
-$plugin->release   = 'Version for Moodle 3.5 onwards';
-$plugin->component = 'block_completion_progress';
+defined('MOODLE_INTERNAL') || die();
+
+/**
+ * Compatibility shim for newer PHPunit versions.
+ *
+ * @package    block_completion_progress
+ * @copyright  2020 Jonathon Fowler <fowlerj@usq.edu.au>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+abstract class testcase_phpunit8 extends \advanced_testcase {
+// @codingStandardsIgnoreStart
+    /**
+     * See PHPUnit\Framework\TestCase::setUp().
+     */
+    protected function setUp(): void {
+        $this->set_up();
+    }
+// @codingStandardsIgnoreEnd
+}

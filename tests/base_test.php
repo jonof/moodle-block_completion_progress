@@ -29,6 +29,17 @@ global $CFG;
 require_once($CFG->dirroot . '/mod/assign/locallib.php');
 require_once($CFG->dirroot.'/blocks/completion_progress/lib.php');
 
+if (version_compare(PHPUnit\Runner\Version::id(), '7', '<')) {
+    // Moodle 3.5 to 3.6.
+    class_alias('block_completion_progress\tests\testcase_phpunit6', 'block_completion_progress\tests\testcase');
+} else if (version_compare(PHPUnit\Runner\Version::id(), '8', '<')) {
+    // Moodle 3.7 to 3.9.
+    class_alias('block_completion_progress\tests\testcase_phpunit7', 'block_completion_progress\tests\testcase');
+} else {
+    // Moodle 3.10 onwards.
+    class_alias('block_completion_progress\tests\testcase_phpunit8', 'block_completion_progress\tests\testcase');
+}
+
 /**
  * Basic unit tests for block_completion_progress.
  *
@@ -36,7 +47,7 @@ require_once($CFG->dirroot.'/blocks/completion_progress/lib.php');
  * @copyright  2017 onwards Nelson Moller  {@link http://moodle.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class block_completion_progress_base_testcase extends advanced_testcase {
+class block_completion_progress_base_testcase extends block_completion_progress\tests\testcase {
 
     /**
      * Default number of students to create.
@@ -51,7 +62,7 @@ class block_completion_progress_base_testcase extends advanced_testcase {
     /**
      * Setup function - we will create a course and add an assign instance to it.
      */
-    protected function setUp() {
+    protected function set_up() {
         global $DB;
 
         $this->resetAfterTest(true);
@@ -103,7 +114,7 @@ class block_completion_progress_base_testcase extends advanced_testcase {
         global $DB;
 
         // Add a block.
-        $context = CONTEXT_COURSE::instance($this->course->id);
+        $context = context_course::instance($this->course->id);
         $blockinfo = [
           'parentcontextid' => $context->id,
           'pagetypepattern' => 'course-view-*',
@@ -152,12 +163,12 @@ class block_completion_progress_base_testcase extends advanced_testcase {
           $blockinstanceid
         );
 
-        $this->assertContains('assign', $text, '', true);
-        $this->assertNotContains('quiz', $text, '', true);
+        $this->assertStringContainsStringIgnoringCase('assign', $text, '');
+        $this->assertStringNotContainsStringIgnoringCase('quiz', $text, '');
 
         // The status is futureNotCompleted.
         $color1 = get_string('futureNotCompleted_colour', 'block_completion_progress');
-        $this->assertContains('background-color:' . $color1, $text, '');
+        $this->assertStringContainsString('background-color:' . $color1, $text, '');
 
         $submission = $assign->get_user_submission($this->students[0]->id, true);
         $submission->status = ASSIGN_SUBMISSION_STATUS_SUBMITTED;
@@ -186,6 +197,6 @@ class block_completion_progress_base_testcase extends advanced_testcase {
 
         // The status is send but not finished.
         $color2 = get_string('submittednotcomplete_colour', 'block_completion_progress');
-        $this->assertContains('background-color:' . $color2, $text, '');
+        $this->assertStringContainsString('background-color:' . $color2, $text, '');
     }
 }
