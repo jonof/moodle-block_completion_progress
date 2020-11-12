@@ -172,8 +172,10 @@ $rolestoexclude = get_config('block_completion_progress' ,'roles_to_exclude');
 $sql = "SELECT DISTINCT r.id, r.name, r.shortname
           FROM {role} r, {role_assignments} a
          WHERE a.contextid = :contextid
-           AND r.id = a.roleid
-           AND r.id not in ($rolestoexclude)";
+           AND r.id = a.roleid";
+if ($rolestoexclude != "") {
+    $sql .= " AND r.id not in ($rolestoexclude)";
+}
 $params = array('contextid' => $context->id);
 $roles = role_fix_names($DB->get_records_sql($sql, $params), $context);
 $rolestodisplay = array(0 => get_string('allparticipants'));
@@ -206,9 +208,11 @@ $sql = "SELECT DISTINCT $picturefields, COALESCE(l.timeaccess, 0) AS lastonlinet
           FROM {user} u
           JOIN {role_assignments} a ON (a.contextid = :contextid AND a.userid = u.id $rolewhere)
           $groupjoin
-    LEFT JOIN {user_lastaccess} l ON (l.courseid = :courseid AND l.userid = u.id)
-     WHERE a.userid not in 
+    LEFT JOIN {user_lastaccess} l ON (l.courseid = :courseid AND l.userid = u.id)";
+if ($rolestoexclude != "") {
+    $sql .= " WHERE a.userid not in 
         (SELECT userid FROM {role_assignments} WHERE contextid = :subcontextid AND roleid IN ($rolestoexclude))";
+}
 $params['contextid'] = $context->id;
 $params['subcontextid'] = $context->id;
 $params['courseid'] = $course->id;
