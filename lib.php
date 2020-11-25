@@ -329,17 +329,6 @@ function block_completion_progress_filter_visibility($activities, $userid, $cour
             }
         }
 
-        // Check visibility by grouping constraints (includes capability check).
-        if (!empty($CFG->enablegroupmembersonly)) {
-            if (isset($coursemodule->uservisible)) {
-                if ($coursemodule->uservisible != 1 && empty($coursemodule->availableinfo)) {
-                    continue;
-                }
-            } else if (!groups_course_module_visible($coursemodule, $userid)) {
-                continue;
-            }
-        }
-
         // Check for exclusions.
         if (in_array($activity['type'].'-'.$activity['instance'].'-'.$userid, $exclusions)) {
             continue;
