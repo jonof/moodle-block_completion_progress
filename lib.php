@@ -85,62 +85,33 @@ const DEFAULT_COMPLETIONPROGRESS_ACTIVITIESINCLUDED = 'activitycompletion';
  * Finds submissions for a user in a course
  *
  * @param int    $courseid ID of the course
- * @param int    $userid   ID of user in the course
+ * @param int    $userid   ID of user in the course, or 0 for all
  * @return array Course module IDs submissions
  */
-function block_completion_progress_student_submissions($courseid, $userid) {
-    global $DB;
+function block_completion_progress_submissions($courseid, $userid = 0) {
+    global $DB, $CFG;
 
     $submissions = array();
-    $params = array('courseid' => $courseid, 'userid' => $userid);
-
-    // Queries to deliver instance IDs of activities with submissions by user.
-    $queries = array (
-        'assign' => "SELECT c.id
-                       FROM {assign_submission} s, {assign} a, {modules} m, {course_modules} c
-                      WHERE s.userid = :userid
-                        AND s.latest = 1
-                        AND s.status = 'submitted'
-                        AND s.assignment = a.id
-                        AND a.course = :courseid
-                        AND m.name = 'assign'
-                        AND m.id = c.module
-                        AND c.instance = a.id",
-        'workshop' => "SELECT DISTINCT c.id
-                         FROM {workshop_submissions} s, {workshop} w, {modules} m, {course_modules} c
-                        WHERE s.authorid = :userid
-                          AND s.workshopid = w.id
-                          AND w.course = :courseid
-                          AND m.name = 'workshop'
-                          AND m.id = c.module
-                          AND c.instance = w.id",
+    $params = array(
+        'courseid' => $courseid,
     );
 
-    foreach ($queries as $moduletype => $query) {
-        $results = $DB->get_records_sql($query, $params);
-        foreach ($results as $cmid => $obj) {
-            $submissions[] = $cmid;
-        }
+    if ($userid) {
+        $assignwhere = 'AND s.userid = :userid';
+        $workshopwhere = 'AND s.authorid = :userid';
+
+        $params += [
+          'userid' => $userid,
+        ];
+    } else {
+        $assignwhere = '';
+        $workshopwhere = '';
     }
-
-    return $submissions;
-}
-
-/**
- * Finds submissions for users in a course
- *
- * @param int    $courseid   ID of the course
- * @return array Mapping of userid-cmid pairs for submissions
- */
-function block_completion_progress_course_submissions($courseid) {
-    global $DB;
-
-    $submissions = array();
-    $params = array('courseid' => $courseid);
 
     // Queries to deliver instance IDs of activities with submissions by user.
     $queries = array (
-        'assign' => "SELECT ". $DB->sql_concat('s.userid', "'-'", 'c.id') ."
+        'assign' => "SELECT ". $DB->sql_concat('s.userid', "'-'", 'c.id') ." AS id,
+                         s.userid, c.id AS cmid
                        FROM {assign_submission} s, {assign} a, {modules} m, {course_modules} c
                       WHERE s.latest = 1
                         AND s.status = 'submitted'
@@ -148,22 +119,28 @@ function block_completion_progress_course_submissions($courseid) {
                         AND a.course = :courseid
                         AND m.name = 'assign'
                         AND m.id = c.module
-                        AND c.instance = a.id",
-        'workshop' => "SELECT ". $DB->sql_concat('s.authorid', "'-'", 'c.id') ."
+                        AND c.instance = a.id
+                        $assignwhere",
+        'workshop' => "SELECT ". $DB->sql_concat('s.authorid', "'-'", 'c.id') ." AS id,
+                           s.authorid AS userid, c.id AS cmid
                          FROM {workshop_submissions} s, {workshop} w, {modules} m, {course_modules} c
                         WHERE s.workshopid = w.id
                           AND w.course = :courseid
                           AND m.name = 'workshop'
                           AND m.id = c.module
-                          AND c.instance = w.id",
+                          AND c.instance = w.id
+                          $workshopwhere
+                      GROUP BY s.authorid, c.id",
     );
 
     foreach ($queries as $moduletype => $query) {
         $results = $DB->get_records_sql($query, $params);
-        foreach ($results as $mapping => $obj) {
-            $submissions[] = $mapping;
+        foreach ($results as $id => $obj) {
+            $submissions[$id] = $obj;
         }
     }
+
+    ksort($submissions);
 
     return $submissions;
 }
@@ -346,20 +323,23 @@ function block_completion_progress_filter_visibility($activities, $userid, $cour
  * @param array $activities  The activities with completion in the course
  * @param int   $userid      The user's id
  * @param int   $course      The course instance
- * @param array $submissions Submissions by the user
+ * @param array $submissions Submissions information, keyed by 'userid-cmid'
  * @return array   an describing the user's attempts based on module+instance identifiers
  */
 function block_completion_progress_completions($activities, $userid, $course, $submissions) {
     $completions = array();
-    $completion = new completion_info($course);
+    $completioninfo = new completion_info($course);
     $cm = new stdClass();
 
     foreach ($activities as $activity) {
         $cm->id = $activity['id'];
-        $activitycompletion = $completion->get_data($cm, true, $userid);
-        $completions[$activity['id']] = $activitycompletion->completionstate;
-        if ($completions[$activity['id']] === COMPLETION_INCOMPLETE && in_array($activity['id'], $submissions)) {
-            $completions[$activity['id']] = 'submitted';
+        $completion = $completioninfo->get_data($cm, true, $userid);
+        $submission = $submissions[$userid . '-' . $cm->id] ?? null;
+
+        if ($completion->completionstate == COMPLETION_INCOMPLETE && $submission) {
+            $completions[$cm->id] = 'submitted';
+        } else {
+            $completions[$cm->id] = $completion->completionstate;
         }
     }
 

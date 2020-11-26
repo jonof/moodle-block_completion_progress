@@ -192,7 +192,7 @@ class block_completion_progress extends block_base {
                         ) {
                             $this->content->text .= HTML_WRITER::tag('p', s(format_string($blockinstance->config->progressTitle)));
                         }
-                        $submissions = block_completion_progress_student_submissions($course->id, $USER->id);
+                        $submissions = block_completion_progress_submissions($course->id, $USER->id);
                         $completions = block_completion_progress_completions($blockinstance->activities, $USER->id, $course,
                             $submissions);
                         $this->content->text .= block_completion_progress_bar($blockinstance->activities,
@@ -252,7 +252,7 @@ class block_completion_progress extends block_base {
 
             // Display progress bar.
             if (has_capability('block/completion_progress:showbar', $this->context)) {
-                $submissions = block_completion_progress_student_submissions($COURSE->id, $USER->id);
+                $submissions = block_completion_progress_submissions($COURSE->id, $USER->id);
                 $completions = block_completion_progress_completions($activities, $USER->id, $COURSE, $submissions);
                 $this->content->text .= block_completion_progress_bar(
                     $activities,

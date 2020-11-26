@@ -217,15 +217,14 @@ $numberofusers = count($users);
 for ($i = 0; $i < $numberofusers; $i++) {
     $users[$i]->submissions = array();
 }
-$submissions = block_completion_progress_course_submissions($course->id);
-foreach ($submissions as $mapping) {
-    $mapvalues = explode('-', $mapping);
+$submissions = block_completion_progress_submissions($course->id);
+foreach ($submissions as $id => $obj) {
     $index = 0;
-    while ($index < $numberofusers && $users[$index]->id != $mapvalues[0]) {
+    while ($index < $numberofusers && $users[$index]->id != $obj->userid) {
         $index++;
     }
     if ($index < $numberofusers) {
-        $users[$index]->submissions[] = $mapvalues[1];
+        $users[$index]->submissions[$id] = $obj;
     }
 }
 
