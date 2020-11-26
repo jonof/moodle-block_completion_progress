@@ -91,21 +91,35 @@ const DEFAULT_COMPLETIONPROGRESS_ACTIVITIESINCLUDED = 'activitycompletion';
 function block_completion_progress_submissions($courseid, $userid = 0) {
     global $DB, $CFG;
 
+    require_once($CFG->dirroot . '/mod/quiz/lib.php');
+
     $submissions = array();
     $params = array(
         'courseid' => $courseid,
+
+        // For Quiz.
+        'gmmax' => QUIZ_GRADEHIGHEST,
+        'gmavg' => QUIZ_GRADEAVERAGE,
+        'gmfirst' => QUIZ_ATTEMPTFIRST,
+        'gmlast' => QUIZ_ATTEMPTLAST,
+        'courseid2' => $courseid,
     );
 
     if ($userid) {
         $assignwhere = 'AND s.userid = :userid';
         $workshopwhere = 'AND s.authorid = :userid';
+        $quizwhere = 'AND qa.userid = :userid';
+        $quizwhere2 = 'AND qa.userid = :userid2';
 
         $params += [
           'userid' => $userid,
+          'userid2' => $userid,
         ];
     } else {
         $assignwhere = '';
         $workshopwhere = '';
+        $quizwhere = '';
+        $quizwhere2 = '';
     }
 
     // Queries to deliver instance IDs of activities with submissions by user.
@@ -135,6 +149,37 @@ function block_completion_progress_submissions($courseid, $userid = 0) {
                           AND c.instance = w.id
                           $workshopwhere
                       GROUP BY s.authorid, c.id",
+        'quiz' => "SELECT ". $DB->sql_concat('qa.userid', "'-'", 'c.id') ." AS id,
+                       qa.userid, c.id AS cmid,
+                       (CASE WHEN qa.sumgrades IS NULL THEN 0 ELSE 1 END) AS graded
+                     FROM {quiz_attempts} qa
+                       INNER JOIN {quiz} q ON q.id = qa.quiz
+                       INNER JOIN {course_modules} c ON c.instance = q.id
+                       INNER JOIN {modules} m ON m.name = 'quiz' AND m.id = c.module
+                    WHERE qa.state = 'finished'
+                      AND q.course = :courseid
+                      AND qa.attempt = (
+                        SELECT CASE WHEN q.grademethod = :gmfirst THEN MIN(qa1.attempt)
+                                    WHEN q.grademethod = :gmlast THEN MAX(qa1.attempt) END
+                        FROM {quiz_attempts} qa1
+                        WHERE qa1.quiz = qa.quiz
+                          AND qa1.userid = qa.userid
+                          AND qa1.state = 'finished'
+                      )
+                      $quizwhere
+                   UNION
+                   SELECT ". $DB->sql_concat('qa.userid', "'-'", 'c.id') ." AS id,
+                       qa.userid, c.id AS cmid,
+                       MIN(CASE WHEN qa.sumgrades IS NULL THEN 0 ELSE 1 END) AS graded
+                     FROM {quiz_attempts} qa
+                       INNER JOIN {quiz} q ON q.id = qa.quiz
+                       INNER JOIN {course_modules} c ON c.instance = q.id
+                       INNER JOIN {modules} m ON m.name = 'quiz' AND m.id = c.module
+                    WHERE (q.grademethod = :gmmax OR q.grademethod = :gmavg)
+                      AND qa.state = 'finished'
+                      AND q.course = :courseid2
+                      $quizwhere2
+                   GROUP BY qa.userid, c.id",
     );
 
     foreach ($queries as $moduletype => $query) {

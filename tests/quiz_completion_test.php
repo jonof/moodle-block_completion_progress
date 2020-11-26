@@ -126,7 +126,7 @@ class quiz_completion_testcase extends \advanced_testcase {
         $student1 = $generator->create_and_enrol($course, 'student');
         $this->assert_progress_completion($course, $student1, $cm, COMPLETION_INCOMPLETE);
         $attempt = $this->submit_for_student($student1, $instance, 1);
-        $this->assert_progress_completion($course, $student1, $cm, COMPLETION_INCOMPLETE);
+        $this->assert_progress_completion($course, $student1, $cm, 'submitted');
         $this->mark_student($attempt, $teacher, 75);      // Pass.
         $this->assert_progress_completion($course, $student1, $cm, COMPLETION_COMPLETE_PASS);
 
@@ -134,7 +134,7 @@ class quiz_completion_testcase extends \advanced_testcase {
         $student2 = $generator->create_and_enrol($course, 'student');
         $this->assert_progress_completion($course, $student2, $cm, COMPLETION_INCOMPLETE);
         $attempt = $this->submit_for_student($student2, $instance, 1);
-        $this->assert_progress_completion($course, $student2, $cm, COMPLETION_INCOMPLETE);
+        $this->assert_progress_completion($course, $student2, $cm, 'submitted');
         $this->mark_student($attempt, $teacher, 25);      // Fail.
         $this->assert_progress_completion($course, $student2, $cm, COMPLETION_COMPLETE_FAIL);
 
@@ -142,16 +142,16 @@ class quiz_completion_testcase extends \advanced_testcase {
         $attempt = $this->submit_for_student($student2, $instance, 2);
         switch ($grademethod) {
             case QUIZ_GRADEHIGHEST:
-                $this->assert_progress_completion($course, $student2, $cm, COMPLETION_COMPLETE_FAIL);
+                $this->assert_progress_completion($course, $student2, $cm, 'submitted');
                 break;
             case QUIZ_GRADEAVERAGE:
-                $this->assert_progress_completion($course, $student2, $cm, COMPLETION_COMPLETE_FAIL);
+                $this->assert_progress_completion($course, $student2, $cm, 'submitted');
                 break;
             case QUIZ_ATTEMPTFIRST:
                 $this->assert_progress_completion($course, $student2, $cm, COMPLETION_COMPLETE_FAIL);
                 break;
             case QUIZ_ATTEMPTLAST:
-                $this->assert_progress_completion($course, $student2, $cm, COMPLETION_INCOMPLETE);
+                $this->assert_progress_completion($course, $student2, $cm, 'submitted');
                 break;
         }
     }
@@ -205,7 +205,7 @@ class quiz_completion_testcase extends \advanced_testcase {
         $student1 = $generator->create_and_enrol($course, 'student');
         $this->assert_progress_completion($course, $student1, $cm, COMPLETION_INCOMPLETE);
         $attempt = $this->submit_for_student($student1, $instance, 1);
-        $this->assert_progress_completion($course, $student1, $cm, COMPLETION_INCOMPLETE);
+        $this->assert_progress_completion($course, $student1, $cm, 'submitted');
         $this->mark_student($attempt, $teacher, 75);      // Pass.
         $this->assert_progress_completion($course, $student1, $cm, COMPLETION_COMPLETE);
 
@@ -213,7 +213,7 @@ class quiz_completion_testcase extends \advanced_testcase {
         $student2 = $generator->create_and_enrol($course, 'student');
         $this->assert_progress_completion($course, $student2, $cm, COMPLETION_INCOMPLETE);
         $attempt = $this->submit_for_student($student2, $instance, 1);
-        $this->assert_progress_completion($course, $student2, $cm, COMPLETION_INCOMPLETE);
+        $this->assert_progress_completion($course, $student2, $cm, 'submitted');
         $this->mark_student($attempt, $teacher, 25);      // Fail.
         $this->assert_progress_completion($course, $student2, $cm, COMPLETION_COMPLETE);
 
@@ -230,7 +230,7 @@ class quiz_completion_testcase extends \advanced_testcase {
                 $this->assert_progress_completion($course, $student2, $cm, COMPLETION_COMPLETE);
                 break;
             case QUIZ_ATTEMPTLAST:
-                $this->assert_progress_completion($course, $student2, $cm, COMPLETION_INCOMPLETE);
+                $this->assert_progress_completion($course, $student2, $cm, 'submitted');
                 break;
         }
     }
