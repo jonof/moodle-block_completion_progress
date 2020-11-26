@@ -112,7 +112,7 @@ class assign_completion_testcase extends \advanced_testcase {
 
         // Student 2 then submits again.
         $this->submit_for_student($student2, $assign);
-        $this->assert_progress_completion($course, $student2, $cm, COMPLETION_COMPLETE_FAIL);
+        $this->assert_progress_completion($course, $student2, $cm, 'submitted');
     }
 
     /**

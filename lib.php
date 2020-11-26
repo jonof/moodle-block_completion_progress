@@ -111,18 +111,22 @@ function block_completion_progress_submissions($courseid, $userid = 0) {
     // Queries to deliver instance IDs of activities with submissions by user.
     $queries = array (
         'assign' => "SELECT ". $DB->sql_concat('s.userid', "'-'", 'c.id') ." AS id,
-                         s.userid, c.id AS cmid
-                       FROM {assign_submission} s, {assign} a, {modules} m, {course_modules} c
+                         s.userid, c.id AS cmid,
+                         (CASE WHEN ag.grade IS NULL OR ag.grade = -1 THEN 0 ELSE 1 END) AS graded
+                      FROM {assign_submission} s
+                        INNER JOIN {assign} a ON s.assignment = a.id
+                        INNER JOIN {course_modules} c ON c.instance = a.id
+                        INNER JOIN {modules} m ON m.name = 'assign' AND m.id = c.module
+                        LEFT JOIN {assign_grades} ag ON ag.assignment = s.assignment
+                              AND ag.attemptnumber = s.attemptnumber
+                              AND ag.userid = s.userid
                       WHERE s.latest = 1
                         AND s.status = 'submitted'
-                        AND s.assignment = a.id
                         AND a.course = :courseid
-                        AND m.name = 'assign'
-                        AND m.id = c.module
-                        AND c.instance = a.id
                         $assignwhere",
         'workshop' => "SELECT ". $DB->sql_concat('s.authorid', "'-'", 'c.id') ." AS id,
-                           s.authorid AS userid, c.id AS cmid
+                           s.authorid AS userid, c.id AS cmid,
+                           1 AS graded
                          FROM {workshop_submissions} s, {workshop} w, {modules} m, {course_modules} c
                         WHERE s.workshopid = w.id
                           AND w.course = :courseid
@@ -337,6 +341,9 @@ function block_completion_progress_completions($activities, $userid, $course, $s
         $submission = $submissions[$userid . '-' . $cm->id] ?? null;
 
         if ($completion->completionstate == COMPLETION_INCOMPLETE && $submission) {
+            $completions[$cm->id] = 'submitted';
+        } else if ($completion->completionstate == COMPLETION_COMPLETE_FAIL && $submission
+                && !$submission->graded) {
             $completions[$cm->id] = 'submitted';
         } else {
             $completions[$cm->id] = $completion->completionstate;
