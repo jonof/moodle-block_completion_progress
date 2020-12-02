@@ -405,8 +405,8 @@ function block_completion_progress_bar($activities, $completions, $config, $user
     $longbars = isset($config->longbars) ? $config->longbars : $defaultlongbars;
     $displaynow = $orderby == 'orderbytime';
     $showpercentage = isset($config->showpercentage) ? $config->showpercentage : DEFAULT_COMPLETIONPROGRESS_SHOWPERCENTAGE;
-    $rowoptions = array();
-    $rowoptions['style'] = '';
+    $rowoptions = array('style' => '');
+    $cellsoptions = array('style' => '');
     $barclasses = array('barRow');
     $content .= html_writer::start_div('barContainer', ['data-instanceid' => $instance]);
 
@@ -423,7 +423,7 @@ function block_completion_progress_bar($activities, $completions, $config, $user
         if ($rows <= 1) {
             $rows = 1;
         }
-        $rowoptions['style'] = 'flex-basis: calc(100% / ' . ceil($numactivities / $rows) . ');';
+        $cellsoptions['style'] = 'flex-basis: calc(100% / ' . ceil($numactivities / $rows) . ');';
         $displaynow = false;
     }
     if ($longbars == 'scroll') {
@@ -471,6 +471,7 @@ function block_completion_progress_bar($activities, $completions, $config, $user
 
     // Start progress bar.
     $content .= html_writer::start_div(implode(' ', $barclasses), $rowoptions);
+    $content .= html_writer::start_div('barRowCells', $cellsoptions);
     $counter = 1;
     foreach ($activities as $activity) {
         $complete = $completions[$activity['id']];
@@ -528,6 +529,7 @@ function block_completion_progress_bar($activities, $completions, $config, $user
         $counter++;
         $content .= HTML_WRITER::div($cellcontent, null, $celloptions);
     }
+    $content .= HTML_WRITER::end_div();
     $content .= HTML_WRITER::end_div();
     $content .= HTML_WRITER::end_div();
 

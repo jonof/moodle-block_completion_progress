@@ -25,6 +25,7 @@ define(['jquery'],
     function($) {
         /**
          * Show progress event information for a cell.
+         * @param {Event} event
          */
         function showInfo(event) {
             var cell = $(this);
@@ -72,28 +73,23 @@ define(['jquery'],
             var nowicon = barcontainer.find('.nowicon');
             var leftarrow = barcontainer.find('.left-arrow-svg');
             var rightarrow = barcontainer.find('.right-arrow-svg');
+            var barrow = barcontainer.find('.barRow');
 
             /**
-             * Positions the scroll arrows.
+             * Show or hide the scroll arrows based on the visible position.
              */
             function checkArrows() {
-                var threshold = 10, buffer = 5;
-                var scrolled = barcontainer.prop('scrollLeft');
-                var scrollWidth = barcontainer.prop('scrollWidth') - barcontainer.prop('offsetWidth');
+                var threshold = 10;
+                var scrolled = barrow.prop('scrollLeft');
+                var scrollWidth = barrow.prop('scrollWidth') - barrow.prop('offsetWidth');
 
                 if (scrolled > threshold) {
-                    leftarrow.css({
-                        'display': 'block',
-                        'left': (scrolled + buffer) + 'px'
-                    });
+                    leftarrow.css('display', 'block');
                 } else {
                     leftarrow.css('display', 'none');
                 }
                 if (scrollWidth > threshold && scrolled < scrollWidth - threshold) {
-                    rightarrow.css({
-                        'display': 'block',
-                        'right': (buffer - scrolled) + 'px'
-                    });
+                    rightarrow.css('display', 'block');
                 } else {
                     rightarrow.css('display', 'none');
                 }
@@ -104,23 +100,24 @@ define(['jquery'],
              * @param {Event} event
              */
             function scrollContainer(event) {
-                var amount = event.data * barcontainer.prop('scrollWidth') * 0.15;
+                var amount = event.data * barrow.prop('scrollWidth') * 0.15;
 
-                barcontainer.prop('scrollLeft', barcontainer.prop('scrollLeft') + amount);
-                checkArrows();
+                barrow.prop('scrollLeft', barrow.prop('scrollLeft') + amount);
 
                 event.preventDefault();
             }
 
             if (nowicon.length > 0) {
                 // Place the 'now' marker in the centre of the scrolled bar.
-                barcontainer.prop('scrollLeft', 0);
-                barcontainer.prop('scrollLeft', nowicon.offset().left
-                    - barcontainer.offset().left - barcontainer.width() / 2);
+                barrow.prop('scrollLeft', 0);
+                barrow.prop('scrollLeft', nowicon.offset().left - barrow.offset().left -
+                    barrow.width() / 2);
             }
 
             leftarrow.click(-1, scrollContainer);
             rightarrow.click(1, scrollContainer);
+
+            barrow.on('scroll', checkArrows);
             $(window).resize(checkArrows);
             checkArrows();
         }

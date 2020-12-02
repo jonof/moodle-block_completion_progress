@@ -6,7 +6,6 @@
 }
 
 .block_completion_progress .barContainer {
-    overflow: hidden;
     position: relative;
     padding: 0;
     clear: both;
@@ -20,6 +19,13 @@
     z-index: 10;
 }
 
+.block_completion_progress .left-arrow-svg {
+    left: 5px;
+}
+.block_completion_progress .right-arrow-svg {
+    right: 5px;
+}
+
 .block_completion_progress .triangle-polygon {
     fill: rgba(0, 0, 0, 0.3);
     stroke: white;
@@ -31,6 +37,8 @@
     width: 100%;
     margin: 0;
     min-height: 25px;
+    overflow: hidden;
+    scroll-behavior: smooth;
 }
 
 .block_completion_progress .progressBarCell {
@@ -50,21 +58,21 @@
     cursor: not-allowed;
 }
 
-.block_completion_progress .barModeScroll {
+.block_completion_progress .barModeScroll .barRowCells {
     white-space: nowrap;
 }
 .block_completion_progress .barModeScroll .progressBarCell {
     display: inline-block;
     width: 25px;
 }
-.block_completion_progress .barModeSqueeze {
+.block_completion_progress .barModeSqueeze .barRowCells {
     display: flex;
 }
 .block_completion_progress .barModeSqueeze .progressBarCell {
     display: inline-block;
     flex: 1 1 0;
 }
-.block_completion_progress .barModeWrap {
+.block_completion_progress .barModeWrap .barRowCells {
     display: flex;
     flex-wrap: wrap;
 }
@@ -74,7 +82,7 @@
     flex-shrink: 0;
     flex-basis: inherit;    /* Will be computed and declared inline on the .barRow element. */
 }
-.block_completion_progress .barWithNow {
+.block_completion_progress .barWithNow .barRowCells {
     margin-top: 25px;
 }
 
