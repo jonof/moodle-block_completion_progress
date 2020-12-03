@@ -83,15 +83,30 @@ define(['jquery'],
                 var scrolled = barrow.prop('scrollLeft');
                 var scrollWidth = barrow.prop('scrollWidth') - barrow.prop('offsetWidth');
 
-                if (scrolled > threshold) {
-                    leftarrow.css('display', 'block');
+                if (document.dir === 'rtl') {
+                    scrolled = -scrolled;
+
+                    if (scrolled > threshold) {
+                        rightarrow.css('display', 'block');
+                    } else {
+                        rightarrow.css('display', 'none');
+                    }
+                    if (scrollWidth > threshold && scrolled < scrollWidth - threshold) {
+                        leftarrow.css('display', 'block');
+                    } else {
+                        leftarrow.css('display', 'none');
+                    }
                 } else {
-                    leftarrow.css('display', 'none');
-                }
-                if (scrollWidth > threshold && scrolled < scrollWidth - threshold) {
-                    rightarrow.css('display', 'block');
-                } else {
-                    rightarrow.css('display', 'none');
+                    if (scrolled > threshold) {
+                        leftarrow.css('display', 'block');
+                    } else {
+                        leftarrow.css('display', 'none');
+                    }
+                    if (scrollWidth > threshold && scrolled < scrollWidth - threshold) {
+                        rightarrow.css('display', 'block');
+                    } else {
+                        rightarrow.css('display', 'none');
+                    }
                 }
             }
 
