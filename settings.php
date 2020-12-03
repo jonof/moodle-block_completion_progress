@@ -59,33 +59,37 @@ if ($ADMIN->fulltree) {
         $options)
     );
 
-    $settings->add(new admin_setting_configcolourpicker('block_completion_progress/completed_colour',
+    $coloursetting = new admin_setting_configcolourpicker('block_completion_progress/completed_colour',
         get_string('completed_colour_title', 'block_completion_progress'),
         get_string('completed_colour_descr', 'block_completion_progress'),
         get_string('completed_colour', 'block_completion_progress'),
-        null )
-    );
+        null );
+    $coloursetting->set_updatedcallback('block_completion_progress::increment_cache_value');
+    $settings->add($coloursetting);
 
-    $settings->add(new admin_setting_configcolourpicker('block_completion_progress/submittednotcomplete_colour',
+    $coloursetting = new admin_setting_configcolourpicker('block_completion_progress/submittednotcomplete_colour',
         get_string('submittednotcomplete_colour_title', 'block_completion_progress'),
         get_string('submittednotcomplete_colour_descr', 'block_completion_progress'),
         get_string('submittednotcomplete_colour', 'block_completion_progress'),
-        null )
-    );
+        null );
+    $coloursetting->set_updatedcallback('block_completion_progress::increment_cache_value');
+    $settings->add($coloursetting);
 
-    $settings->add(new admin_setting_configcolourpicker('block_completion_progress/notCompleted_colour',
+    $coloursetting = new admin_setting_configcolourpicker('block_completion_progress/notCompleted_colour',
         get_string('notCompleted_colour_title', 'block_completion_progress'),
         get_string('notCompleted_colour_descr', 'block_completion_progress'),
         get_string('notCompleted_colour', 'block_completion_progress'),
-        null )
-    );
+        null );
+    $coloursetting->set_updatedcallback('block_completion_progress::increment_cache_value');
+    $settings->add($coloursetting);
 
-    $settings->add(new admin_setting_configcolourpicker('block_completion_progress/futureNotCompleted_colour',
+    $coloursetting = new admin_setting_configcolourpicker('block_completion_progress/futureNotCompleted_colour',
         get_string('futureNotCompleted_colour_title', 'block_completion_progress'),
         get_string('futureNotCompleted_colour_descr', 'block_completion_progress'),
         get_string('futureNotCompleted_colour', 'block_completion_progress'),
-        null )
-    );
+        null );
+    $coloursetting->set_updatedcallback('block_completion_progress::increment_cache_value');
+    $settings->add($coloursetting);
 
     $settings->add(new admin_setting_configcheckbox('block_completion_progress/showinactive',
         get_string('showinactive', 'block_completion_progress'),

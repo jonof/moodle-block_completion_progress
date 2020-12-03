@@ -382,18 +382,6 @@ function block_completion_progress_bar($activities, $completions, $config, $user
     $dateformat = get_string('strftimedate', 'langconfig');
     $alternatelinks = block_completion_progress_modules_with_alternate_links();
 
-    // Get colours and use defaults if they are not set in global settings.
-    $colournames = array(
-        'completed_colour' => 'completed_colour',
-        'submittednotcomplete_colour' => 'submittednotcomplete_colour',
-        'notCompleted_colour' => 'notCompleted_colour',
-        'futureNotCompleted_colour' => 'futureNotCompleted_colour'
-    );
-    $colours = array();
-    foreach ($colournames as $name => $stringkey) {
-        $colours[$name] = get_config('block_completion_progress', $name) ?: get_string('block_completion_progress', $stringkey);
-    }
-
     // Get relevant block instance settings or use defaults.
     if (get_config('block_completion_progress', 'forceiconsinbar') !== "1") {
         $useicons = isset($config->progressBarIcons) ? $config->progressBarIcons : DEFAULT_COMPLETIONPROGRESS_PROGRESSBARICONS;
@@ -480,14 +468,13 @@ function block_completion_progress_bar($activities, $completions, $config, $user
         $celloptions = array(
             'class' => 'progressBarCell',
             'data-info-ref' => 'progressBarInfo'.$instance.'-'.$userid.'-'.$activity['id'],
-            'style' => 'background-color:'
         );
         if ($complete === 'submitted') {
-            $celloptions['style'] .= $colours['submittednotcomplete_colour'].';';
+            $celloptions['class'] .= ' submittedNotComplete';
             $cellcontent = $OUTPUT->pix_icon('blank', '', 'block_completion_progress');
 
         } else if ($complete == COMPLETION_COMPLETE || $complete == COMPLETION_COMPLETE_PASS) {
-            $celloptions['style'] .= $colours['completed_colour'].';';
+            $celloptions['class'] .= ' completed';
             $cellcontent = $OUTPUT->pix_icon($useicons == 1 ? 'tick' : 'blank', '', 'block_completion_progress');
 
         } else if (
@@ -495,11 +482,11 @@ function block_completion_progress_bar($activities, $completions, $config, $user
             (!isset($config->orderby) || $config->orderby == 'orderbytime') &&
             (isset($activity['expected']) && $activity['expected'] > 0 && $activity['expected'] < $now)
         ) {
-            $celloptions['style'] .= $colours['notCompleted_colour'].';';
+            $celloptions['class'] .= ' notCompleted';
             $cellcontent = $OUTPUT->pix_icon($useicons == 1 ? 'cross' : 'blank', '', 'block_completion_progress');
 
         } else {
-            $celloptions['style'] .= $colours['futureNotCompleted_colour'].';';
+            $celloptions['class'] .= ' futureNotCompleted';
             $cellcontent = $OUTPUT->pix_icon('blank', '', 'block_completion_progress');
         }
         if (empty($activity['link'])) {

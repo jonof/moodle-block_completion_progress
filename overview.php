@@ -99,6 +99,9 @@ $PAGE->set_heading($title);
 $PAGE->navbar->add($title);
 $PAGE->set_pagelayout('report');
 
+$cachevalue = debugging() ? -1 : (int)get_config('block_completion_progress', 'cachevalue');
+$PAGE->requires->css('/blocks/completion_progress/css.php?v=' . $cachevalue);
+
 // Check user is logged in and capable of accessing the Overview.
 require_login($course, false);
 require_capability('block/completion_progress:overview', $blockcontext);

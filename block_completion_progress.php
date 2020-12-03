@@ -279,7 +279,17 @@ class block_completion_progress extends block_base {
         $this->page->requires->js_call_amd('block_completion_progress/progressbar', 'init', [
             'instances' => $blockinstancesonpage,
         ]);
+        $cachevalue = debugging() ? -1 : (int)get_config('block_completion_progress', 'cachevalue');
+        $this->page->requires->css('/blocks/completion_progress/css.php?v=' . $cachevalue);
 
         return $this->content;
+    }
+
+    /**
+     * Bumps a value to assist in caching of configured colours in css.php.
+     */
+    public static function increment_cache_value() {
+        $value = get_config('block_completion_progress', 'cachevalue') + 1;
+        set_config('cachevalue', $value, 'block_completion_progress');
     }
 }
