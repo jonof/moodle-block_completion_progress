@@ -36,14 +36,14 @@
     padding: 0;
     width: 100%;
     margin: 0;
-    min-height: 25px;
+    min-height: 1.6rem;
     overflow: hidden;
     scroll-behavior: smooth;
 }
 
 .block_completion_progress .progressBarCell {
-    height: 25px;
-    margin: 0 -1px 0 0;
+    height: 1.6rem;
+    margin: 0;
     padding: 0;
     text-align: center;
     vertical-align: middle;
@@ -63,7 +63,7 @@
 }
 .block_completion_progress .barModeScroll .progressBarCell {
     display: inline-block;
-    width: 25px;
+    width: 1.6rem;
 }
 .block_completion_progress .barModeSqueeze .barRowCells {
     display: flex;
@@ -83,7 +83,7 @@
     flex-basis: inherit;    /* Will be computed and declared inline on the .barRow element. */
 }
 .block_completion_progress .barWithNow .barRowCells {
-    margin-top: 25px;
+    margin-top: 1.6rem;
 }
 
 #page-blocks-completion_progress-overview .block_completion_progress .progressBarCell {
@@ -92,7 +92,7 @@
 
 .block_completion_progress .progressBarCell .nowDiv {
     position: absolute;
-    top: -25px;
+    top: -100%;
     white-space: nowrap;
     width: 100px;
 }
@@ -136,32 +136,34 @@
 
 .block_completion_progress .barModeScroll .progressBarCell:first-of-type,
 .block_completion_progress .barModeSqueeze .progressBarCell:first-of-type {
-    border-radius: 4px 0 0 4px;
-    border-left: none;
-    border-right: solid 1px #e3e3e3;
+    border-top-left-radius: 0.26rem;
+    border-bottom-left-radius: 0.26rem;
 }
 
 .dir-rtl .block_completion_progress .barModeScroll .progressBarCell:first-of-type,
 .dir-rtl .block_completion_progress .barModeSqueeze .progressBarCell:first-of-type {
-    border-radius: 0 4px 4px 0;
-    border-left: solid 1px #e3e3e3;
+    border-top-right-radius: 0.26rem;
+    border-bottom-right-radius: 0.26rem;
+    border-right: solid 1px #e3e3e3;
 }
 
 .block_completion_progress .barModeScroll .progressBarCell:last-of-type,
 .block_completion_progress .barModeSqueeze .progressBarCell:last-of-type {
-    border-radius: 0 4px 4px 0;
+    border-top-right-radius: 0.26rem;
+    border-bottom-right-radius: 0.26rem;
+    border-right: solid 1px #e3e3e3;
 }
 
 .dir-rtl .block_completion_progress .barModeScroll .progressBarCell:last-of-type,
 .dir-rtl .block_completion_progress .barModeSqueeze .progressBarCell:last-of-type {
-    border-radius: 4px 0 0 4px;
-    border-left: none;
-    border-right: solid 1px #e3e3e3;
+    border-top-left-radius: 0.26rem;
+    border-bottom-left-radius: 0.26rem;
+    border-left: solid 1px #e3e3e3;
 }
 
 .block_completion_progress .progressBarCell img {
     height: auto;
-    margin: 1px 0 0 0;
+    margin: 0;
     max-height: 15px;
     max-width: 15px;
     padding: 0;
