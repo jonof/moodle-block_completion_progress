@@ -79,7 +79,6 @@ $blockcontext = context_block::instance($id);
 
 // Set up page parameters.
 $PAGE->set_course($course);
-$PAGE->requires->css('/blocks/completion_progress/styles.css');
 $PAGE->set_url(
     '/blocks/completion_progress/overview.php',
     array(

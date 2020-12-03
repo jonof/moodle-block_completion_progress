@@ -112,7 +112,10 @@
 }
 
 .block_completion_progress .progressBarCell .nowicon {
-    width: auto;
+    width: 15px;
+    height: 15px;
+    margin: 0;
+    padding: 0;
 }
 
 .block_completion_progress .barModeScroll .progressBarCell:first-of-type,
@@ -128,14 +131,21 @@
     border-right: solid 1px #e3e3e3;
 }
 
-.block_completion_progress .progressBarCell img {
-    height: auto;
-    margin: 0;
-    max-height: 15px;
-    max-width: 15px;
-    padding: 0;
-    vertical-align: middle;
-    width: 85%;
+.block_completion_progress .barWithIcons .progressBarCell::before {
+    display: inline-block;
+    content: '';
+    width: 100%;
+    height: 100%;
+    max-width: 16px;
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+.block_completion_progress .barWithIcons .progressBarCell.completed::before {
+    background-image: url([[pix:block_completion_progress|tick]]);
+}
+.block_completion_progress .barWithIcons .progressBarCell.notCompleted::before {
+    background-image: url([[pix:block_completion_progress|cross]]);
 }
 
 .block_completion_progress .progressEventInfo,

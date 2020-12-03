@@ -421,6 +421,9 @@ function block_completion_progress_bar($activities, $completions, $config, $user
         $content .= HTML_WRITER::tag('svg', $rightpoly, array('class' => 'right-arrow-svg', 'height' => '30', 'width' => '30'));
     }
     $barclasses[] = 'barMode' . ucfirst($longbars);
+    if ($useicons) {
+        $barclasses[] = 'barWithIcons';
+    }
 
     // Determine where to put the NOW indicator.
     $nowpos = -1;
@@ -465,17 +468,16 @@ function block_completion_progress_bar($activities, $completions, $config, $user
         $complete = $completions[$activity['id']];
 
         // A cell in the progress bar.
+        $cellcontent = '';
         $celloptions = array(
             'class' => 'progressBarCell',
             'data-info-ref' => 'progressBarInfo'.$instance.'-'.$userid.'-'.$activity['id'],
         );
         if ($complete === 'submitted') {
             $celloptions['class'] .= ' submittedNotComplete';
-            $cellcontent = $OUTPUT->pix_icon('blank', '', 'block_completion_progress');
 
         } else if ($complete == COMPLETION_COMPLETE || $complete == COMPLETION_COMPLETE_PASS) {
             $celloptions['class'] .= ' completed';
-            $cellcontent = $OUTPUT->pix_icon($useicons == 1 ? 'tick' : 'blank', '', 'block_completion_progress');
 
         } else if (
             $complete == COMPLETION_COMPLETE_FAIL ||
@@ -483,11 +485,9 @@ function block_completion_progress_bar($activities, $completions, $config, $user
             (isset($activity['expected']) && $activity['expected'] > 0 && $activity['expected'] < $now)
         ) {
             $celloptions['class'] .= ' notCompleted';
-            $cellcontent = $OUTPUT->pix_icon($useicons == 1 ? 'cross' : 'blank', '', 'block_completion_progress');
 
         } else {
             $celloptions['class'] .= ' futureNotCompleted';
-            $cellcontent = $OUTPUT->pix_icon('blank', '', 'block_completion_progress');
         }
         if (empty($activity['link'])) {
             $celloptions['data-haslink'] = 'false';
