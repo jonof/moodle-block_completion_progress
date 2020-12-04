@@ -276,15 +276,9 @@ class block_completion_progress extends block_base {
         }
 
         // Organise access to JS.
-        $jsmodule = array(
-            'name' => 'block_completion_progress',
-            'fullpath' => '/blocks/completion_progress/module.js',
-            'requires' => array(),
-            'strings' => array(),
-        );
-        $arguments = array($blockinstancesonpage, array($USER->id));
-        $this->page->requires->js_init_call('M.block_completion_progress.setupScrolling', array(), false, $jsmodule);
-        $this->page->requires->js_init_call('M.block_completion_progress.init', $arguments, false, $jsmodule);
+        $this->page->requires->js_call_amd('block_completion_progress/progressbar', 'init', [
+            'instances' => $blockinstancesonpage,
+        ]);
 
         return $this->content;
     }

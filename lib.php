@@ -412,14 +412,14 @@ function block_completion_progress_bar($activities, $completions, $config, $user
     $showpercentage = isset($config->showpercentage) ? $config->showpercentage : DEFAULT_COMPLETIONPROGRESS_SHOWPERCENTAGE;
     $rowoptions = array();
     $rowoptions['style'] = '';
-    $content .= HTML_WRITER::start_div('barContainer');
+    $content .= html_writer::start_div('barContainer', ['data-instanceid' => $instance]);
 
     // Determine the segment width.
     $wrapafter = get_config('block_completion_progress', 'wrapafter') ?: DEFAULT_COMPLETIONPROGRESS_WRAPAFTER;
     if ($wrapafter <= 1) {
         $wrapafter = 1;
     }
-    if ($numactivities <= $wrapafter) {
+    if ($longbars == 'wrap' && $numactivities <= $wrapafter) {
         $longbars = 'squeeze';
     }
     if ($longbars == 'wrap') {
@@ -490,12 +490,11 @@ function block_completion_progress_bar($activities, $completions, $config, $user
         $complete = $completions[$activity['id']];
 
         // A cell in the progress bar.
-        $showinfojs = 'M.block_completion_progress.showInfo('.$instance.','.$userid.','.$activity['id'].');';
         $celloptions = array(
             'class' => 'progressBarCell',
-            'ontouchstart' => $showinfojs . ' return false;',
-            'onmouseover' => $showinfojs,
-             'style' => 'display:' . $celldisplay .'; width:' . $cellwidth . $cellunit . ';background-color:');
+            'data-info-ref' => 'progressBarInfo'.$instance.'-'.$userid.'-'.$activity['id'],
+            'style' => 'display:' . $celldisplay .'; width:' . $cellwidth . $cellunit . ';background-color:'
+        );
         if ($complete === 'submitted') {
             $celloptions['style'] .= $colours['submittednotcomplete_colour'].';';
             $cellcontent = $OUTPUT->pix_icon('blank', '', 'block_completion_progress');
@@ -517,11 +516,11 @@ function block_completion_progress_bar($activities, $completions, $config, $user
             $cellcontent = $OUTPUT->pix_icon('blank', '', 'block_completion_progress');
         }
         if (empty($activity['link'])) {
-            $celloptions['style'] .= 'cursor: unset;';
+            $celloptions['data-haslink'] = 'false';
         } else if (!empty($activity['available']) || $simple) {
-            $celloptions['onclick'] = 'document.location=\''.$activity['link'].'\';';
+            $celloptions['data-haslink'] = 'true';
         } else if (!empty($activity['link'])) {
-            $celloptions['style'] .= 'cursor: not-allowed;';
+            $celloptions['data-haslink'] = 'not-allowed';
         }
         if ($longbars != 'wrap' && $counter == 1) {
             $celloptions['class'] .= ' firstProgressBarCell';
@@ -568,8 +567,7 @@ function block_completion_progress_bar($activities, $completions, $config, $user
         $content .= get_string('mouse_over_prompt', 'block_completion_progress');
         $content .= ' ';
         $attributes = array (
-            'class' => 'accesshide',
-            'onclick' => 'M.block_completion_progress.showAll('.$instance.','.$userid.')'
+            'class' => 'accesshide progressShowAllInfo',
         );
         $content .= HTML_WRITER::link('#', get_string('showallinfo', 'block_completion_progress'), $attributes);
     }
@@ -593,7 +591,7 @@ function block_completion_progress_bar($activities, $completions, $config, $user
                 array('src' => $activity['icon'], 'class' => 'moduleIcon', 'alt' => '', 'role' => 'presentation'));
         $text .= s(format_string($activity['name']));
         if (!empty($activity['link']) && (!empty($activity['available']) || $simple)) {
-            $content .= $OUTPUT->action_link($activity['link'], $text);
+            $content .= $OUTPUT->action_link($activity['link'], $text, null, ['class' => 'action_link']);
         } else {
             $content .= $text;
         }

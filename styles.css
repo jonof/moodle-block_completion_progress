@@ -9,6 +9,7 @@
     overflow: hidden;
     position: relative;
     padding: 0;
+    clear: both;
 }
 
 .block_completion_progress .left-arrow-svg,
@@ -25,7 +26,6 @@
     stroke-width: 3px;
 }
 
-.block_completion_progress .nowRow,
 .block_completion_progress .barRow {
     padding: 0;
     width: 100%;
@@ -34,21 +34,21 @@
     display: table;
 }
 
-.block_completion_progress .nowRow .blankDiv {
-    display: table-cell;
-    height: 25px;
-}
-
 .block_completion_progress .progressBarCell {
     height: 25px;
     margin: 0 -1px 0 0;
     padding: 0;
     text-align: center;
     vertical-align: middle;
-    cursor: pointer;
     border-left: solid 1px #e3e3e3;
     border-top: solid 1px #e3e3e3;
     position: relative;
+}
+.block_completion_progress .progressBarCell[data-haslink=true] {
+    cursor: pointer;
+}
+.block_completion_progress .progressBarCell[data-haslink=not-allowed] {
+    cursor: not-allowed;
 }
 
 #page-blocks-completion_progress-overview .block_completion_progress .progressBarCell {

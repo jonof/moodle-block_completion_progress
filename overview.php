@@ -422,10 +422,9 @@ if ($paged) {
 }
 
 // Organise access to JS for progress bars.
-$jsmodule = array('name' => 'block_completion_progress', 'fullpath' => '/blocks/completion_progress/module.js');
-$arguments = array(array($block->id), $userids);
-$PAGE->requires->js_init_call('M.block_completion_progress.setupScrolling', array(), false, $jsmodule);
-$PAGE->requires->js_init_call('M.block_completion_progress.init', $arguments, false, $jsmodule);
+$PAGE->requires->js_call_amd('block_completion_progress/progressbar', 'init', [
+    'instances' => array($block->id),
+]);
 
 echo $OUTPUT->container_end();
 echo $OUTPUT->footer();
