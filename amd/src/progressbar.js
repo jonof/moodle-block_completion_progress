@@ -122,19 +122,23 @@ define(['jquery'],
                 event.preventDefault();
             }
 
-            if (nowicon.length > 0) {
-                // Place the 'now' marker in the centre of the scrolled bar.
-                barrow.prop('scrollLeft', 0);
-                barrow.prop('scrollLeft', nowicon.offset().left - barrow.offset().left -
-                    barrow.width() / 2);
-            }
+            // On page load, place the 'now' marker in the centre of the scrolled bar
+            // and adjust which arrows should be visible.
+            $(function() {
+                if (nowicon.length > 0) {
+                    barrow.prop('scrollLeft', 0);
+                    barrow.prop('scrollLeft', nowicon.offset().left - barrow.offset().left -
+                        barrow.width() / 2);
+                }
+
+                checkArrows();
+            });
 
             leftarrow.click(-1, scrollContainer);
             rightarrow.click(1, scrollContainer);
 
             barrow.on('scroll', checkArrows);
             $(window).resize(checkArrows);
-            checkArrows();
         }
 
         /**
