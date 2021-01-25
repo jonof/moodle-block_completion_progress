@@ -29,10 +29,6 @@ require_once($CFG->dirroot.'/blocks/completion_progress/lib.php');
 require_once($CFG->dirroot.'/notes/lib.php');
 require_once($CFG->libdir.'/tablelib.php');
 
-if (!class_exists('core\output\checkbox_toggleall')) {
-    class_alias('block_completion_progress\checkbox_toggleall_compat', 'core\output\checkbox_toggleall');
-}
-
 /**
  * Default number of participants per page.
  */
