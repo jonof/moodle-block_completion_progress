@@ -1,0 +1,48 @@
+name: Deploy DEV
+on: workflow_dispatch
+jobs:
+  Deploy:
+    runs-on: self-hosted
+    steps:
+      - name: connect to dev server
+        run: aws eks --region us-east-1 update-kubeconfig --name aprende-dev
+      - name: login to ECR
+        run: aws ecr get-login-password --region us-east-1 | sudo docker login  --username AWS --password-stdin  https://249553882629.dkr.ecr.us-east-1.amazonaws.com
+      - uses: actions/checkout@v2
+        with:
+          ref: 'dev' 
+      - name: get current image and generate dockerfile
+        run: |
+          IMAGE=$(kubectl -n dev describe deployment moodle | grep Image | awk '{print $2}') 
+          REPOPATH=$(grep  ${{ github.repository   }} /usr/local/moodle/.gitmodules  -B2 | grep path |awk '{print $3}')
+          echo FROM $IMAGE > $GITHUB_WORKSPACE/Dockerfile
+          echo RUN rm -rf /var/www/moodle/$REPOPATH >> $GITHUB_WORKSPACE/Dockerfile
+          echo "COPY  . /var/www/moodle/$REPOPATH" >> $GITHUB_WORKSPACE/Dockerfile
+          echo "RUN chown -R www-data:www-data /var/www/moodle/$REPOPATH" >> $GITHUB_WORKSPACE/Dockerfile         
+      - name: build, push and deploy image
+        run:  |
+          DATE=`date '+%Y%m%d%H%M%S'` 
+          cd $GITHUB_WORKSPACE
+          sudo docker build -t 249553882629.dkr.ecr.us-east-1.amazonaws.com/aprende-moodle:DEV-moodle-3.9-$DATE .
+          sudo docker push --quiet 249553882629.dkr.ecr.us-east-1.amazonaws.com/aprende-moodle:DEV-moodle-3.9-$DATE
+          kubectl -n dev --record deployment/moodle-cron set image moodle-cron=249553882629.dkr.ecr.us-east-1.amazonaws.com/aprende-moodle:DEV-moodle-3.9-$DATE
+          kubectl -n dev rollout status deployment moodle-cron 
+          kubectl -n dev --record deployment/moodle set image moodle=249553882629.dkr.ecr.us-east-1.amazonaws.com/aprende-moodle:DEV-moodle-3.9-$DATE
+          kubectl -n dev rollout status deployment moodle
+      - name: run upgrade and purge_caches
+        run: |
+          sleep 7
+          POD=$(kubectl -n dev get pod | grep cron | awk  '{print $1}') 
+          kubectl -n dev exec --stdin   $POD -- /usr/local/bin/php  /var/www/moodle/admin/cli/upgrade.php --non-interactive
+          kubectl -n dev exec --stdin   $POD -- /usr/local/bin/php  /var/www/moodle/admin/cli/purge_caches.php          
+      - name: clean up
+        run: |
+          #sudo docker rmi -f $(sudo docker images -a -q)
+          #sudo rm -rf $GITHUB_WORKSPACE
+      - uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          fields: repo,message,commit,author # selectable (default: repo,message)
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} # required
+        if: always() # Pick up events even if the job fails or is canceled.
