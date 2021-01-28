@@ -1,5 +1,8 @@
 name: Deploy DEV
-on: workflow_dispatch
+on:
+  push:
+    branches:
+      - dev
 jobs:
   Deploy:
     runs-on: self-hosted
