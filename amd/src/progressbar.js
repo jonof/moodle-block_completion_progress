@@ -66,79 +66,87 @@ define(['jquery'],
         }
 
         /**
-         * Prepare scroll mode behaviour.
-         * @param {jQuery} barcontainer
+         * Scroll the bar corresponding to the arrow clicked.
+         * @param {Event} event
          */
-        function setupScroll(barcontainer) {
-            var nowicon = barcontainer.find('.nowicon');
+        function scrollContainer(event) {
+            var barrow = $(this).closest('.block_completion_progress .barContainer').find('.barRow');
+            var amount = event.data * barrow.prop('scrollWidth') * 0.15;
+
+            barrow.prop('scrollLeft', barrow.prop('scrollLeft') + amount);
+
+            event.preventDefault();
+        }
+
+        /**
+         * Show or hide the scroll arrows based on the visible position.
+         */
+        function checkArrows() {
+            var threshold = 10;
+            var barrow = $(this);
+            var barcontainer = barrow.closest('.block_completion_progress .barContainer');
             var leftarrow = barcontainer.find('.left-arrow-svg');
             var rightarrow = barcontainer.find('.right-arrow-svg');
-            var barrow = barcontainer.find('.barRow');
+            var scrolled = barrow.prop('scrollLeft');
+            var scrollWidth = barrow.prop('scrollWidth') - barrow.prop('offsetWidth');
 
-            /**
-             * Show or hide the scroll arrows based on the visible position.
-             */
-            function checkArrows() {
-                var threshold = 10;
-                var scrolled = barrow.prop('scrollLeft');
-                var scrollWidth = barrow.prop('scrollWidth') - barrow.prop('offsetWidth');
+            if (document.dir === 'rtl') {
+                scrolled = -scrolled;
 
-                if (document.dir === 'rtl') {
-                    scrolled = -scrolled;
-
-                    if (scrolled > threshold) {
-                        rightarrow.css('display', 'block');
-                    } else {
-                        rightarrow.css('display', 'none');
-                    }
-                    if (scrollWidth > threshold && scrolled < scrollWidth - threshold) {
-                        leftarrow.css('display', 'block');
-                    } else {
-                        leftarrow.css('display', 'none');
-                    }
+                if (scrolled > threshold) {
+                    rightarrow.css('display', 'block');
                 } else {
-                    if (scrolled > threshold) {
-                        leftarrow.css('display', 'block');
-                    } else {
-                        leftarrow.css('display', 'none');
-                    }
-                    if (scrollWidth > threshold && scrolled < scrollWidth - threshold) {
-                        rightarrow.css('display', 'block');
-                    } else {
-                        rightarrow.css('display', 'none');
-                    }
+                    rightarrow.css('display', 'none');
+                }
+                if (scrollWidth > threshold && scrolled < scrollWidth - threshold) {
+                    leftarrow.css('display', 'block');
+                } else {
+                    leftarrow.css('display', 'none');
+                }
+            } else {
+                if (scrolled > threshold) {
+                    leftarrow.css('display', 'block');
+                } else {
+                    leftarrow.css('display', 'none');
+                }
+                if (scrollWidth > threshold && scrolled < scrollWidth - threshold) {
+                    rightarrow.css('display', 'block');
+                } else {
+                    rightarrow.css('display', 'none');
                 }
             }
+        }
 
-            /**
-             * Scroll the bar.
-             * @param {Event} event
-             */
-            function scrollContainer(event) {
-                var amount = event.data * barrow.prop('scrollWidth') * 0.15;
-
-                barrow.prop('scrollLeft', barrow.prop('scrollLeft') + amount);
-
-                event.preventDefault();
-            }
+        /**
+         * Prepare scroll mode behaviour.
+         * @param {jQuery} barcontainers there could be many nodes here in overview mode
+         */
+        function setupScroll(barcontainers) {
+            var barrows = barcontainers.find('.barRow');
 
             // On page load, place the 'now' marker in the centre of the scrolled bar
             // and adjust which arrows should be visible.
             $(function() {
-                if (nowicon.length > 0) {
+                var nowicons = barcontainers.find('.nowicon');
+                nowicons.each(function() {
+                    var nowicon = $(this);
+                    var barrow = nowicon.closest('.block_completion_progress .barRow');
+
                     barrow.prop('scrollLeft', 0);
                     barrow.prop('scrollLeft', nowicon.offset().left - barrow.offset().left -
                         barrow.width() / 2);
-                }
+                });
 
-                checkArrows();
+                barrows.each(checkArrows);
             });
 
-            leftarrow.click(-1, scrollContainer);
-            rightarrow.click(1, scrollContainer);
+            barcontainers.on('click', '.left-arrow-svg', -1, scrollContainer);
+            barcontainers.on('click', '.right-arrow-svg', 1, scrollContainer);
 
-            barrow.on('scroll', checkArrows);
-            $(window).resize(checkArrows);
+            barrows.on('scroll', checkArrows);
+            $(window).resize(function() {
+                barrows.each(checkArrows);
+            });
         }
 
         /**
@@ -146,19 +154,19 @@ define(['jquery'],
          * @param {integer} instanceid the bar instance id
          */
         function initialiseBar(instanceid) {
-            var barcontainer = $('.block_completion_progress ' +
+            var barcontainers = $('.block_completion_progress ' +
                 '.barContainer[data-instanceid="' + instanceid + '"]');
 
             // Show information elements on hover or tap.
-            barcontainer.on('touchstart mouseover', '.progressBarCell', showInfo);
+            barcontainers.on('touchstart mouseover', '.progressBarCell', showInfo);
 
             // Navigate to the activity when its cell is clicked.
-            barcontainer.on('click', '.progressBarCell[data-haslink=true]', viewActivity);
+            barcontainers.on('click', '.progressBarCell[data-haslink=true]', viewActivity);
 
             // Show all information elements when the 'show all' link is clicked.
-            barcontainer.siblings('.progressEventInfo').find('.progressShowAllInfo').click(showAllInfo);
+            barcontainers.siblings('.progressEventInfo').find('.progressShowAllInfo').click(showAllInfo);
 
-            setupScroll(barcontainer);
+            setupScroll(barcontainers);
         }
 
         return /** @alias module:block_completion_progress/progressbar */ {
