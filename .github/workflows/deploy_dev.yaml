@@ -27,11 +27,11 @@ jobs:
         run:  |
           DATE=`date '+%Y%m%d%H%M%S'` 
           cd $GITHUB_WORKSPACE
-          sudo docker build -t 249553882629.dkr.ecr.us-east-1.amazonaws.com/aprende-moodle:DEV-moodle-3.9-$DATE .
-          sudo docker push --quiet 249553882629.dkr.ecr.us-east-1.amazonaws.com/aprende-moodle:DEV-moodle-3.9-$DATE
-          kubectl -n dev --record deployment/moodle-cron set image moodle-cron=249553882629.dkr.ecr.us-east-1.amazonaws.com/aprende-moodle:DEV-moodle-3.9-$DATE
+          sudo docker build -t 249553882629.dkr.ecr.us-east-1.amazonaws.com/aprende-moodle-dev:DEV-moodle-3.9-$DATE .
+          sudo docker push --quiet 249553882629.dkr.ecr.us-east-1.amazonaws.com/aprende-moodle-dev:DEV-moodle-3.9-$DATE
+          kubectl -n dev --record deployment/moodle-cron set image moodle-cron=249553882629.dkr.ecr.us-east-1.amazonaws.com/aprende-moodle-dev:DEV-moodle-3.9-$DATE
           kubectl -n dev rollout status deployment moodle-cron 
-          kubectl -n dev --record deployment/moodle set image moodle=249553882629.dkr.ecr.us-east-1.amazonaws.com/aprende-moodle:DEV-moodle-3.9-$DATE
+          kubectl -n dev --record deployment/moodle set image moodle=249553882629.dkr.ecr.us-east-1.amazonaws.com/aprende-moodle-dev:DEV-moodle-3.9-$DATE
           kubectl -n dev rollout status deployment moodle
       - name: run upgrade and purge_caches
         run: |
