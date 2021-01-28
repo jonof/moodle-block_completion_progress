@@ -18,10 +18,11 @@ jobs:
         run: |
           IMAGE=$(kubectl -n dev describe deployment moodle | grep Image | awk '{print $2}') 
           REPOPATH=$(grep  ${{ github.repository   }} /usr/local/moodle/.gitmodules  -B2 | grep path |awk '{print $3}')
+          REPODIR=$(echo $REPOPATH | sed 's/[/].*$//')
           echo FROM $IMAGE > $GITHUB_WORKSPACE/Dockerfile
           echo RUN rm -rf /var/www/moodle/$REPOPATH >> $GITHUB_WORKSPACE/Dockerfile
           echo "COPY  . /var/www/moodle/$REPOPATH" >> $GITHUB_WORKSPACE/Dockerfile
-          echo "RUN chown -R www-data:www-data /var/www/moodle/$REPOPATH" >> $GITHUB_WORKSPACE/Dockerfile         
+          echo "RUN chown -R www-data:www-data /var/www/moodle/$REPODIR" >> $GITHUB_WORKSPACE/Dockerfile         
       - name: build, push and deploy image
         run:  |
           DATE=`date '+%Y%m%d%H%M%S'` 
