@@ -1,22 +1,22 @@
-name: Deploy DEV
+name: Deploy QA
 on:
   push:
     branches:
-      - dev
+      - qa
 jobs:
   Deploy:
     runs-on: self-hosted
     steps:
-      - name: connect to dev server
+      - name: connect to qa server
         run: aws eks --region us-east-1 update-kubeconfig --name aprende-dev
       - name: login to ECR
         run: aws ecr get-login-password --region us-east-1 | sudo docker login  --username AWS --password-stdin  https://249553882629.dkr.ecr.us-east-1.amazonaws.com
       - uses: actions/checkout@v2
         with:
-          ref: 'dev' 
+          ref: 'qa' 
       - name: get current image and generate dockerfile
         run: |
-          IMAGE=$(kubectl -n dev describe deployment moodle | grep Image | awk '{print $2}') 
+          IMAGE=$(kubectl -n qa describe deployment moodle | grep Image | awk '{print $2}') 
           REPOPATH=$(grep  ${{ github.repository }} /usr/local/moodle/.gitmodules  -B2 | grep path |awk '{print $3}')
           REPODIR=$(echo $REPOPATH | sed 's/[/].*$//')
           echo FROM $IMAGE > $GITHUB_WORKSPACE/Dockerfile
@@ -27,17 +27,17 @@ jobs:
         run:  |
           DATE=`date '+%Y%m%d%H%M%S'` 
           cd $GITHUB_WORKSPACE
-          sudo docker build -t 249553882629.dkr.ecr.us-east-1.amazonaws.com/aprende-moodle-dev:DEV-moodle-3.9-$DATE .
-          sudo docker push --quiet 249553882629.dkr.ecr.us-east-1.amazonaws.com/aprende-moodle-dev:DEV-moodle-3.9-$DATE
-          kubectl -n dev --record deployment/moodle-cron set image moodle-cron=249553882629.dkr.ecr.us-east-1.amazonaws.com/aprende-moodle-dev:DEV-moodle-3.9-$DATE
-          kubectl -n dev rollout status deployment moodle-cron 
-          kubectl -n dev --record deployment/moodle set image moodle=249553882629.dkr.ecr.us-east-1.amazonaws.com/aprende-moodle-dev:DEV-moodle-3.9-$DATE
-          kubectl -n dev rollout status deployment moodle
+          sudo docker build -t 249553882629.dkr.ecr.us-east-1.amazonaws.com/aprende-moodle-qa:QA-moodle-3.9-$DATE .
+          sudo docker push --quiet 249553882629.dkr.ecr.us-east-1.amazonaws.com/aprende-moodle-qa:QA-moodle-3.9-$DATE
+          kubectl -n qa --record deployment/moodle-cron set image moodle-cron=249553882629.dkr.ecr.us-east-1.amazonaws.com/aprende-moodle-qa:QA-moodle-3.9-$DATE
+          kubectl -n qa rollout status deployment moodle-cron 
+          kubectl -n qa --record deployment/moodle set image moodle=249553882629.dkr.ecr.us-east-1.amazonaws.com/aprende-moodle-qa:QA-moodle-3.9-$DATE
+          kubectl -n qa rollout status deployment moodle
       - name: run upgrade and purge_caches
         run: |
-          POD=$(kubectl -n dev get pod | grep cron | awk  '{print $1}') 
-          kubectl -n dev exec --stdin   $POD -- /usr/local/bin/php  /var/www/moodle/admin/cli/upgrade.php --non-interactive
-          kubectl -n dev exec --stdin   $POD -- /usr/local/bin/php  /var/www/moodle/admin/cli/purge_caches.php          
+          POD=$(kubectl -n qa get pod | grep cron | awk  '{print $1}') 
+          kubectl -n qa exec --stdin   $POD -- /usr/local/bin/php  /var/www/moodle/admin/cli/upgrade.php --non-interactive
+          kubectl -n qa exec --stdin   $POD -- /usr/local/bin/php  /var/www/moodle/admin/cli/purge_caches.php          
       - name: clean up
         run: |
           #sudo docker rmi -f $(sudo docker images -a -q)
