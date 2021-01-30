@@ -36,8 +36,8 @@ jobs:
       - name: run upgrade and purge_caches
         run: |
           POD=$(kubectl -n qa get pod | grep cron | awk  '{print $1}') 
-          kubectl -n qa exec --stdin   $POD -- /usr/local/bin/php  /var/www/moodle/admin/cli/upgrade.php --non-interactive
           kubectl -n qa exec --stdin   $POD -- /usr/local/bin/php  /var/www/moodle/admin/cli/purge_caches.php          
+          kubectl -n qa exec --stdin   $POD -- /usr/local/bin/php  /var/www/moodle/admin/cli/upgrade.php --non-interactive
       - name: clean up
         run: |
           #sudo docker rmi -f $(sudo docker images -a -q)
@@ -45,7 +45,7 @@ jobs:
       - uses: 8398a7/action-slack@v3
         with:
           status: ${{ job.status }}
-          fields: repo,message,commit,author,took,action # selectable (default: repo,message)
+          fields: repo,message,commit,author,took,action,branch # selectable (default: repo,message)
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} # required
         if: always() # Pick up events even if the job fails or is canceled.
