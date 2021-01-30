@@ -36,8 +36,8 @@ jobs:
       - name: run upgrade and purge_caches
         run: |
           POD=$(kubectl -n dev get pod | grep cron | awk  '{print $1}') 
-          kubectl -n dev exec --stdin   $POD -- /usr/local/bin/php  /var/www/moodle/admin/cli/upgrade.php --non-interactive
           kubectl -n dev exec --stdin   $POD -- /usr/local/bin/php  /var/www/moodle/admin/cli/purge_caches.php          
+          kubectl -n dev exec --stdin   $POD -- /usr/local/bin/php  /var/www/moodle/admin/cli/upgrade.php --non-interactive
       - name: clean up
         run: |
           #sudo docker rmi -f $(sudo docker images -a -q)
