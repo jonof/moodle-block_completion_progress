@@ -276,16 +276,20 @@ class block_completion_progress extends block_base {
         }
 
         // Organise access to JS.
-        $jsmodule = array(
-            'name' => 'block_completion_progress',
-            'fullpath' => '/blocks/completion_progress/module.js',
-            'requires' => array(),
-            'strings' => array(),
-        );
-        $arguments = array($blockinstancesonpage, array($USER->id));
-        $this->page->requires->js_init_call('M.block_completion_progress.setupScrolling', array(), false, $jsmodule);
-        $this->page->requires->js_init_call('M.block_completion_progress.init', $arguments, false, $jsmodule);
+        $this->page->requires->js_call_amd('block_completion_progress/progressbar', 'init', [
+            'instances' => $blockinstancesonpage,
+        ]);
+        $cachevalue = debugging() ? -1 : (int)get_config('block_completion_progress', 'cachevalue');
+        $this->page->requires->css('/blocks/completion_progress/css.php?v=' . $cachevalue);
 
         return $this->content;
+    }
+
+    /**
+     * Bumps a value to assist in caching of configured colours in css.php.
+     */
+    public static function increment_cache_value() {
+        $value = get_config('block_completion_progress', 'cachevalue') + 1;
+        set_config('cachevalue', $value, 'block_completion_progress');
     }
 }

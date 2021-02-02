@@ -37,11 +37,6 @@ const DEFAULT_COMPLETIONPROGRESS_WRAPAFTER = 16;
 const DEFAULT_COMPLETIONPROGRESS_LONGBARS = 'squeeze';
 
 /**
- * Width of cells when in scroll mode.
- */
-const DEFAULT_COMPLETIONPROGRESS_SCROLLCELLWIDTH = 25;
-
-/**
  * Default course name (long/short) to show on Dashboard pages.
  */
 const DEFAULT_COMPLETIONPROGRESS_COURSENAMETOSHOW = 'shortname';
@@ -466,18 +461,6 @@ function block_completion_progress_bar($activities, $completions, $config, $user
     $dateformat = get_string('strftimedate', 'langconfig');
     $alternatelinks = block_completion_progress_modules_with_alternate_links();
 
-    // Get colours and use defaults if they are not set in global settings.
-    $colournames = array(
-        'completed_colour' => 'completed_colour',
-        'submittednotcomplete_colour' => 'submittednotcomplete_colour',
-        'notCompleted_colour' => 'notCompleted_colour',
-        'futureNotCompleted_colour' => 'futureNotCompleted_colour'
-    );
-    $colours = array();
-    foreach ($colournames as $name => $stringkey) {
-        $colours[$name] = get_config('block_completion_progress', $name) ?: get_string('block_completion_progress', $stringkey);
-    }
-
     // Get relevant block instance settings or use defaults.
     if (get_config('block_completion_progress', 'forceiconsinbar') !== "1") {
         $useicons = isset($config->progressBarIcons) ? $config->progressBarIcons : DEFAULT_COMPLETIONPROGRESS_PROGRESSBARICONS;
@@ -489,16 +472,17 @@ function block_completion_progress_bar($activities, $completions, $config, $user
     $longbars = isset($config->longbars) ? $config->longbars : $defaultlongbars;
     $displaynow = $orderby == 'orderbytime';
     $showpercentage = isset($config->showpercentage) ? $config->showpercentage : DEFAULT_COMPLETIONPROGRESS_SHOWPERCENTAGE;
-    $rowoptions = array();
-    $rowoptions['style'] = '';
-    $content .= HTML_WRITER::start_div('barContainer');
+    $rowoptions = array('style' => '');
+    $cellsoptions = array('style' => '');
+    $barclasses = array('barRow');
+    $content .= html_writer::start_div('barContainer', ['data-instanceid' => $instance]);
 
     // Determine the segment width.
     $wrapafter = get_config('block_completion_progress', 'wrapafter') ?: DEFAULT_COMPLETIONPROGRESS_WRAPAFTER;
     if ($wrapafter <= 1) {
         $wrapafter = 1;
     }
-    if ($numactivities <= $wrapafter) {
+    if ($longbars == 'wrap' && $numactivities <= $wrapafter) {
         $longbars = 'squeeze';
     }
     if ($longbars == 'wrap') {
@@ -506,37 +490,30 @@ function block_completion_progress_bar($activities, $completions, $config, $user
         if ($rows <= 1) {
             $rows = 1;
         }
-        $cellwidth = floor(100 / ceil($numactivities / $rows));
-        $cellunit = '%';
-        $celldisplay = 'inline-block';
+        $cellsoptions['style'] = 'flex-basis: calc(100% / ' . ceil($numactivities / $rows) . ');';
         $displaynow = false;
     }
     if ($longbars == 'scroll') {
-        $cellwidth = DEFAULT_COMPLETIONPROGRESS_SCROLLCELLWIDTH;
-        $cellunit = 'px';
-        $celldisplay = 'inline-block';
-        $rowoptions['style'] .= 'white-space: nowrap;';
         $leftpoly = HTML_WRITER::tag('polygon', '', array('points' => '30,0 0,15 30,30', 'class' => 'triangle-polygon'));
         $rightpoly = HTML_WRITER::tag('polygon', '', array('points' => '0,0 30,15 0,30', 'class' => 'triangle-polygon'));
         $content .= HTML_WRITER::tag('svg', $leftpoly, array('class' => 'left-arrow-svg', 'height' => '30', 'width' => '30'));
         $content .= HTML_WRITER::tag('svg', $rightpoly, array('class' => 'right-arrow-svg', 'height' => '30', 'width' => '30'));
     }
-    if ($longbars == 'squeeze') {
-        $cellwidth = $numactivities > 0 ? floor(100 / $numactivities) : 1;
-        $cellunit = '%';
-        $celldisplay = 'table-cell';
+    $barclasses[] = 'barMode' . ucfirst($longbars);
+    if ($useicons) {
+        $barclasses[] = 'barWithIcons';
     }
 
     // Determine where to put the NOW indicator.
     $nowpos = -1;
     if ($orderby == 'orderbytime' && $longbars != 'wrap' && $displaynow == 1 && !$simple) {
+        $barclasses[] = 'barWithNow';
 
         // Find where to put now arrow.
         $nowpos = 0;
         while ($nowpos < $numactivities && $now > $activities[$nowpos]['expected'] && $activities[$nowpos]['expected'] != 0) {
             $nowpos++;
         }
-        $rowoptions['style'] .= 'margin-top: 25px;';
         $nowstring = get_string('now_indicator', 'block_completion_progress');
         $leftarrowimg = $OUTPUT->pix_icon('left', $nowstring, 'block_completion_progress', array('class' => 'nowicon'));
         $rightarrowimg = $OUTPUT->pix_icon('right', $nowstring, 'block_completion_progress', array('class' => 'nowicon'));
@@ -563,50 +540,40 @@ function block_completion_progress_bar($activities, $completions, $config, $user
     }
 
     // Start progress bar.
-    $content .= HTML_WRITER::start_div('barRow', $rowoptions);
+    $content .= html_writer::start_div(implode(' ', $barclasses), $rowoptions);
+    $content .= html_writer::start_div('barRowCells', $cellsoptions);
     $counter = 1;
     foreach ($activities as $activity) {
         $complete = $completions[$activity['id']];
 
         // A cell in the progress bar.
-        $showinfojs = 'M.block_completion_progress.showInfo('.$instance.','.$userid.','.$activity['id'].');';
+        $cellcontent = '';
         $celloptions = array(
             'class' => 'progressBarCell',
-            'ontouchstart' => $showinfojs . ' return false;',
-            'onmouseover' => $showinfojs,
-             'style' => 'display:' . $celldisplay .'; width:' . $cellwidth . $cellunit . ';background-color:');
+            'data-info-ref' => 'progressBarInfo'.$instance.'-'.$userid.'-'.$activity['id'],
+        );
         if ($complete === 'submitted') {
-            $celloptions['style'] .= $colours['submittednotcomplete_colour'].';';
-            $cellcontent = $OUTPUT->pix_icon('blank', '', 'block_completion_progress');
+            $celloptions['class'] .= ' submittedNotComplete';
 
         } else if ($complete == COMPLETION_COMPLETE || $complete == COMPLETION_COMPLETE_PASS) {
-            $celloptions['style'] .= $colours['completed_colour'].';';
-            $cellcontent = $OUTPUT->pix_icon($useicons == 1 ? 'tick' : 'blank', '', 'block_completion_progress');
+            $celloptions['class'] .= ' completed';
 
         } else if (
             $complete == COMPLETION_COMPLETE_FAIL ||
             (!isset($config->orderby) || $config->orderby == 'orderbytime') &&
             (isset($activity['expected']) && $activity['expected'] > 0 && $activity['expected'] < $now)
         ) {
-            $celloptions['style'] .= $colours['notCompleted_colour'].';';
-            $cellcontent = $OUTPUT->pix_icon($useicons == 1 ? 'cross' : 'blank', '', 'block_completion_progress');
+            $celloptions['class'] .= ' notCompleted';
 
         } else {
-            $celloptions['style'] .= $colours['futureNotCompleted_colour'].';';
-            $cellcontent = $OUTPUT->pix_icon('blank', '', 'block_completion_progress');
+            $celloptions['class'] .= ' futureNotCompleted';
         }
         if (empty($activity['link'])) {
-            $celloptions['style'] .= 'cursor: unset;';
+            $celloptions['data-haslink'] = 'false';
         } else if (!empty($activity['available']) || $simple) {
-            $celloptions['onclick'] = 'document.location=\''.$activity['link'].'\';';
+            $celloptions['data-haslink'] = 'true';
         } else if (!empty($activity['link'])) {
-            $celloptions['style'] .= 'cursor: not-allowed;';
-        }
-        if ($longbars != 'wrap' && $counter == 1) {
-            $celloptions['class'] .= ' firstProgressBarCell';
-        }
-        if ($longbars != 'wrap' && $counter == $numactivities) {
-            $celloptions['class'] .= ' lastProgressBarCell';
+            $celloptions['data-haslink'] = 'not-allowed';
         }
 
         // Place the NOW indicator.
@@ -630,6 +597,7 @@ function block_completion_progress_bar($activities, $completions, $config, $user
     }
     $content .= HTML_WRITER::end_div();
     $content .= HTML_WRITER::end_div();
+    $content .= HTML_WRITER::end_div();
 
     // Add the percentage below the progress bar.
     if ($showpercentage == 1 && !$simple) {
@@ -647,8 +615,7 @@ function block_completion_progress_bar($activities, $completions, $config, $user
         $content .= get_string('mouse_over_prompt', 'block_completion_progress');
         $content .= ' ';
         $attributes = array (
-            'class' => 'accesshide',
-            'onclick' => 'M.block_completion_progress.showAll('.$instance.','.$userid.')'
+            'class' => 'accesshide progressShowAllInfo',
         );
         $content .= HTML_WRITER::link('#', get_string('showallinfo', 'block_completion_progress'), $attributes);
     }
@@ -672,7 +639,7 @@ function block_completion_progress_bar($activities, $completions, $config, $user
                 array('src' => $activity['icon'], 'class' => 'moduleIcon', 'alt' => '', 'role' => 'presentation'));
         $text .= s(format_string($activity['name']));
         if (!empty($activity['link']) && (!empty($activity['available']) || $simple)) {
-            $content .= $OUTPUT->action_link($activity['link'], $text);
+            $content .= $OUTPUT->action_link($activity['link'], $text, null, ['class' => 'action_link']);
         } else {
             $content .= $text;
         }

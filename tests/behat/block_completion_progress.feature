@@ -1,4 +1,4 @@
-@block @block_completion_progress @mod_quiz
+@block @block_completion_progress @javascript
 Feature: Using block completion progress for a quiz
   In order to know what quizzes are due
   As a student
@@ -40,9 +40,7 @@ Feature: Using block completion progress for a quiz
       | question       | page |
       | First question | 1    |
     Given I log in as "teacher1"
-    And I am on site homepage
-    And I follow "Course 1"
-    And I turn editing mode on
+    And I am on "Course 1" course homepage with editing mode on
     And I follow "Quiz 1A No deadline"
     And I navigate to "Edit settings" in current page administration
     And I set the following fields to these values:
@@ -56,19 +54,23 @@ Feature: Using block completion progress for a quiz
     And I press "Save changes"
     And I log out
 
-  Scenario: Basic functionning of the block
+  Scenario: Basic functioning of the block
     Given I log in as "student1"
-    And I am on site homepage
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
+    When I hover ".block_completion_progress .progressBarCell:first-child" "css_element"
     Then I should see "Progress: 0%" in the "Completion Progress" "block"
+    And I should see "Quiz 1A No deadline" in the "Completion Progress" "block"
+    And I should see "Not completed" in the "Completion Progress" "block"
 
   Scenario: Submit the quizzes
     Given I log in as "student1"
-    And I am on site homepage
-    And I follow "Course 1"
+    And I am on "Course 1" course homepage
     And I follow "Quiz 1A No deadline"
     And I press "Attempt quiz now"
     And I follow "Finish attempt ..."
     And I press "Submit all and finish"
-    And I follow "C1"
+    And I am on "Course 1" course homepage
+    When I hover ".block_completion_progress .progressBarCell:first-child" "css_element"
     Then I should see "Progress: 100%" in the "Completion Progress" "block"
+    And I should see "Quiz 1A No deadline" in the "Completion Progress" "block"
+    And I should see "Completed" in the "Completion Progress" "block"

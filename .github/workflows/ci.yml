@@ -3,8 +3,8 @@ name: Moodle Plugin CI
 on: [push, pull_request]
 
 jobs:
-  citest:
-    name: CI test
+  ci:
+    name: CI
     runs-on: ubuntu-18.04
 
     strategy:
@@ -114,3 +114,7 @@ jobs:
     - name: Run phpunit
       if: ${{ always() }}
       run: moodle-plugin-ci phpunit
+
+    - name: Run behat
+      if: ${{ always() }}
+      run: moodle-plugin-ci behat --profile chrome

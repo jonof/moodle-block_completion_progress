@@ -79,7 +79,6 @@ $blockcontext = context_block::instance($id);
 
 // Set up page parameters.
 $PAGE->set_course($course);
-$PAGE->requires->css('/blocks/completion_progress/styles.css');
 $PAGE->set_url(
     '/blocks/completion_progress/overview.php',
     array(
@@ -98,6 +97,9 @@ $PAGE->set_title($title);
 $PAGE->set_heading($title);
 $PAGE->navbar->add($title);
 $PAGE->set_pagelayout('report');
+
+$cachevalue = debugging() ? -1 : (int)get_config('block_completion_progress', 'cachevalue');
+$PAGE->requires->css('/blocks/completion_progress/css.php?v=' . $cachevalue);
 
 // Check user is logged in and capable of accessing the Overview.
 require_login($course, false);
@@ -421,10 +423,9 @@ if ($paged) {
 }
 
 // Organise access to JS for progress bars.
-$jsmodule = array('name' => 'block_completion_progress', 'fullpath' => '/blocks/completion_progress/module.js');
-$arguments = array(array($block->id), $userids);
-$PAGE->requires->js_init_call('M.block_completion_progress.setupScrolling', array(), false, $jsmodule);
-$PAGE->requires->js_init_call('M.block_completion_progress.init', $arguments, false, $jsmodule);
+$PAGE->requires->js_call_amd('block_completion_progress/progressbar', 'init', [
+    'instances' => array($block->id),
+]);
 
 echo $OUTPUT->container_end();
 echo $OUTPUT->footer();
