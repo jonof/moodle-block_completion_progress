@@ -144,7 +144,7 @@ class block_completion_progress_base_testcase extends block_completion_progress\
         );
         $this->assertFalse($result);
 
-        $submissions = block_completion_progress_student_submissions($this->course->id, $this->students[0]->id);
+        $submissions = block_completion_progress_submissions($this->course->id, $this->students[0]->id);
         $config = unserialize(base64_decode($blockinfo['configdata']));
         $activities = block_completion_progress_get_activities($this->course->id, $config);
 
@@ -179,7 +179,7 @@ class block_completion_progress_base_testcase extends block_completion_progress\
         );
         $this->assertTrue($result);
 
-        $submissions = block_completion_progress_student_submissions($this->course->id, $this->students[0]->id);
+        $submissions = block_completion_progress_submissions($this->course->id, $this->students[0]->id);
         $completions = block_completion_progress_completions($activities, $this->students[0]->id, $this->course,
           $submissions);
 

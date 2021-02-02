@@ -85,85 +85,158 @@ const DEFAULT_COMPLETIONPROGRESS_ACTIVITIESINCLUDED = 'activitycompletion';
  * Finds submissions for a user in a course
  *
  * @param int    $courseid ID of the course
- * @param int    $userid   ID of user in the course
+ * @param int    $userid   ID of user in the course, or 0 for all
  * @return array Course module IDs submissions
  */
-function block_completion_progress_student_submissions($courseid, $userid) {
-    global $DB;
+function block_completion_progress_submissions($courseid, $userid = 0) {
+    global $DB, $CFG;
+
+    require_once($CFG->dirroot . '/mod/quiz/lib.php');
 
     $submissions = array();
-    $params = array('courseid' => $courseid, 'userid' => $userid);
-
-    // Queries to deliver instance IDs of activities with submissions by user.
-    $queries = array (
-        'assign' => "SELECT c.id
-                       FROM {assign_submission} s, {assign} a, {modules} m, {course_modules} c
-                      WHERE s.userid = :userid
-                        AND s.latest = 1
-                        AND s.status = 'submitted'
-                        AND s.assignment = a.id
-                        AND a.course = :courseid
-                        AND m.name = 'assign'
-                        AND m.id = c.module
-                        AND c.instance = a.id",
-        'workshop' => "SELECT DISTINCT c.id
-                         FROM {workshop_submissions} s, {workshop} w, {modules} m, {course_modules} c
-                        WHERE s.authorid = :userid
-                          AND s.workshopid = w.id
-                          AND w.course = :courseid
-                          AND m.name = 'workshop'
-                          AND m.id = c.module
-                          AND c.instance = w.id",
+    $params = array(
+        'courseid' => $courseid,
     );
 
-    foreach ($queries as $moduletype => $query) {
-        $results = $DB->get_records_sql($query, $params);
-        foreach ($results as $cmid => $obj) {
-            $submissions[] = $cmid;
-        }
+    if ($userid) {
+        $assignwhere = 'AND s.userid = :userid';
+        $workshopwhere = 'AND s.authorid = :userid';
+        $quizwhere = 'AND qa.userid = :userid';
+
+        $params += [
+          'userid' => $userid,
+        ];
+    } else {
+        $assignwhere = '';
+        $workshopwhere = '';
+        $quizwhere = '';
     }
-
-    return $submissions;
-}
-
-/**
- * Finds submissions for users in a course
- *
- * @param int    $courseid   ID of the course
- * @return array Mapping of userid-cmid pairs for submissions
- */
-function block_completion_progress_course_submissions($courseid) {
-    global $DB;
-
-    $submissions = array();
-    $params = array('courseid' => $courseid);
 
     // Queries to deliver instance IDs of activities with submissions by user.
     $queries = array (
-        'assign' => "SELECT ". $DB->sql_concat('s.userid', "'-'", 'c.id') ."
-                       FROM {assign_submission} s, {assign} a, {modules} m, {course_modules} c
+        [
+            // Assignments with individual submission, or groups requiring a submission per user,
+            // or ungrouped users in a group submission situation.
+            'module' => 'assign',
+            'query' => "SELECT ". $DB->sql_concat('s.userid', "'-'", 'c.id') ." AS id,
+                         s.userid, c.id AS cmid,
+                         MAX(CASE WHEN ag.grade IS NULL OR ag.grade = -1 THEN 0 ELSE 1 END) AS graded
+                      FROM {assign_submission} s
+                        INNER JOIN {assign} a ON s.assignment = a.id
+                        INNER JOIN {course_modules} c ON c.instance = a.id
+                        INNER JOIN {modules} m ON m.name = 'assign' AND m.id = c.module
+                        LEFT JOIN {assign_grades} ag ON ag.assignment = s.assignment
+                              AND ag.attemptnumber = s.attemptnumber
+                              AND ag.userid = s.userid
                       WHERE s.latest = 1
                         AND s.status = 'submitted'
-                        AND s.assignment = a.id
                         AND a.course = :courseid
-                        AND m.name = 'assign'
-                        AND m.id = c.module
-                        AND c.instance = a.id",
-        'workshop' => "SELECT ". $DB->sql_concat('s.authorid', "'-'", 'c.id') ."
+                        AND (
+                            a.teamsubmission = 0 OR
+                            (a.teamsubmission <> 0 AND a.requireallteammemberssubmit <> 0 AND s.groupid = 0) OR
+                            (a.teamsubmission <> 0 AND a.preventsubmissionnotingroup = 0 AND s.groupid = 0)
+                        )
+                        $assignwhere
+                    GROUP BY s.userid, c.id",
+            'params' => [ ],
+        ],
+
+        [
+            // Assignments with groups requiring only one submission per group.
+            'module' => 'assign',
+            'query' => "SELECT ". $DB->sql_concat('s.userid', "'-'", 'c.id') ." AS id,
+                         s.userid, c.id AS cmid,
+                         MAX(CASE WHEN ag.grade IS NULL OR ag.grade = -1 THEN 0 ELSE 1 END) AS graded
+                      FROM {assign_submission} gs
+                        INNER JOIN {assign} a ON gs.assignment = a.id
+                        INNER JOIN {course_modules} c ON c.instance = a.id
+                        INNER JOIN {modules} m ON m.name = 'assign' AND m.id = c.module
+                        INNER JOIN {groups_members} s ON s.groupid = gs.groupid
+                        LEFT JOIN {assign_grades} ag ON ag.assignment = gs.assignment
+                              AND ag.attemptnumber = gs.attemptnumber
+                              AND ag.userid = s.userid
+                      WHERE gs.latest = 1
+                        AND gs.status = 'submitted'
+                        AND gs.userid = 0
+                        AND a.course = :courseid
+                        AND (a.teamsubmission <> 0 AND a.requireallteammemberssubmit = 0)
+                        $assignwhere
+                    GROUP BY s.userid, c.id",
+            'params' => [ ],
+        ],
+
+        [
+            'module' => 'workshop',
+            'query' => "SELECT ". $DB->sql_concat('s.authorid', "'-'", 'c.id') ." AS id,
+                           s.authorid AS userid, c.id AS cmid,
+                           1 AS graded
                          FROM {workshop_submissions} s, {workshop} w, {modules} m, {course_modules} c
                         WHERE s.workshopid = w.id
                           AND w.course = :courseid
                           AND m.name = 'workshop'
                           AND m.id = c.module
-                          AND c.instance = w.id",
+                          AND c.instance = w.id
+                          $workshopwhere
+                      GROUP BY s.authorid, c.id",
+            'params' => [ ],
+        ],
+
+        [
+            // Quizzes with 'first' and 'last attempt' grading methods.
+            'module' => 'quiz',
+            'query' => "SELECT ". $DB->sql_concat('qa.userid', "'-'", 'c.id') ." AS id,
+                       qa.userid, c.id AS cmid,
+                       (CASE WHEN qa.sumgrades IS NULL THEN 0 ELSE 1 END) AS graded
+                     FROM {quiz_attempts} qa
+                       INNER JOIN {quiz} q ON q.id = qa.quiz
+                       INNER JOIN {course_modules} c ON c.instance = q.id
+                       INNER JOIN {modules} m ON m.name = 'quiz' AND m.id = c.module
+                    WHERE qa.state = 'finished'
+                      AND q.course = :courseid
+                      AND qa.attempt = (
+                        SELECT CASE WHEN q.grademethod = :gmfirst THEN MIN(qa1.attempt)
+                                    WHEN q.grademethod = :gmlast THEN MAX(qa1.attempt) END
+                        FROM {quiz_attempts} qa1
+                        WHERE qa1.quiz = qa.quiz
+                          AND qa1.userid = qa.userid
+                          AND qa1.state = 'finished'
+                      )
+                      $quizwhere",
+            'params' => [
+                'gmfirst' => QUIZ_ATTEMPTFIRST,
+                'gmlast' => QUIZ_ATTEMPTLAST,
+            ],
+        ],
+        [
+            // Quizzes with 'maximum' and 'average' grading methods.
+            'module' => 'quiz',
+            'query' => "SELECT ". $DB->sql_concat('qa.userid', "'-'", 'c.id') ." AS id,
+                       qa.userid, c.id AS cmid,
+                       MIN(CASE WHEN qa.sumgrades IS NULL THEN 0 ELSE 1 END) AS graded
+                     FROM {quiz_attempts} qa
+                       INNER JOIN {quiz} q ON q.id = qa.quiz
+                       INNER JOIN {course_modules} c ON c.instance = q.id
+                       INNER JOIN {modules} m ON m.name = 'quiz' AND m.id = c.module
+                    WHERE (q.grademethod = :gmmax OR q.grademethod = :gmavg)
+                      AND qa.state = 'finished'
+                      AND q.course = :courseid
+                      $quizwhere
+                   GROUP BY qa.userid, c.id",
+            'params' => [
+                'gmmax' => QUIZ_GRADEHIGHEST,
+                'gmavg' => QUIZ_GRADEAVERAGE,
+            ],
+        ],
     );
 
-    foreach ($queries as $moduletype => $query) {
-        $results = $DB->get_records_sql($query, $params);
-        foreach ($results as $mapping => $obj) {
-            $submissions[] = $mapping;
+    foreach ($queries as $spec) {
+        $results = $DB->get_records_sql($spec['query'], $params + $spec['params']);
+        foreach ($results as $id => $obj) {
+            $submissions[$id] = $obj;
         }
     }
+
+    ksort($submissions);
 
     return $submissions;
 }
@@ -346,20 +419,26 @@ function block_completion_progress_filter_visibility($activities, $userid, $cour
  * @param array $activities  The activities with completion in the course
  * @param int   $userid      The user's id
  * @param int   $course      The course instance
- * @param array $submissions Submissions by the user
+ * @param array $submissions Submissions information, keyed by 'userid-cmid'
  * @return array   an describing the user's attempts based on module+instance identifiers
  */
 function block_completion_progress_completions($activities, $userid, $course, $submissions) {
     $completions = array();
-    $completion = new completion_info($course);
+    $completioninfo = new completion_info($course);
     $cm = new stdClass();
 
     foreach ($activities as $activity) {
         $cm->id = $activity['id'];
-        $activitycompletion = $completion->get_data($cm, true, $userid);
-        $completions[$activity['id']] = $activitycompletion->completionstate;
-        if ($completions[$activity['id']] === COMPLETION_INCOMPLETE && in_array($activity['id'], $submissions)) {
-            $completions[$activity['id']] = 'submitted';
+        $completion = $completioninfo->get_data($cm, true, $userid);
+        $submission = $submissions[$userid . '-' . $cm->id] ?? null;
+
+        if ($completion->completionstate == COMPLETION_INCOMPLETE && $submission) {
+            $completions[$cm->id] = 'submitted';
+        } else if ($completion->completionstate == COMPLETION_COMPLETE_FAIL && $submission
+                && !$submission->graded) {
+            $completions[$cm->id] = 'submitted';
+        } else {
+            $completions[$cm->id] = $completion->completionstate;
         }
     }
 
