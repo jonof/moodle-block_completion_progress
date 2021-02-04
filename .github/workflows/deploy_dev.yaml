@@ -27,10 +27,10 @@ jobs:
       - name: get plugin code and compare
         run: |
           PLUGIN=$(echo ${{ github.repository }}| sed  's@.*/@@')
-          PLUGINREPO=$(grep $PLUGIN /usr/local/.gitmodules  -B2 | grep url |awk '{print $3}') 
+          PLUGINREPO=$(grep $PLUGIN /usr/local/moodle/.gitmodules  -B2 | grep url |awk '{print $3}') 
           echo $PLUGINREPO
           DATE=`date '+%Y%m%d%H%M%S'` 
-          PLUGINPATH=$(grep $PLUGIN /usr/local/.gitmodules  -B2 | grep path |awk '{print $3}') 
+          PLUGINPATH=$(grep $PLUGIN /usr/local/moodle/.gitmodules  -B2 | grep path |awk '{print $3}') 
           CURRENT=$(cat /tmp/moodle/$PLUGINPATH/version.php  | grep "plugin->version" | awk '{print $3}'|sed 's/.$//')
           NEW=$(cat /home/ubuntu/_work/$PLUGIN/$PLUGIN/version.php  |grep "plugin->version" | awk '{print $3}'|sed 's/.$//')
           echo Updating from  $CURRENT  to $NEW
@@ -43,9 +43,9 @@ jobs:
           git clone git@github.com:Aprende-com/devops.git /tmp/devops-$DATE
           sudo cp /tmp/devops-$DATE/dockerfiles/Dockerfile /tmp
           cd /tmp
-          sudo docker build -t 249553882629.dkr.ecr.us-east-1.amazonaws.com/aprende-moodle-dev:moodle-DEV-3.9-$DATE .
-          sudo docker push --quiet 249553882629.dkr.ecr.us-east-1.amazonaws.com/aprende-moodle-dev:moodle-DEV-3.9-$DATE
-          kubectl -n dev --record deployment/moodle set image moodle=249553882629.dkr.ecr.us-east-1.amazonaws.com/aprende-moodle-dev:moodle-DEV-3.9-$DATE
+          sudo docker build -t 249553882629.dkr.ecr.us-east-1.amazonaws.com/aprende-moodle-dev:moodle-DEV-3.10-$DATE .
+          sudo docker push --quiet 249553882629.dkr.ecr.us-east-1.amazonaws.com/aprende-moodle-dev:moodle-DEV-3.10-$DATE
+          kubectl -n dev --record deployment/moodle set image moodle=249553882629.dkr.ecr.us-east-1.amazonaws.com/aprende-moodle-dev:moodle-DEV-3.10-$DATE
           kubectl -n dev rollout status deployment moodle
       - name: run upgrade and purge_caches
         run: |
