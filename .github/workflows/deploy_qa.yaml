@@ -8,6 +8,8 @@ jobs:
     if: "!contains(github.event.commits[0].message, '[skip ci]')" 
     runs-on: self-hosted
     steps:
+      - name: clean up previous
+        run: sudo rm -rf /tmp/moodle
       - name: connect to qa server
         run: aws eks --region us-east-1 update-kubeconfig --name aprende-dev
       - name: login to ECR
