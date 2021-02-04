@@ -21,16 +21,16 @@ jobs:
         run: IMAGE=$(kubectl -n qa describe deployment moodle | grep Image | awk '{print $2}') && sudo docker run -d $IMAGE  --entrypoint=/bin/bash
       - name: copy files
         run: |
-          CONTAINER=$(sudo docker ps | awk '{print $1}'| tail -n 1) 
+          CONTAINER=$(sudo docker ps | awk '{print $1}'| head -n 2| tail -n1) 
           sudo docker cp $CONTAINER:/var/www/moodle /tmp/ 
           sudo chmod -R 777 /tmp/moodle  
       - name: get plugin code and compare
         run: |
           PLUGIN=$(echo ${{ github.repository }}| sed  's@.*/@@')
-          PLUGINREPO=$(grep $PLUGIN /tmp/moodle/.gitmodules  -B2 | grep url |awk '{print $3}') 
+          PLUGINREPO=$(grep $PLUGIN /usr/local/moodle/.gitmodules  -B2 | grep url |awk '{print $3}') 
           echo $PLUGINREPO
           DATE=`date '+%Y%m%d%H%M%S'` 
-          PLUGINPATH=$(grep $PLUGIN /tmp/moodle/.gitmodules  -B2 | grep path |awk '{print $3}') 
+          PLUGINPATH=$(grep $PLUGIN /usr/local/moodle/.gitmodules  -B2 | grep path |awk '{print $3}') 
           CURRENT=$(cat /tmp/moodle/$PLUGINPATH/version.php  | grep "plugin->version" | awk '{print $3}'|sed 's/.$//')
           NEW=$(cat /home/ubuntu/_work/$PLUGIN/$PLUGIN/version.php  |grep "plugin->version" | awk '{print $3}'|sed 's/.$//')
           echo Updating from  $CURRENT  to $NEW
@@ -43,9 +43,9 @@ jobs:
           git clone git@github.com:Aprende-com/devops.git /tmp/devops-$DATE
           sudo cp /tmp/devops-$DATE/dockerfiles/Dockerfile /tmp
           cd /tmp
-          sudo docker build -t 249553882629.dkr.ecr.us-east-1.amazonaws.com/aprende-moodle-qa:moodle-qa-3.9-$DATE .
-          sudo docker push --quiet 249553882629.dkr.ecr.us-east-1.amazonaws.com/aprende-moodle-qa:moodle-qa-3.9-$DATE
-          kubectl -n qa --record deployment/moodle set image moodle=249553882629.dkr.ecr.us-east-1.amazonaws.com/aprende-moodle-qa:moodle-qa-3.9-$DATE
+          sudo docker build -t 249553882629.dkr.ecr.us-east-1.amazonaws.com/aprende-moodle-qa:moodle-qa-3.10-$DATE .
+          sudo docker push --quiet 249553882629.dkr.ecr.us-east-1.amazonaws.com/aprende-moodle-qa:moodle-qa-3.10-$DATE
+          kubectl -n qa --record deployment/moodle set image moodle=249553882629.dkr.ecr.us-east-1.amazonaws.com/aprende-moodle-qa:moodle-qa-3.10-$DATE
           kubectl -n qa rollout status deployment moodle
       - name: run upgrade and purge_caches
         run: |
@@ -56,6 +56,7 @@ jobs:
       - name: clean up
         run: |
           #sudo docker rmi -f $(sudo docker images -a -q)
+          sudo rm -rf /tmp/moodle
           sudo docker kill $(sudo docker ps -q)
       - uses: 8398a7/action-slack@v3
         with:
