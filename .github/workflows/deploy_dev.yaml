@@ -21,7 +21,7 @@ jobs:
         run: IMAGE=$(kubectl -n dev describe deployment moodle | grep Image | awk '{print $2}') && sudo docker run -d $IMAGE  --entrypoint=/bin/bash
       - name: copy files
         run: |
-          CONTAINER=$(sudo docker ps | awk '{print $1}'| head -n 2) 
+          CONTAINER=$(sudo docker ps | awk '{print $1}'| head -n 2| tail -n1) 
           sudo docker cp $CONTAINER:/var/www/moodle /tmp/ 
           sudo chmod -R 777 /tmp/moodle  
       - name: get plugin code and compare
