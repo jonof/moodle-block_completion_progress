@@ -8,6 +8,8 @@ jobs:
     if: "!contains(github.event.commits[0].message, '[skip ci]')" 
     runs-on: self-hosted
     steps:
+      - name: clean up previous
+        run: sudo rm -rf /tmp/moodle
       - name: connect to dev server
         run: aws eks --region us-east-1 update-kubeconfig --name aprende-dev
       - name: login to ECR
@@ -54,11 +56,12 @@ jobs:
       - name: clean up
         run: |
           #sudo docker rmi -f $(sudo docker images -a -q)
+          sudo rm -rf /tmp/moodle
           sudo docker kill $(sudo docker ps -q)
       - uses: 8398a7/action-slack@v3
         with:
           status: ${{ job.status }}
-          fields: repo,message,commit,author,took,action,branch # selectable (default: repo,message)
+          fields: repo,message,commit,author,took,action,branch,job,workflow # selectable (default: repo,message)
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} # required
         if: always() # Pick up events even if the job fails or is canceled.
