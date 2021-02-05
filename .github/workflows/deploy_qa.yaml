@@ -54,6 +54,7 @@ jobs:
           kubectl -n qa exec --stdin   $POD -- /usr/local/bin/php  /var/www/moodle/admin/cli/purge_caches.php          
           kubectl -n qa exec --stdin   $POD -- /usr/local/bin/php  /var/www/moodle/admin/cli/upgrade.php --non-interactive
       - name: clean up
+        if: always()
         run: |
           #sudo docker rmi -f $(sudo docker images -a -q)
           sudo rm -rf /tmp/moodle
