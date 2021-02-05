@@ -43,9 +43,9 @@ jobs:
           git clone git@github.com:Aprende-com/devops.git /tmp/devops-$DATE
           sudo cp /tmp/devops-$DATE/dockerfiles/Dockerfile /tmp
           cd /tmp
-          sudo docker build -t 249553882629.dkr.ecr.us-east-1.amazonaws.com/aprende-moodle-dev:moodle-DEV-3.10-$DATE .
-          sudo docker push --quiet 249553882629.dkr.ecr.us-east-1.amazonaws.com/aprende-moodle-dev:moodle-DEV-3.10-$DATE
-          kubectl -n dev --record deployment/moodle set image moodle=249553882629.dkr.ecr.us-east-1.amazonaws.com/aprende-moodle-dev:moodle-DEV-3.10-$DATE
+          sudo docker build -t 249553882629.dkr.ecr.us-east-1.amazonaws.com/aprende-moodle-dev:moodle-DEV-3.10.1-$DATE .
+          sudo docker push --quiet 249553882629.dkr.ecr.us-east-1.amazonaws.com/aprende-moodle-dev:moodle-DEV-3.10.1-$DATE
+          kubectl -n dev --record deployment/moodle set image moodle=249553882629.dkr.ecr.us-east-1.amazonaws.com/aprende-moodle-dev:moodle-DEV-3.10.1-$DATE
           kubectl -n dev rollout status deployment moodle
       - name: run upgrade and purge_caches
         run: |
