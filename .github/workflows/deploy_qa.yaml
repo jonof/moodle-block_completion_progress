@@ -23,7 +23,6 @@ jobs:
         run: |
           CONTAINER=$(sudo docker ps | awk '{print $1}'| head -n 2| tail -n1) 
           sudo docker cp $CONTAINER:/var/www/moodle /tmp/ 
-          sudo chmod -R 777 /tmp/moodle  
       - name: get plugin code and compare
         run: |
           PLUGIN=$(echo ${{ github.repository }}| sed  's@.*/@@')
@@ -35,8 +34,9 @@ jobs:
           NEW=$(cat /home/ubuntu/_work/$PLUGIN/$PLUGIN/version.php  |grep "plugin->version" | awk '{print $3}'|sed 's/.$//')
           echo Updating from  $CURRENT  to $NEW
           if  [ $CURRENT -gt $NEW ]; then echo cancel deploy, cannot downgrade version, current version $CURRENT version trying to install $NEW && sudo docker kill $(sudo docker ps -q)  && exit 1; else echo "continue"; fi
-          rm -rf /tmp/moodle/$PLUGINPATH/* 
-          cp -rf /home/ubuntu/_work/$PLUGIN/$PLUGIN/* /tmp/moodle/$PLUGINPATH/
+          sudo rm -rf /tmp/moodle/$PLUGINPATH/* 
+          sudo cp -rf /home/ubuntu/_work/$PLUGIN/$PLUGIN/* /tmp/moodle/$PLUGINPATH/
+          sudo chmod -R 755 /tmp/moodle
       - name: build, push and deploy image
         run:  |
           DATE=`date '+%Y%m%d%H%M%S'` 
