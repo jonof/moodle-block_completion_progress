@@ -9,7 +9,7 @@ jobs:
     steps:
         - name: update
           run: |
-            if [[ ! -e moodle-dev ]]; then sudo rm -rf moodle-dev; fi
+            if [[ -e moodle-dev ]]; then sudo rm -rf moodle-dev; fi
             git clone -b aprende_3101_dev  git@github.com:Aprende-com/moodle-dev.git
             cd moodle-dev
             git submodule update --init --recursive .
