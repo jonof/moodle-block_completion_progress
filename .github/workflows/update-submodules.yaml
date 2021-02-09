@@ -1,0 +1,19 @@
+name: Update submodules 
+on:
+  push:
+    branches: master
+jobs:
+ update-submodules:
+    if: "!contains(github.event.commits[0].message, '[skip ci]')"
+    runs-on: self-hosted    
+    steps:
+        - name: update
+          run: |
+            if [[ ! -e moodle-dev ]]; then sudo rm -rf moodle-dev; fi
+            git clone -b aprende_3101_dev  git@github.com:Aprende-com/moodle-dev.git
+            cd moodle-dev
+            git submodule update --init --recursive .
+            git submodule foreach git checkout master
+            git submodule foreach git pull origin master
+            git submodule foreach git status 
+            git push origin aprende_3101_dev
