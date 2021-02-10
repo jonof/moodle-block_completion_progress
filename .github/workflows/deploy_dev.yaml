@@ -1,0 +1,68 @@
+name: Deploy DEV V2
+on:
+  push:
+    branches:
+      - dev
+jobs:
+  Deploy:
+    if: "!contains(github.event.commits[0].message, '[skip ci]')" 
+    runs-on: self-hosted
+    steps:
+      - name: clean up previous
+        run: sudo rm -rf /tmp/moodle
+      - name: connect to dev server
+        run: aws eks --region us-east-1 update-kubeconfig --name aprende-dev
+      - name: login to ECR
+        run: aws ecr get-login-password --region us-east-1 | sudo docker login  --username AWS --password-stdin  https://249553882629.dkr.ecr.us-east-1.amazonaws.com
+      - uses: actions/checkout@v2
+        with:
+          ref: 'dev' 
+      - name: get current image
+        run: IMAGE=$(kubectl -n dev describe deployment moodle | grep Image | awk '{print $2}') && sudo docker run -d $IMAGE  --entrypoint=/bin/bash
+      - name: copy files
+        run: |
+          CONTAINER=$(sudo docker ps | awk '{print $1}'| head -n 2| tail -n1) 
+          sudo docker cp $CONTAINER:/var/www/moodle /tmp/ 
+      - name: get plugin code and compare
+        run: |
+          PLUGIN=$(echo ${{ github.repository }}| sed  's@.*/@@')
+          PLUGINREPO=$(grep $PLUGIN /usr/local/moodle/.gitmodules  -B2 | grep url |awk '{print $3}') 
+          echo $PLUGINREPO
+          DATE=`date '+%Y%m%d%H%M%S'` 
+          PLUGINPATH=$(grep $PLUGIN /usr/local/moodle/.gitmodules  -B2 | grep path |awk '{print $3}') 
+          CURRENT=$(cat /tmp/moodle/$PLUGINPATH/version.php  | grep "plugin->version" | awk '{print $3}'|sed 's/.$//')
+          NEW=$(cat /home/ubuntu/_work/$PLUGIN/$PLUGIN/version.php  |grep "plugin->version" | awk '{print $3}'|sed 's/.$//')
+          echo Updating from  $CURRENT  to $NEW
+          if  [ $CURRENT -gt $NEW ]; then echo cancel deploy, cannot downgrade version, current version $CURRENT version trying to install $NEW && sudo docker kill $(sudo docker ps -q)  && exit 1; else echo "continue"; fi
+          sudo rm -rf /tmp/moodle/$PLUGINPATH/* 
+          sudo cp -rf /home/ubuntu/_work/$PLUGIN/$PLUGIN/* /tmp/moodle/$PLUGINPATH/
+          sudo chmod -R 755 /tmp/moodle
+      - name: build, push and deploy image
+        run:  |
+          DATE=`date '+%Y%m%d%H%M%S'` 
+          git clone git@github.com:Aprende-com/devops.git /tmp/devops-$DATE
+          sudo cp /tmp/devops-$DATE/dockerfiles/Dockerfile /tmp
+          cd /tmp
+          sudo docker build -t 249553882629.dkr.ecr.us-east-1.amazonaws.com/aprende-moodle-dev:moodle-DEV-3.10.1-$DATE .
+          sudo docker push --quiet 249553882629.dkr.ecr.us-east-1.amazonaws.com/aprende-moodle-dev:moodle-DEV-3.10.1-$DATE
+          kubectl -n dev --record deployment/moodle set image moodle=249553882629.dkr.ecr.us-east-1.amazonaws.com/aprende-moodle-dev:moodle-DEV-3.10.1-$DATE
+          kubectl -n dev rollout status deployment moodle
+      - name: run upgrade and purge_caches
+        run: |
+          sleep 10
+          POD=$(kubectl -n dev get pod | grep moodle | grep Running |awk  '{print $1}') 
+          kubectl -n dev exec --stdin   $POD -- /usr/local/bin/php  /var/www/moodle/admin/cli/purge_caches.php          
+          kubectl -n dev exec --stdin   $POD -- /usr/local/bin/php  /var/www/moodle/admin/cli/upgrade.php --non-interactive
+      - name: clean up
+        if: always()
+        run: |
+          #sudo docker rmi -f $(sudo docker images -a -q)
+          sudo rm -rf /tmp/moodle
+          sudo docker kill $(sudo docker ps -q)
+      - uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          fields: repo,message,commit,author,took,action,branch,job,workflow # selectable (default: repo,message)
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} # required
+        if: always() # Pick up events even if the job fails or is canceled.
