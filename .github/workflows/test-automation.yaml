@@ -14,7 +14,7 @@ jobs:
         with:
           repository: 'Aprende-com/aprende-automation'
           ref: '${{ github.head_ref }}'
-          token: '${{ secrets.PERSONAL_TOKEN }}'
+          token: '{{ secrets.PERSONAL_TOKEN }}'
       - name: run automated tests
         run: |
          chmod +x src/test/resources/webdriver/linux/chromedriver
@@ -22,27 +22,27 @@ jobs:
          echo ISSUEID es ${{ github.head_ref }}
          mvn clean install -DskipTests
          echo mvn clean verify -Dcucumber.options="--tags @issue:${{ github.head_ref }}"
-         mvn clean verify -Dcucumber.options="--tags @issue:${{ github.head_ref }}" -Dserenity.public.url="http://172.31.33.72/${{ github.head_ref }}"
+         mvn clean verify -Dcucumber.options="--tags @issue:${{ github.head_ref }}" -Dserenity.public.url="http://reports.aprende.dev/${{ github.head_ref }}"
       - name: copy files
         if: always()
         run: sudo cp -rf target/site/serenity/* /var/www/reports/${{ github.head_ref }}
       - name: URL
         if: always()
-        run: echo http://172.31.33.72//${{ github.head_ref }}
+        run: echo http://reports.aprende.dev/${{ github.head_ref }}
       - name: clean up
         if: always ()
         run: sudo rm -rf *
       - name: slack notification
         if: always ()
         run: |
-          export MESSAGE="Test report for <https://aprende.atlassian.net/browse/${{ github.head_ref }}|*${{ github.head_ref }}*> is available! --> <http://172.31.33.72/${{ github.head_ref }}|View Report>"
+          export MESSAGE="Test report for <https://aprende.atlassian.net/browse/${{ github.head_ref }}|*${{ github.head_ref }}*> is available! --> <http://reports.aprende.dev/${{ github.head_ref }}|View Report>"
           curl -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
           --header "Content-Type: application/json" \
           --data "{\"text\": \"${MESSAGE}\"}"
-      - uses: 8398a7/action-slack@v3
-        with:
-          status: ${{ job.status }}
-          fields: repo,message,author,job # selectable (default: repo,message)
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} # required
-        if: always() # Pick up events even if the job fails or is canceled.
+      #- uses: 8398a7/action-slack@v3
+      #  with:
+      #    status: ${{ job.status }}
+      #    fields: repo,message,author,job # selectable (default: repo,message)
+      #  env:
+      #    SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} # required
+      #  if: always() # Pick up events even if the job fails or is canceled.
