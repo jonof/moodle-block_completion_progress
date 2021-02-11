@@ -18,14 +18,14 @@ jobs:
       - name: run automated tests
         run: |
          chmod +x src/test/resources/webdriver/linux/chromedriver
-         if [[ ! -e var/www/reports/${{ github.head_ref }} ]]; then sudo mkdir -p /var/www/reports/${{ github.head_ref }}; fi
+         if [[ -e /var/www/reports/${{ github.head_ref }} ]]; then sudo rm -rf /var/www/reports/${{ github.head_ref }}; fi
          echo ISSUEID es ${{ github.head_ref }}
          mvn clean install -DskipTests
          echo mvn clean verify -Dcucumber.options="--tags @issue:${{ github.head_ref }}"
          mvn clean verify -Dcucumber.options="--tags @issue:${{ github.head_ref }}" -Dserenity.public.url="http://reports.aprende.dev/${{ github.head_ref }}"
       - name: copy files
         if: always()
-        run: sudo cp -rf target/site/serenity/* /var/www/reports/${{ github.head_ref }}
+        run: sudo cp -rf target/site/serenity /var/www/reports/${{ github.head_ref }}
       - name: URL
         if: always()
         run: echo http://reports.aprende.dev/${{ github.head_ref }}
@@ -46,3 +46,4 @@ jobs:
       #  env:
       #    SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} # required
       #  if: always() # Pick up events even if the job fails or is canceled.
+~                                                                                          
