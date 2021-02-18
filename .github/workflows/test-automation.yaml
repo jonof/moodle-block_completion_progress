@@ -39,10 +39,10 @@ jobs:
           curl -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
           --header "Content-Type: application/json" \
           --data "{\"text\": \"${MESSAGE}\"}"
-      #- uses: 8398a7/action-slack@v3
-      #  with:
-      #    status: ${{ job.status }}
-      #    fields: repo,message,author,job # selectable (default: repo,message)
-      #  env:
-      #    SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} # required
-      #  if: always() # Pick up events even if the job fails or is canceled
+      - name: slack notification QA
+        if: always ()
+        run: |
+          export MESSAGE="Test report for <https://aprende.atlassian.net/browse/${{ github.head_ref }}|*${{ github.head_ref }}*> is available! --> <http://reports.aprende.dev/${{ github.head_ref }}|View Report>"
+          curl -X POST "${{ secrets.SLACK_WEBHOOK_URL_QA }}" \
+          --header "Content-Type: application/json" \
+          --data "{\"text\": \"${MESSAGE}\"}"
