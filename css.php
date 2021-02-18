@@ -23,6 +23,7 @@
  */
 
 require_once(__DIR__ . '/../../config.php');
+require_once($CFG->libdir.'/filelib.php');
 
 $cachevalue = optional_param('v', -1, PARAM_INT);
 
