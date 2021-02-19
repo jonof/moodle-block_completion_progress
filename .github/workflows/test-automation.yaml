@@ -1,5 +1,3 @@
-name: Test Automation
-on:
   pull_request:
     types: [closed]
     branches: qa
@@ -53,5 +51,4 @@ jobs:
           export MESSAGE="Test report for <https://aprende.atlassian.net/browse/${{ github.head_ref }}|*${{ github.head_ref }}*> is available! --> <http://reports.aprende.dev/${{ github.head_ref }}|View Report>"
           curl -X POST "${{ secrets.SLACK_WEBHOOK_URL_QA }}" \
           --header "Content-Type: application/json" \
-          --data "{\"text\": \"${MESSAGE}\"}"
-~                                                  
+          --data "{\"text\": \"${MESSAGE}\"
