@@ -16,6 +16,7 @@ jobs:
           ref: '${{ github.head_ref }}'
           token: '{{ secrets.PERSONAL_TOKEN }}'
       - name: run automated tests
+        continue-on-error: true
         run: |
          chmod +x src/test/resources/webdriver/linux/chromedriver
          if [[ -e /var/www/reports/${{ github.head_ref }} ]]; then sudo rm -rf /var/www/reports/${{ github.head_ref }}; fi
@@ -33,14 +34,14 @@ jobs:
         if: always ()
         run: sudo rm -rf *
       - name: slack notification
-        if: always ()
+        #if: always ()
         run: |
           export MESSAGE="Test report for <https://aprende.atlassian.net/browse/${{ github.head_ref }}|*${{ github.head_ref }}*> is available! --> <http://reports.aprende.dev/${{ github.head_ref }}|View Report>"
           curl -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
           --header "Content-Type: application/json" \
           --data "{\"text\": \"${MESSAGE}\"}"
       - name: slack notification QA
-        if: always ()
+        #if: always ()
         run: |
           export MESSAGE="Test report for <https://aprende.atlassian.net/browse/${{ github.head_ref }}|*${{ github.head_ref }}*> is available! --> <http://reports.aprende.dev/${{ github.head_ref }}|View Report>"
           curl -X POST "${{ secrets.SLACK_WEBHOOK_URL_QA }}" \
