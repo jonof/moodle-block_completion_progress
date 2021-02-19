@@ -15,6 +15,13 @@ jobs:
           repository: 'Aprende-com/aprende-automation'
           ref: '${{ github.head_ref }}'
           token: '{{ secrets.PERSONAL_TOKEN }}'
+      - name: The job has failed
+        if: ${{ failure() }}
+        run: |
+          export MESSAGE="Test case for <https://aprende.atlassian.net/browse/${{ github.event.inputs.issueid }}|*${{ github.event.inputs.issueid }}*> does not exist!"
+          curl -X POST "${{ secrets.SLACK_WEBHOOK_URL_QA }}" \
+          --header "Content-Type: application/json" \
+          --data "{\"text\": \"${MESSAGE}\"}"
       - name: run automated tests
         continue-on-error: true
         run: |
@@ -47,3 +54,4 @@ jobs:
           curl -X POST "${{ secrets.SLACK_WEBHOOK_URL_QA }}" \
           --header "Content-Type: application/json" \
           --data "{\"text\": \"${MESSAGE}\"}"
+~                                                  
