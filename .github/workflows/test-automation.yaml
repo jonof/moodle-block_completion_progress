@@ -18,7 +18,7 @@ jobs:
       - name: The job has failed
         if: ${{ failure() }}
         run: |
-          export MESSAGE="Test case for <https://aprende.atlassian.net/browse/${{ github.event.inputs.issueid }}|*${{ github.event.inputs.issueid }}*> does not exist!"
+          export MESSAGE="Test case for <https://aprende.atlassian.net/browse/${{ github.head_ref }}|*${{ github.head_ref }}*> does not exist!"
           curl -X POST "${{ secrets.SLACK_WEBHOOK_URL_QA }}" \
           --header "Content-Type: application/json" \
           --data "{\"text\": \"${MESSAGE}\"}"
