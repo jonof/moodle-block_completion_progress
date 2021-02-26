@@ -5,7 +5,7 @@ on:
       - master
 jobs:
   generate:
-    if: "!contains(github.event.commits[0].message, '[skip ci]')"
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
     name: Moodle Plugin Version Generator
     runs-on: ubuntu-latest
     steps:

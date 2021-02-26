@@ -4,7 +4,7 @@ on:
     branches: master
 jobs:
  update-submodules:
-    if: "!contains(github.event.commits[0].message, '[skip ci]')"
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
     runs-on: self-hosted    
     steps:
         - name: update
@@ -16,6 +16,8 @@ jobs:
             git submodule foreach git checkout master
             git submodule foreach git pull origin master
             git submodule foreach git status 
+            git add -A
+            git commit -m "update submodules"
             git push origin aprende_3101_dev
         - uses: 8398a7/action-slack@v3
           with:
