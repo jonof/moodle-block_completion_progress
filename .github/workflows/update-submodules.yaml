@@ -16,6 +16,8 @@ jobs:
             git submodule foreach git checkout master
             git submodule foreach git pull origin master
             git submodule foreach git status 
+            git add -A
+            git commit -m "update submodules"
             git push origin aprende_3101_dev
         - uses: 8398a7/action-slack@v3
           with:

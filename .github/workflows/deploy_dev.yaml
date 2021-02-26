@@ -49,7 +49,7 @@ jobs:
           kubectl -n dev rollout status deployment moodle
       - name: run upgrade and purge_caches
         run: |
-          sleep 10
+          #sleep 10
           POD=$(kubectl -n dev get pod | grep moodle | grep Running |awk  '{print $1}') 
           kubectl -n dev exec --stdin   $POD -- /usr/local/bin/php  /var/www/moodle/admin/cli/purge_caches.php          
           kubectl -n dev exec --stdin   $POD -- /usr/local/bin/php  /var/www/moodle/admin/cli/upgrade.php --non-interactive
