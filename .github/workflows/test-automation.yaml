@@ -7,7 +7,7 @@ env:
   ISSUEID: ${{ github.head_ref }}
 jobs:
  automates-tests:
-    if: "!contains(github.event.commits[0].message, '[skip ci]')"
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v2
