@@ -69,6 +69,7 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} # required
         if: always() # Pick up events even if the job fails or is canceled.
  automates-tests:
+    needs: [Deploy]
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
     runs-on: self-hosted
     steps:
@@ -115,4 +116,4 @@ jobs:
           export MESSAGE="Test report for <https://aprende.atlassian.net/browse/${{ github.head_ref }}|*${{ github.head_ref }}*> is available! --> <http://reports.aprende.dev/${{ github.head_ref }}|View Report>"
           curl -X POST "${{ secrets.SLACK_WEBHOOK_URL_QA }}" \
           --header "Content-Type: application/json" \
-          --data "{\"text\": \"${MESSAGE}\"
+          --data "{\"text\": \"${MESSAGE}\"}"
