@@ -69,6 +69,7 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} # required
         if: always() # Pick up events even if the job fails or is canceled.
  automates-tests:
+    needs: [Deploy]
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
     runs-on: self-hosted
     steps:
