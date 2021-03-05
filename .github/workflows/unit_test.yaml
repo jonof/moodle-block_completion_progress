@@ -1,0 +1,48 @@
+name: Unit Test
+on:
+  pull_request:
+    types: [opened]
+    branches: qa
+jobs:
+  build:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: self-hosted
+    steps:
+      - name: login to ECR
+        run: aws ecr get-login-password --region us-east-1 | sudo docker login  --username AWS --password-stdin  https://249553882629.dkr.ecr.us-east-1.amazonaws.com
+      - name: connect to qa server
+        run: aws eks --region us-east-1 update-kubeconfig --name aprende-dev
+      - uses: actions/checkout@v2
+        with:
+          ref: '${{ github.head_ref }}'
+      - name: get current image and run unit tests
+        run: |
+          DATE=`date '+%Y%m%d%H%M%S'` 
+          PLUGIN=$(echo ${{ github.repository }}| sed  's@.*/@@')
+          PLUGINPATH=$(grep $PLUGIN /usr/local/moodle/.gitmodules  -B2 | grep path |awk '{print $3}')
+          IMAGE=$(kubectl describe deployment moodle -n qa| grep Image | awk '{print $2}') 
+          cd /home/ubuntu/_work/$PLUGIN/$PLUGIN/
+          aws s3 cp s3://aprende-configs/configqa.php /home/ubuntu/_work/$PLUGIN/$PLUGIN/
+          echo FROM $IMAGE > /home/ubuntu/_work/$PLUGIN/$PLUGIN/Dockerfile 
+          echo RUN rm -rf /var/www/moodle/${{ github.event.inputs.path }}/${{ github.event.inputs.folder }}/* >> /tmp/${{ github.event.inputs.folder }}/Dockerfile
+          echo "COPY  . /var/www/moodle/$PLUGINPATH" >> /home/ubuntu/_work/$PLUGIN/$PLUGIN/Dockerfile
+          echo "COPY  ./configqa.php /var/www/moodle/config.php" >> /home/ubuntu/_work/$PLUGIN/$PLUGIN/Dockerfile
+          echo "RUN chmod 755 /var/www/moodle/$PLUGINPATH" >> /home/ubuntu/_work/$PLUGIN/$PLUGIN/Dockerfile 
+          sudo docker run --rm -dit -p 3306:3306  -e MYSQL_ROOT_PASSWORD=P4S5w0rd123  --name mysql mysql:8.0
+          sleep 22
+          mysql -h 172.17.0.2 -uroot -pP4S5w0rd123 -e  "create database moodle_test;"
+          mysql -h 172.17.0.2 -uroot -pP4S5w0rd123 -e  "ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY 'P4S5w0rd123';"
+          #git clone git@github.com:Aprende-com/devops.git /tmp/devops-$DATE  
+          sudo docker build -t unit-test-$DATE .
+          sudo docker run -d unit-test-$DATE
+          CONTAINER=$(sudo docker ps | grep unit-test-$DATE | awk '{print $1}'| head -n 2| tail -n1)
+          sudo docker exec  $CONTAINER php /var/www/moodle/admin/tool/phpunit/cli/init.php
+          sudo docker exec  $CONTAINER wget -O phpunit https://phar.phpunit.de/phpunit-9.phar 
+          sudo docker exec  $CONTAINER chmod 755 /var/www/html/phpunit
+          TESTS=$(sudo docker exec  $CONTAINER ls /var/www/moodle/$PLUGINPATH/tests)
+          for i in $TESTS;do sudo docker exec $CONTAINER  /var/www/html/phpunit /var/www/moodle/$PLUGINPATH/tests/$i;done
+      - name: clean up
+        if: always()
+        run: |
+          sudo docker kill $(sudo docker ps -q) 
+          sudo docker rm $(sudo docker ps -a -q)      
