@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 require_once($CFG->dirroot . '/mod/assign/locallib.php');
-require_once($CFG->dirroot.'/blocks/completion_progress/lib.php');
+require_once($CFG->dirroot . '/blocks/completion_progress/lib.php');
 
 /**
  * Basic unit tests for block_completion_progress.
@@ -36,7 +36,8 @@ require_once($CFG->dirroot.'/blocks/completion_progress/lib.php');
  * @copyright  2017 onwards Nelson Moller  {@link http://moodle.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class block_completion_progress_base_testcase extends advanced_testcase {
+class block_completion_progress_base_testcase extends advanced_testcase
+{
 
     /**
      * Default number of students to create.
@@ -51,7 +52,8 @@ class block_completion_progress_base_testcase extends advanced_testcase {
     /**
      * Setup function - we will create a course and add an assign instance to it.
      */
-    protected function setUp() {
+    protected function setUp(): void
+    {
         global $DB;
 
         $this->resetAfterTest(true);
@@ -72,15 +74,15 @@ class block_completion_progress_base_testcase extends advanced_testcase {
         $teacherrole = $DB->get_record('role', array('shortname' => 'teacher'));
         foreach ($this->teachers as $i => $teacher) {
             $this->getDataGenerator()->enrol_user($teacher->id,
-              $this->course->id,
-              $teacherrole->id);
+                $this->course->id,
+                $teacherrole->id);
         }
 
         $studentrole = $DB->get_record('role', array('shortname' => 'student'));
         foreach ($this->students as $i => $student) {
             $this->getDataGenerator()->enrol_user($student->id,
-              $this->course->id,
-              $studentrole->id);
+                $this->course->id,
+                $studentrole->id);
         }
     }
 
@@ -90,7 +92,8 @@ class block_completion_progress_base_testcase extends advanced_testcase {
      * @param array $params Array of parameters to pass to the generator
      * @return assign Assign class.
      */
-    protected function create_instance($params=array()) {
+    protected function create_instance($params = array())
+    {
         $generator = $this->getDataGenerator()->get_plugin_generator('mod_assign');
         $params['course'] = $this->course->id;
         $instance = $generator->create_instance($params);
@@ -99,40 +102,41 @@ class block_completion_progress_base_testcase extends advanced_testcase {
         return new assign($context, $cm, $this->course);
     }
 
-    public function test_assign_get_completion_state() {
+    public function test_assign_get_completion_state()
+    {
         global $DB;
 
         // Add a block.
         $context = CONTEXT_COURSE::instance($this->course->id);
         $blockinfo = [
-          'parentcontextid' => $context->id,
-          'pagetypepattern' => 'course-view-*',
-          'showinsubcontexts' => 0,
-          'defaultweight' => 5,
-          'timecreated' => time(),
-          'timemodified' => time(),
-          'defaultregion' => 'side-post',
-          'configdata' => 'Tzo4OiJzdGRDbGFzcyI6Njp7czo3OiJvcmRlcmJ5IjtzOjExOiJvcmRlcmJ5dGltZSI7czo4OiJsb25nYmFycyI7czo3OiJzcXVlZXp'.
-                          'lIjtzOjE2OiJwcm9ncmVzc0Jhckljb25zIjtzOjE6IjEiO3M6MTQ6InNob3dwZXJjZW50YWdlIjtzOjE6IjAiO3M6MTM6InByb2dyZX'.
-                          'NzVGl0bGUiO3M6MDoiIjtzOjE4OiJhY3Rpdml0aWVzaW5jbHVkZWQiO3M6MTg6ImFjdGl2aXR5Y29tcGxldGlvbiI7fQ=='
+            'parentcontextid'   => $context->id,
+            'pagetypepattern'   => 'course-view-*',
+            'showinsubcontexts' => 0,
+            'defaultweight'     => 5,
+            'timecreated'       => time(),
+            'timemodified'      => time(),
+            'defaultregion'     => 'side-post',
+            'configdata'        => 'Tzo4OiJzdGRDbGFzcyI6Njp7czo3OiJvcmRlcmJ5IjtzOjExOiJvcmRlcmJ5dGltZSI7czo4OiJsb25nYmFycyI7czo3OiJzcXVlZXp' .
+                'lIjtzOjE2OiJwcm9ncmVzc0Jhckljb25zIjtzOjE6IjEiO3M6MTQ6InNob3dwZXJjZW50YWdlIjtzOjE6IjAiO3M6MTM6InByb2dyZX' .
+                'NzVGl0bGUiO3M6MDoiIjtzOjE4OiJhY3Rpdml0aWVzaW5jbHVkZWQiO3M6MTg6ImFjdGl2aXR5Y29tcGxldGlvbiI7fQ=='
         ];
 
         $blockinstance = $this->getDataGenerator()->create_block('completion_progress', $blockinfo);
         $blockinstanceid = $blockinstance->id;
 
         $assign = $this->create_instance([
-          'submissiondrafts' => 0,
-          'completionsubmit' => 1,
-          'completion' => COMPLETION_TRACKING_AUTOMATIC
+            'submissiondrafts' => 0,
+            'completionsubmit' => 1,
+            'completion'       => COMPLETION_TRACKING_AUTOMATIC
         ]);
 
         $this->setUser($this->students[0]);
 
         $result = assign_get_completion_state(
-          $this->course,
-          $assign->get_course_module(),
-          $this->students[0]->id,
-          false
+            $this->course,
+            $assign->get_course_module(),
+            $this->students[0]->id,
+            false
         );
         $this->assertFalse($result);
 
@@ -141,15 +145,15 @@ class block_completion_progress_base_testcase extends advanced_testcase {
         $activities = block_completion_progress_get_activities($this->course->id, $config);
 
         $completions = block_completion_progress_completions($activities, $this->students[0]->id, $this->course,
-          $submissions);
+            $submissions);
 
         $text = block_completion_progress_bar(
-          $activities,
-          $completions,
-          $config,
-          $this->students[0]->id,
-          $this->course,
-          $blockinstanceid
+            $activities,
+            $completions,
+            $config,
+            $this->students[0]->id,
+            $this->course,
+            $blockinstanceid
         );
 
         $this->assertContains('assign', $text, '', true);
@@ -164,24 +168,24 @@ class block_completion_progress_base_testcase extends advanced_testcase {
         $DB->update_record('assign_submission', $submission);
 
         $result = assign_get_completion_state(
-          $this->course,
-          $assign->get_course_module(),
-          $this->students[0]->id,
-          false
+            $this->course,
+            $assign->get_course_module(),
+            $this->students[0]->id,
+            false
         );
         $this->assertTrue($result);
 
         $submissions = block_completion_progress_student_submissions($this->course->id, $this->students[0]->id);
         $completions = block_completion_progress_completions($activities, $this->students[0]->id, $this->course,
-          $submissions);
+            $submissions);
 
         $text = block_completion_progress_bar(
-          $activities,
-          $completions,
-          $config,
-          $this->students[0]->id,
-          $this->course,
-          $blockinstanceid
+            $activities,
+            $completions,
+            $config,
+            $this->students[0]->id,
+            $this->course,
+            $blockinstanceid
         );
 
         // The status is send but not finished.
