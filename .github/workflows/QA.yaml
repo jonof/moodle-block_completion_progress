@@ -60,8 +60,8 @@ jobs:
         run: |
           echo "upgrade failed, rolling back"      
           REV=$(kubectl -n qa rollout history deployment moodle |tail -n3 |sed '$ d' |sed '$ d'|awk '{print $1}')
-          kubectl rollout undo deployment/moodle  --to-revision=$REV -n dev
-          kubectl -n dev rollout status deployment moodle
+          kubectl rollout undo deployment/moodle  --to-revision=$REV -n qa
+          kubectl -n qa rollout status deployment moodle
       - name: clean up
         if: always()
         run: |
