@@ -1,10 +1,10 @@
-name: Unit Test
+name: Coverage Unit Tests 
 on:
   pull_request:
     types: [opened]
     branches: qa
 jobs:
-  build:
+  unit_tests:
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
     runs-on: self-hosted
     steps:
@@ -16,18 +16,24 @@ jobs:
         with:
           ref: '${{ github.head_ref }}'
       - name: get current image and run unit tests
+        #continue-on-error: true
         run: |
           DATE=`date '+%Y%m%d%H%M%S'` 
           PLUGIN=$(echo ${{ github.repository }}| sed  's@.*/@@')
           PLUGINPATH=$(grep $PLUGIN /usr/local/moodle/.gitmodules  -B2 | grep path |awk '{print $3}')
           IMAGE=$(kubectl describe deployment moodle -n qa| grep Image | awk '{print $2}') 
           cd /home/ubuntu/_work/$PLUGIN/$PLUGIN/
+          cp /home/ubuntu/tools/coverage/php.ini /home/ubuntu/_work/$PLUGIN/$PLUGIN/
+          cp /home/ubuntu/tools/coverage/20-xdebug.ini /home/ubuntu/_work/$PLUGIN/$PLUGIN/
           aws s3 cp s3://aprende-configs/configqa.php /home/ubuntu/_work/$PLUGIN/$PLUGIN/
-          echo FROM $IMAGE > /home/ubuntu/_work/$PLUGIN/$PLUGIN/Dockerfile 
-          echo RUN rm -rf /var/www/moodle/${{ github.event.inputs.path }}/${{ github.event.inputs.folder }}/* >> /tmp/${{ github.event.inputs.folder }}/Dockerfile
-          echo "COPY  . /var/www/moodle/$PLUGINPATH" >> /home/ubuntu/_work/$PLUGIN/$PLUGIN/Dockerfile
-          echo "COPY  ./configqa.php /var/www/moodle/config.php" >> /home/ubuntu/_work/$PLUGIN/$PLUGIN/Dockerfile
-          echo "RUN chmod 755 /var/www/moodle/$PLUGINPATH" >> /home/ubuntu/_work/$PLUGIN/$PLUGIN/Dockerfile 
+          sudo echo "FROM $IMAGE" > /home/ubuntu/_work/$PLUGIN/$PLUGIN/Dockerfile 
+          sudo echo "RUN rm -rf /var/www/moodle/$PLUGINPATH/*" >> /home/ubuntu/_work/$PLUGIN/$PLUGIN/Dockerfile
+          sudo echo "COPY  . /var/www/moodle/$PLUGINPATH/" >> /home/ubuntu/_work/$PLUGIN/$PLUGIN/Dockerfile
+          sudo echo "COPY  ./configqa.php /var/www/moodle/config.php" >> /home/ubuntu/_work/$PLUGIN/$PLUGIN/Dockerfile
+          sudo echo "COPY  ./20-xdebug.ini /usr/local/etc/php/conf.d/20-xdebug.ini" >> /home/ubuntu/_work/$PLUGIN/$PLUGIN/Dockerfile
+          sudo echo "RUN chmod 755 /var/www/moodle/$PLUGINPATH" >> /home/ubuntu/_work/$PLUGIN/$PLUGIN/Dockerfile 
+          sudo echo "RUN cd /var/www/moodle && pecl install xdebug && rm -f /usr/local/etc/php/php.ini" >> /home/ubuntu/_work/$PLUGIN/$PLUGIN/Dockerfile 
+          sudo echo "COPY  ./php.ini /usr/local/etc/php/php.ini" >> /home/ubuntu/_work/$PLUGIN/$PLUGIN/Dockerfile
           sudo docker run --rm -dit -p 3306:3306  -e MYSQL_ROOT_PASSWORD=P4S5w0rd123  --name mysql mysql:8.0
           sleep 22
           mysql -h 172.17.0.2 -uroot -pP4S5w0rd123 -e  "create database moodle_test;"
@@ -37,10 +43,25 @@ jobs:
           sudo docker run -d unit-test-$DATE
           CONTAINER=$(sudo docker ps | grep unit-test-$DATE | awk '{print $1}'| head -n 2| tail -n1)
           sudo docker exec  $CONTAINER php /var/www/moodle/admin/tool/phpunit/cli/init.php
-          sudo docker exec  $CONTAINER wget -O phpunit https://phar.phpunit.de/phpunit-9.phar 
-          sudo docker exec  $CONTAINER chmod 755 /var/www/html/phpunit
-          TESTS=$(sudo docker exec  $CONTAINER ls /var/www/moodle/$PLUGINPATH/tests)
-          for i in $TESTS;do sudo docker exec $CONTAINER  /var/www/html/phpunit /var/www/moodle/$PLUGINPATH/tests/$i;done
+          cp /home/ubuntu/tools/coverage/phpunit_template.xml  phpunit.xml
+          PATHS=$(grep path /usr/local/moodle/.gitmodules  -B2 | grep path |awk '{print $3}')
+          for i in $PATHS;do   sed -i '/ <testsuite name="aprende_phpunit_testsuite">/a  \ \ \ \ \ \ \ \ \ \   <directory suffix="_test.php">'$i'/tests</directory>'  phpunit.xml;done
+          for i in $PATHS;do   sed -i '/ <whitelist>/a  \ \ \ \ \ \ \ \ \ \    <directory suffix=".php">'$i'</directory>'  phpunit.xml;done
+          pwd
+          cat phpunit.xml
+          sudo docker cp /home/ubuntu/tools/coverage/install_composer.sh $CONTAINER:/tmp
+          sudo docker exec $CONTAINER  chmod 777 /tmp/install_composer.sh
+          sudo docker exec $CONTAINER rm -f /var/www/moodle/phpunit.xml
+          sudo docker cp phpunit.xml $CONTAINER:/var/www/moodle/phpunit.xml
+          sudo docker exec $CONTAINER /tmp/install_composer.sh
+      - name: Copy report
+        if: always()
+        run: |
+          CONTAINER=$(sudo docker ps | grep unit-test-$DATE | awk '{print $1}'| head -n 2| tail -n1)
+          cd /var/www/reports/coverage-reports/2021
+          MONTH=`date '+%m'`
+          sudo rm -rf $MONTH
+          sudo docker cp $CONTAINER:/var/www/moodle/coverage-html-output/ /var/www/reports/coverage-reports/2021/$MONTH
       - name: clean up
         if: always()
         run: |
