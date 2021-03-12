@@ -53,6 +53,7 @@ jobs:
           POD=$(kubectl -n dev get pod | grep moodle | grep Running |awk  '{print $1}') 
           kubectl -n dev exec --stdin   $POD -- /usr/local/bin/php  /var/www/moodle/admin/cli/purge_caches.php          
           kubectl -n dev exec --stdin   $POD -- /usr/local/bin/php  /var/www/moodle/admin/cli/upgrade.php --non-interactive
+          kubectl -n dev exec --stdin   $POD -- /usr/local/bin/php  /var/www/moodle/admin/cli/purge_caches.php          
       - name: The job has failed
         if: ${{ failure() }}
         run: |
