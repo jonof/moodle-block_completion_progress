@@ -2,7 +2,7 @@ name: Coverage Unit Tests
 on:
   pull_request:
     types: [opened]
-    branches: qa
+    branches: master
 jobs:
   unit_tests:
     if: "!contains(github.event.head_commit.message, '[skip ci]')"

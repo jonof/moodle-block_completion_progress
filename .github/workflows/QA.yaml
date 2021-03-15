@@ -1,10 +1,10 @@
 name: QA Pipeline
 on:
-  pull_request:
-    types: [closed]
-    branches: qa
+  push:
+    branches:
+      - qa
 env:
-  ISSUEID: ${{ github.head_ref }}
+  ISSUEID: ${{ github.event.head_commit.message }}
 jobs:
  Deploy:
     if: "!contains(github.event.head_commit.message, '[skip ci]')" 
@@ -84,12 +84,12 @@ jobs:
       - uses: actions/checkout@v2
         with:
           repository: 'Aprende-com/aprende-automation'
-          ref: '${{ github.head_ref }}'
+          ref: '${{ github.event.head_commit.message }}'
           token: '{{ secrets.PERSONAL_TOKEN }}'
       - name: The job has failed
         if: ${{ failure() }}
         run: |
-          export MESSAGE="Test case for <https://aprende.atlassian.net/browse/${{ github.head_ref }}|*${{ github.head_ref }}*> does not exist!"
+          export MESSAGE="Test case for <https://aprende.atlassian.net/browse/${{ github.event.head_commit.message }}|*${{ github.event.head_commit.message }}*> does not exist!"
           curl -X POST "${{ secrets.SLACK_WEBHOOK_URL_QA }}" \
           --header "Content-Type: application/json" \
           --data "{\"text\": \"${MESSAGE}\"}"
@@ -97,31 +97,31 @@ jobs:
         continue-on-error: true
         run: |
          chmod +x src/test/resources/webdriver/linux/chromedriver
-         if [[ -e /var/www/reports/${{ github.head_ref }} ]]; then sudo rm -rf /var/www/reports/${{ github.head_ref }}; fi
-         echo ISSUEID es ${{ github.head_ref }}
+         if [[ -e /var/www/reports/${{ github.event.head_commit.message }} ]]; then sudo rm -rf /var/www/reports/${{ github.event.head_commit.message }}; fi
+         echo ISSUEID es ${{ github.event.head_commit.message }}
          mvn clean install -DskipTests
-         echo mvn clean verify -Dcucumber.options="--tags @issue:${{ github.head_ref }}"
-         mvn clean verify -Dcucumber.options="--tags @issue:${{ github.head_ref }}" -Dserenity.public.url="http://reports.aprende.dev/${{ github.head_ref }}"
+         echo mvn clean verify -Dcucumber.options="--tags @issue:${{ github.event.head_commit.message }}"
+         mvn clean verify -Dcucumber.options="--tags @issue:${{ github.event.head_commit.message }}" -Dserenity.public.url="http://reports.aprende.dev/${{ github.event.head_commit.message }}"
       - name: copy files
         #if: always()
-        run: sudo cp -rf target/site/serenity /var/www/reports/${{ github.head_ref }}
+        run: sudo cp -rf target/site/serenity /var/www/reports/${{ github.event.head_commit.message }}
       - name: URL
         #if: always()
-        run: echo http://reports.aprende.dev/${{ github.head_ref }}
+        run: echo http://reports.aprende.dev/${{ github.event.head_commit.message }}
       - name: clean up
         #if: always ()
         run: sudo rm -rf *
       - name: slack notification
         #if: always ()
         run: |
-          export MESSAGE="Test report for <https://aprende.atlassian.net/browse/${{ github.head_ref }}|*${{ github.head_ref }}*> is available! --> <http://reports.aprende.dev/${{ github.head_ref }}|View Report>"
+          export MESSAGE="Test report for <https://aprende.atlassian.net/browse/${{ github.event.head_commit.message }}|*${{ github.event.head_commit.message }}*> is available! --> <http://reports.aprende.dev/${{ github.event.head_commit.message }}|View Report>"
           curl -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
           --header "Content-Type: application/json" \
           --data "{\"text\": \"${MESSAGE}\"}"
       - name: slack notification QA
         #if: always ()
         run: |
-          export MESSAGE="Test report for <https://aprende.atlassian.net/browse/${{ github.head_ref }}|*${{ github.head_ref }}*> is available! --> <http://reports.aprende.dev/${{ github.head_ref }}|View Report>"
+          export MESSAGE="Test report for <https://aprende.atlassian.net/browse/${{ github.event.head_commit.message }}|*${{ github.event.head_commit.message }}*> is available! --> <http://reports.aprende.dev/${{ github.event.head_commit.message }}|View Report>"
           curl -X POST "${{ secrets.SLACK_WEBHOOK_URL_QA }}" \
           --header "Content-Type: application/json" \
           --data "{\"text\": \"${MESSAGE}\"}"
