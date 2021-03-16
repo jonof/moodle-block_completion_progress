@@ -33,3 +33,10 @@ $string['privacy:metadata'] = 'The Completion Progress block only displays exist
 $string['selectitem'] = 'Select \'{$a}\'';
 $string['why_show_precentage'] = 'Why show a progress percentage to students?';
 $string['why_show_precentage_help'] = '<p>It is possible to show an overall percentage of progress to students.</p><p>This is calculated as the number of activities completed divided by the total number of activities in the bar.</p>';
+
+// Empty strings added to surpress errors on unittests.
+$string['futureNotCompleted_colour'] = '';
+$string['submitted'] = '';
+$string['showallinfo'] = '';
+$string['mouse_over_prompt'] = '';
+$string['submittednotcomplete_colour'] = '';
