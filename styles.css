@@ -1,14 +1,11 @@
 .block_completion_progress .content {
     text-align: left;
 }
-.dir-rtl .block_completion_progress .content {
-    text-align: right;
-}
 
 .block_completion_progress .barContainer {
-    overflow: hidden;
     position: relative;
     padding: 0;
+    clear: both;
 }
 
 .block_completion_progress .left-arrow-svg,
@@ -19,36 +16,73 @@
     z-index: 10;
 }
 
+.block_completion_progress .left-arrow-svg {
+    /* rtl:ignore */
+    left: 5px;
+}
+.block_completion_progress .right-arrow-svg {
+    /* rtl:ignore */
+    right: 5px;
+}
+
 .block_completion_progress .triangle-polygon {
     fill: rgba(0, 0, 0, 0.3);
     stroke: white;
     stroke-width: 3px;
 }
 
-.block_completion_progress .nowRow,
 .block_completion_progress .barRow {
     padding: 0;
     width: 100%;
     margin: 0;
-    height: 25px;
-    display: table;
-}
-
-.block_completion_progress .nowRow .blankDiv {
-    display: table-cell;
-    height: 25px;
+    min-height: 1.6rem;
+    overflow: hidden;
+    scroll-behavior: smooth;
 }
 
 .block_completion_progress .progressBarCell {
-    height: 25px;
-    margin: 0 -1px 0 0;
+    height: 1.6rem;
+    margin: 0;
     padding: 0;
     text-align: center;
     vertical-align: middle;
-    cursor: pointer;
     border-left: solid 1px #e3e3e3;
     border-top: solid 1px #e3e3e3;
     position: relative;
+}
+.block_completion_progress .progressBarCell[data-haslink=true] {
+    cursor: pointer;
+}
+.block_completion_progress .progressBarCell[data-haslink=not-allowed] {
+    cursor: not-allowed;
+}
+
+.block_completion_progress .barModeScroll .barRowCells {
+    white-space: nowrap;
+}
+.block_completion_progress .barModeScroll .progressBarCell {
+    display: inline-block;
+    width: 1.6rem;
+}
+.block_completion_progress .barModeSqueeze .barRowCells {
+    display: flex;
+}
+.block_completion_progress .barModeSqueeze .progressBarCell {
+    display: inline-block;
+    flex: 1 1 0;
+}
+.block_completion_progress .barModeWrap .barRowCells {
+    display: flex;
+    flex-wrap: wrap;
+}
+.block_completion_progress .barModeWrap .progressBarCell {
+    display: inline-block;
+    flex-grow: 0;
+    flex-shrink: 0;
+    flex-basis: inherit;    /* Will be computed and declared inline on the .barRow element. */
+}
+.block_completion_progress .barWithNow .barRowCells {
+    margin-top: 1.6rem;
 }
 
 #page-blocks-completion_progress-overview .block_completion_progress .progressBarCell {
@@ -57,7 +91,7 @@
 
 .block_completion_progress .progressBarCell .nowDiv {
     position: absolute;
-    top: -25px;
+    top: -100%;
     white-space: nowrap;
     width: 100px;
 }
@@ -67,21 +101,9 @@
     text-align: left;
 }
 
-.dir-rtl .block_completion_progress .progressBarCell .firstNow {
-    right: 0;
-    left: auto;
-    text-align: right;
-}
-
 .block_completion_progress .progressBarCell .firstHalfNow {
     left: 100%;
     text-align: left;
-}
-
-.dir-rtl .block_completion_progress .progressBarCell .firstHalfNow {
-    right: 100%;
-    left: initial;
-    text-align: right;
 }
 
 .block_completion_progress .progressBarCell .lastHalfNow {
@@ -89,45 +111,41 @@
     text-align: right;
 }
 
-.dir-rtl .block_completion_progress .progressBarCell .lastHalfNow {
-    left: 0;
-    text-align: left;
-    right: initial;
-}
-
 .block_completion_progress .progressBarCell .nowicon {
-    width: auto;
-}
-
-.block_completion_progress .progressBarCell.firstProgressBarCell {
-    border-radius: 4px 0 0 4px;
-    border-left: none;
-    border-right: solid 1px #e3e3e3;
-}
-
-.dir-rtl .block_completion_progress .progressBarCell.firstProgressBarCell {
-    border-radius: 0 4px 4px 0;
-    border-left: solid 1px #e3e3e3;
-}
-
-.block_completion_progress .progressBarCell.lastProgressBarCell {
-    border-radius: 0 4px 4px 0;
-}
-
-.dir-rtl .block_completion_progress .progressBarCell.lastProgressBarCell {
-    border-radius: 4px 0 0 4px;
-    border-left: none;
-    border-right: solid 1px #e3e3e3;
-}
-
-.block_completion_progress .progressBarCell img {
-    height: auto;
-    margin: 1px 0 0 0;
-    max-height: 15px;
-    max-width: 15px;
+    width: 15px;
+    height: 15px;
+    margin: 0;
     padding: 0;
-    vertical-align: middle;
-    width: 85%;
+}
+
+.block_completion_progress .barModeScroll .progressBarCell:first-of-type,
+.block_completion_progress .barModeSqueeze .progressBarCell:first-of-type {
+    border-top-left-radius: 0.26rem;
+    border-bottom-left-radius: 0.26rem;
+}
+
+.block_completion_progress .barModeScroll .progressBarCell:last-of-type,
+.block_completion_progress .barModeSqueeze .progressBarCell:last-of-type {
+    border-top-right-radius: 0.26rem;
+    border-bottom-right-radius: 0.26rem;
+    border-right: solid 1px #e3e3e3;
+}
+
+.block_completion_progress .barWithIcons .progressBarCell::before {
+    display: inline-block;
+    content: '';
+    width: 100%;
+    height: 100%;
+    max-width: 16px;
+    background-position: 50% 50%;
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+.block_completion_progress .barWithIcons .progressBarCell.completed::before {
+    background-image: url([[pix:block_completion_progress|tick]]);
+}
+.block_completion_progress .barWithIcons .progressBarCell.notCompleted::before {
+    background-image: url([[pix:block_completion_progress|cross]]);
 }
 
 .block_completion_progress .progressEventInfo,
@@ -141,10 +159,6 @@
 }
 .block_completion_progress .progressEventInfo {
     white-space: pre-wrap;
-}
-.dir-rtl .block_completion_progress .progressEventInfo,
-.dir-rtl .block_completion_progress .progressPercentage {
-    text-align: right;
 }
 .block_completion_progress .progressEventInfo .iconInInfo,
 #fitem_id_config_progressBarIcons .iconOnConfig {
@@ -189,11 +203,6 @@
     margin-right: 5px;
     max-width: 24px;
 }
-.dir-rtl .block_completion_progress .moduleIcon {
-    float: right;
-    margin-right: 0;
-    margin-left: 5px;
-}
 
 .block_completion_progress .progressBarHeader {
     font-size: 90%;
@@ -218,33 +227,19 @@
     margin-top: 20px;
     text-align: left;
 }
-.dir-rtl #page-blocks-completion_progress-overview .buttons {
-    text-align: right;
-}
 
 #page-blocks-completion_progress-overview .buttons label {
     display: inline;
     margin: 0 5px 0 10px;
 }
-.dir-rtl #page-blocks-completion_progress-overview .buttons label {
-    margin: 0 10px 0 5px;
-}
 #page-blocks-completion_progress-overview .progressoverviewmenus {
     text-align: left;
     margin-bottom: 5px;
-}
-.dir-rtl #page-blocks-completion_progress-overview .progressoverviewmenus {
-    text-align: right;
 }
 
 #page-blocks-completion_progress-overview .progressoverviewmenus .singleselect {
     text-align: left;
     margin-right: 10px;
-}
-.dir-rtl #page-blocks-completion_progress-overview .progressoverviewmenus .singleselect {
-    text-align: right;
-    margin-right: 0;
-    margin-left: 10px;
 }
 
 #page-blocks-completion_progress-overview .progressoverviewmenus form,
@@ -257,10 +252,6 @@
 
 #page-blocks-completion_progress-overview #showall {
     margin-left: 10px;
-}
-.dir-rtl #page-blocks-completion_progress-overview #showall {
-    margin-left: 0;
-    margin-right: 10px;
 }
 
 #page-blocks-completion_progress-overview .progressoverviewmenus select {
