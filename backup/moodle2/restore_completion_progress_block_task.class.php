@@ -42,16 +42,13 @@ class restore_completion_progress_block_task extends restore_block_task {
         // Get the blockid.
         $id = $this->get_blockid();
 
-        // Get restored course id.
-        $courseid = $this->get_courseid();
-
         if ($configdata = $DB->get_field('block_instances', 'configdata', array('id' => $id))) {
             $config = (array)unserialize(base64_decode($configdata));
             $newactivities = array();
             if (isset($config['selectactivities'])) {
 
                 // Translate the old config information to the target course values.
-                foreach ($config['selectactivities'] as $index => $value) {
+                foreach ($config['selectactivities'] as $value) {
                     $matches = array();
                     preg_match('/(.+)-(\d+)/', $value, $matches);
                     if (!empty($matches)) {
@@ -109,7 +106,7 @@ class restore_completion_progress_block_task extends restore_block_task {
      *
      * @return array An empty array
      */
-    static public function define_decode_contents() {
+    public static function define_decode_contents() {
         return array();
     }
 
@@ -118,7 +115,7 @@ class restore_completion_progress_block_task extends restore_block_task {
      *
      * @return array An empty array
      */
-    static public function define_decode_rules() {
+    public static function define_decode_rules() {
         return array();
     }
 }

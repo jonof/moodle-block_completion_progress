@@ -148,7 +148,7 @@ class block_completion_progress extends block_base {
                        AND bi.parentcontextid = :contextid
                   ORDER BY region, weight, bi.id";
 
-            foreach ($courses as $courseid => $course) {
+            foreach ($courses as $course) {
 
                 // Get specific block config and context.
                 $completion = new completion_info($course);

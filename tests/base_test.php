@@ -77,8 +77,6 @@ class block_completion_progress_base_testcase extends block_completion_progress\
      * Setup function - we will create a course and add an assign instance to it.
      */
     protected function set_up() {
-        global $DB;
-
         $this->resetAfterTest(true);
 
         set_config('enablecompletion', 1);

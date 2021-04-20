@@ -285,7 +285,7 @@ function block_completion_progress_get_activities($courseid, $config = null, $fo
     $activities = array();
     foreach ($modinfo->instances as $module => $instances) {
         $modulename = get_string('pluginname', $module);
-        foreach ($instances as $index => $cm) {
+        foreach ($instances as $cm) {
             if (
                 $cm->completion != COMPLETION_TRACKING_NONE && (
                     $config == null || (
@@ -376,7 +376,7 @@ function block_completion_progress_filter_visibility($activities, $userid, $cour
     $coursecontext = CONTEXT_COURSE::instance($courseid);
 
     // Keep only activities that are visible.
-    foreach ($activities as $index => $activity) {
+    foreach ($activities as $activity) {
 
         $coursemodule = $modinfo->cms[$activity['id']];
 
@@ -738,7 +738,7 @@ function block_completion_progress_exclusions ($courseid, $userid = null) {
     }
     $results = $DB->get_records_sql($query, $params);
     $exclusions = array();
-    foreach ($results as $key => $value) {
+    foreach ($results as $value) {
         $exclusions[] = $value->exclusion;
     }
     return $exclusions;
