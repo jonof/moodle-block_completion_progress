@@ -205,4 +205,24 @@ class block_completion_progress_base_testcase extends block_completion_progress\
         // The status is send but not finished.
         $this->assertStringContainsString('submittedNotComplete', $text, '');
     }
+
+    /**
+     * Test checking page types.
+     */
+    public function test_on_site_page() {
+        $page = new \moodle_page();
+        $page->set_pagetype('site-index');
+        $this->assertTrue(block_completion_progress_on_site_page($page));
+
+        $page = new \moodle_page();
+        $page->set_pagetype('my-index');
+        $this->assertTrue(block_completion_progress_on_site_page($page));
+
+        $page = new \moodle_page();
+        $page->set_pagetype('course-view');
+        $this->assertFalse(block_completion_progress_on_site_page($page));
+
+        $page = new \moodle_page();
+        $this->assertFalse(block_completion_progress_on_site_page($page));
+    }
 }

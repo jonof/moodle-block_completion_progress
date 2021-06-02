@@ -70,7 +70,7 @@ class block_completion_progress extends block_base {
      * @return bool
      */
     public function instance_allow_multiple() {
-        return !block_completion_progress_on_site_page();
+        return !block_completion_progress_on_site_page($this->page);
     }
 
     /**
@@ -79,7 +79,7 @@ class block_completion_progress extends block_base {
      * @return bool
      */
     public function instance_allow_config() {
-        return !block_completion_progress_on_site_page();
+        return !block_completion_progress_on_site_page($this->page);
     }
 
     /**
@@ -119,7 +119,7 @@ class block_completion_progress extends block_base {
         }
 
         // Draw the multi-bar content for the Dashboard and Front page.
-        if (block_completion_progress_on_site_page()) {
+        if (block_completion_progress_on_site_page($this->page)) {
 
             if (!$CFG->enablecompletion) {
                 $this->content->text .= get_string('completion_not_enabled', 'block_completion_progress');
