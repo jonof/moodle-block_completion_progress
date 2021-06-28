@@ -1,3 +1,4 @@
+<?php
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -14,23 +15,31 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Completion Progress overview page behaviour.
+ * Compatibility shim for newer PHPunit versions.
  *
- * @module     block_completion_progress/overview
  * @package    block_completion_progress
  * @copyright  2020 Jonathon Fowler <fowlerj@usq.edu.au>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['core_user/participants'],
-    function(Participants) {
-        return /** @alias module:block_completion_progress/overview */ {
-            /**
-             * Initialise the overview page.
-             *
-             * @param {object} options initialisation options.
-             */
-            init: function(options) {
-                Participants.init(options);
-            }
-        };
-    });
+
+namespace block_completion_progress\tests;
+
+defined('MOODLE_INTERNAL') || die();
+
+/**
+ * Compatibility shim for newer PHPunit versions.
+ *
+ * @package    block_completion_progress
+ * @copyright  2020 Jonathon Fowler <fowlerj@usq.edu.au>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+abstract class testcase_phpunit8 extends \advanced_testcase {
+// @codingStandardsIgnoreStart
+    /**
+     * See PHPUnit\Framework\TestCase::setUp().
+     */
+    protected function setUp(): void {
+        $this->set_up();
+    }
+// @codingStandardsIgnoreEnd
+}

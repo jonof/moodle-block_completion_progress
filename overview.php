@@ -29,10 +29,6 @@ require_once($CFG->dirroot.'/blocks/completion_progress/lib.php');
 require_once($CFG->dirroot.'/notes/lib.php');
 require_once($CFG->libdir.'/tablelib.php');
 
-if (!class_exists('core\output\checkbox_toggleall')) {
-    class_alias('block_completion_progress\checkbox_toggleall_compat', 'core\output\checkbox_toggleall');
-}
-
 /**
  * Default number of participants per page.
  */
@@ -83,7 +79,6 @@ $blockcontext = context_block::instance($id);
 
 // Set up page parameters.
 $PAGE->set_course($course);
-$PAGE->requires->css('/blocks/completion_progress/styles.css');
 $PAGE->set_url(
     '/blocks/completion_progress/overview.php',
     array(
@@ -102,6 +97,9 @@ $PAGE->set_title($title);
 $PAGE->set_heading($title);
 $PAGE->navbar->add($title);
 $PAGE->set_pagelayout('report');
+
+$cachevalue = debugging() ? -1 : (int)get_config('block_completion_progress', 'cachevalue');
+$PAGE->requires->css('/blocks/completion_progress/css.php?v=' . $cachevalue);
 
 // Check user is logged in and capable of accessing the Overview.
 require_login($course, false);
@@ -199,7 +197,11 @@ if ((substr($group, 0, 6) == 'group-') && ($groupid = intval(substr($group, 6)))
 
 
 // Get the list of users enrolled in the course.
-$picturefields = user_picture::fields('u');
+if ($CFG->branch < 311) {
+    $picturefields = user_picture::fields('u');
+} else {
+    $picturefields = core_user\fields::for_userpic()->get_sql('u', false, '', '', false)->selects;
+}
 $sql = "SELECT DISTINCT $picturefields, COALESCE(l.timeaccess, 0) AS lastonlinetime
           FROM {user} u
           JOIN {role_assignments} a ON (a.contextid = :contextid AND a.userid = u.id $rolewhere)
@@ -217,15 +219,14 @@ $numberofusers = count($users);
 for ($i = 0; $i < $numberofusers; $i++) {
     $users[$i]->submissions = array();
 }
-$submissions = block_completion_progress_course_submissions($course->id);
-foreach ($submissions as $mapping) {
-    $mapvalues = explode('-', $mapping);
+$submissions = block_completion_progress_submissions($course->id);
+foreach ($submissions as $id => $obj) {
     $index = 0;
-    while ($index < $numberofusers && $users[$index]->id != $mapvalues[0]) {
+    while ($index < $numberofusers && $users[$index]->id != $obj->userid) {
         $index++;
     }
     if ($index < $numberofusers) {
-        $users[$index]->submissions[] = $mapvalues[1];
+        $users[$index]->submissions[$id] = $obj;
     }
 }
 
@@ -426,10 +427,9 @@ if ($paged) {
 }
 
 // Organise access to JS for progress bars.
-$jsmodule = array('name' => 'block_completion_progress', 'fullpath' => '/blocks/completion_progress/module.js');
-$arguments = array(array($block->id), $userids);
-$PAGE->requires->js_init_call('M.block_completion_progress.setupScrolling', array(), false, $jsmodule);
-$PAGE->requires->js_init_call('M.block_completion_progress.init', $arguments, false, $jsmodule);
+$PAGE->requires->js_call_amd('block_completion_progress/progressbar', 'init', [
+    'instances' => array($block->id),
+]);
 
 echo $OUTPUT->container_end();
 echo $OUTPUT->footer();
