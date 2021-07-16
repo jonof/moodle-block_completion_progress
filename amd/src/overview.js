@@ -17,7 +17,6 @@
  * Completion Progress overview page behaviour.
  *
  * @module     block_completion_progress/overview
- * @package    block_completion_progress
  * @copyright  2020 Jonathon Fowler <fowlerj@usq.edu.au>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

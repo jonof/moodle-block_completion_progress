@@ -14,27 +14,22 @@ jobs:
           - php: '7.4'
             database: 'pgsql'
             moodle-branch: 'master'
-            node-version: '14.15.0'
           - php: '7.3'
             database: 'mariadb'
             moodle-branch: 'MOODLE_311_STABLE'
-            node-version: '14.15.0'
           - php: '7.3'
             database: 'pgsql'
             moodle-branch: 'MOODLE_310_STABLE'
-            node-version: '14.15.0'
           - php: '7.2'
             database: 'pgsql'
             moodle-branch: 'MOODLE_39_STABLE'
-            node-version: '14.15.0'
           - php: '7.2'
             database: 'pgsql'
             moodle-branch: 'MOODLE_38_STABLE'
-            node-version: '14.15.0'
 
     services:
       postgres:
-        image: postgres:9.6
+        image: postgres:10
         env:
           POSTGRES_USER: 'postgres'
           POSTGRES_HOST_AUTH_METHOD: 'trust'
@@ -43,7 +38,7 @@ jobs:
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 3
 
       mariadb:
-        image: mariadb
+        image: mariadb:10.2
         env:
           MYSQL_USER: 'root'
           MYSQL_ALLOW_EMPTY_PASSWORD: "true"
@@ -57,16 +52,12 @@ jobs:
       with:
         path: plugin
 
-    - name: Install node
-      uses: actions/setup-node@v2
-      with:
-        node-version: ${{ matrix.node-version }}
-
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
       with:
         php-version: ${{ matrix.php }}
         extensions: pgsql, zip, gd
+        ini-values: max_input_vars=5000
         coverage: none
 
     - name: Deploy moodle-plugin-ci
@@ -74,14 +65,15 @@ jobs:
         composer create-project -n --no-dev --prefer-dist moodlehq/moodle-plugin-ci ci ^3
         echo $(cd ci/bin; pwd) >> $GITHUB_PATH
         echo $(cd ci/vendor/bin; pwd) >> $GITHUB_PATH
-        # PHPUnit depends on en_AU.UTF-8 locale
         sudo locale-gen en_AU.UTF-8
+        echo "NVM_DIR=$HOME/.nvm" >> $GITHUB_ENV
 
     - name: Install Moodle
       run: moodle-plugin-ci install --plugin ./plugin --db-host=127.0.0.1
       env:
         DB: ${{ matrix.database }}
         MOODLE_BRANCH: ${{ matrix.moodle-branch }}
+        MOODLE_REPO: https://github.com/moodle/moodle.git
 
     - name: Run phplint
       if: ${{ always() }}
