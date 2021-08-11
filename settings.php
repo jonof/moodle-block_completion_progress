@@ -106,6 +106,7 @@ if ($ADMIN->fulltree) {
         '',
         DEFAULT_COMPLETIONPROGRESS_FORCEICONSINBAR)
     );
+
     $settings->add(new admin_setting_pickroles(
         'block_completion_progress/roles_to_exclude',
         get_string('roles_to_exclude', 'block_completion_progress'),

@@ -54,12 +54,12 @@ class block_completion_progress_edit_form extends block_edit_form {
 
         // Control order of items in Progress Bar.
         $expectedbystring = get_string('completionexpected', 'completion');
-        $orderingoptions = array(
+        $options = array(
             'orderbytime'   => get_string('config_orderby_due_time', 'block_completion_progress', $expectedbystring),
             'orderbycourse' => get_string('config_orderby_course_order', 'block_completion_progress'),
         );
-        $orderbylabel = get_string('config_orderby', 'block_completion_progress');
-        $mform->addElement('select', 'config_orderby', $orderbylabel, $orderingoptions);
+        $label = get_string('config_orderby', 'block_completion_progress');
+        $mform->addElement('select', 'config_orderby', $label, $options);
         $mform->setDefault('config_orderby', DEFAULT_COMPLETIONPROGRESS_ORDERBY);
         $mform->addHelpButton('config_orderby', 'how_ordering_works', 'block_completion_progress');
 
@@ -72,18 +72,18 @@ class block_completion_progress_edit_form extends block_edit_form {
         }
         if (!$allwithexpected) {
             $warningstring = get_string('not_all_expected_set', 'block_completion_progress', $expectedbystring);
-            $expectedwarning = HTML_WRITER::tag('div', $warningstring, array('class' => 'warning'));
+            $expectedwarning = html_writer::tag('div', $warningstring, array('class' => 'warning'));
             $mform->addElement('static', $expectedwarning, '', $expectedwarning);
         }
 
         // Control how long bars wrap/scroll.
-        $longbaroptions = array(
+        $options = array(
             'squeeze' => get_string('config_squeeze', 'block_completion_progress'),
             'scroll' => get_string('config_scroll', 'block_completion_progress'),
             'wrap' => get_string('config_wrap', 'block_completion_progress'),
         );
-        $longbarslabel = get_string('config_longbars', 'block_completion_progress');
-        $mform->addElement('select', 'config_longbars', $longbarslabel, $longbaroptions);
+        $label = get_string('config_longbars', 'block_completion_progress');
+        $mform->addElement('select', 'config_longbars', $label, $options);
         $defaultlongbars = get_config('block_completion_progress', 'defaultlongbars') ?: DEFAULT_COMPLETIONPROGRESS_LONGBARS;
         $mform->setDefault('config_longbars', $defaultlongbars);
         $mform->addHelpButton('config_longbars', 'how_longbars_works', 'block_completion_progress');
@@ -108,16 +108,16 @@ class block_completion_progress_edit_form extends block_edit_form {
         $groups = groups_get_all_groups($COURSE->id);
         $groupings = groups_get_all_groupings($COURSE->id);
         if (!empty($groups) || !empty($groupings)) {
-            $groupsmenu = array();
-            $groupsmenu[0] = get_string('allparticipants');
+            $options = array();
+            $options[0] = get_string('allparticipants');
             foreach ($groups as $group) {
-                $groupsmenu['group-' . $group->id] = format_string($group->name);
+                $options['group-' . $group->id] = format_string($group->name);
             }
             foreach ($groupings as $grouping) {
-                $groupsmenu['grouping-' . $grouping->id] = format_string($grouping->name);
+                $options['grouping-' . $grouping->id] = format_string($grouping->name);
             }
-            $grouplabel = get_string('config_group', 'block_completion_progress');
-            $mform->addElement('select', 'config_group', $grouplabel, $groupsmenu);
+            $label = get_string('config_group', 'block_completion_progress');
+            $mform->addElement('select', 'config_group', $label, $options);
             $mform->setDefault('config_group', '0');
             $mform->addHelpButton('config_group', 'how_group_works', 'block_completion_progress');
             $mform->setAdvanced('config_group', true);
@@ -132,12 +132,12 @@ class block_completion_progress_edit_form extends block_edit_form {
         $mform->setAdvanced('config_progressTitle', true);
 
         // Control which activities are included in the bar.
-        $activitiesincludedoptions = array(
+        $options = array(
             'activitycompletion' => get_string('config_activitycompletion', 'block_completion_progress'),
             'selectedactivities' => get_string('config_selectedactivities', 'block_completion_progress'),
         );
-        $activitieslabel = get_string('config_activitiesincluded', 'block_completion_progress');
-        $mform->addElement('select', 'config_activitiesincluded', $activitieslabel, $activitiesincludedoptions);
+        $label = get_string('config_activitiesincluded', 'block_completion_progress');
+        $mform->addElement('select', 'config_activitiesincluded', $label, $options);
         $mform->setDefault('config_activitiesincluded', DEFAULT_COMPLETIONPROGRESS_ACTIVITIESINCLUDED);
         $mform->addHelpButton('config_activitiesincluded', 'how_activitiesincluded_works', 'block_completion_progress');
         $mform->setAdvanced('config_activitiesincluded', true);
@@ -145,15 +145,15 @@ class block_completion_progress_edit_form extends block_edit_form {
         // Check that there are activities to monitor.
         if (empty($activities)) {
             $warningstring = get_string('no_activities_config_message', 'block_completion_progress');
-            $activitieswarning = HTML_WRITER::tag('div', $warningstring, array('class' => 'warning'));
+            $activitieswarning = html_writer::tag('div', $warningstring, array('class' => 'warning'));
             $mform->addElement('static', '', '', $activitieswarning);
         } else {
-            $activitiestoinclude = array();
-            foreach ($activities as $index => $activity) {
-                $activitiestoinclude[$activity['type'].'-'.$activity['instance']] = $activity['name'];
+            $options = array();
+            foreach ($activities as $activity) {
+                $options[$activity['type'].'-'.$activity['instance']] = $activity['name'];
             }
-            $selectactivitieslabel = get_string('config_selectactivities', 'block_completion_progress');
-            $mform->addElement('select', 'config_selectactivities', $selectactivitieslabel, $activitiestoinclude);
+            $label = get_string('config_selectactivities', 'block_completion_progress');
+            $mform->addElement('select', 'config_selectactivities', $label, $options);
             $mform->getElement('config_selectactivities')->setMultiple(true);
             $mform->getElement('config_selectactivities')->setSize($numactivies);
             $mform->setAdvanced('config_selectactivities', true);

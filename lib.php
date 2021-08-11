@@ -285,7 +285,7 @@ function block_completion_progress_get_activities($courseid, $config = null, $fo
     $activities = array();
     foreach ($modinfo->instances as $module => $instances) {
         $modulename = get_string('pluginname', $module);
-        foreach ($instances as $index => $cm) {
+        foreach ($instances as $cm) {
             if (
                 $cm->completion != COMPLETION_TRACKING_NONE && (
                     $config == null || (
@@ -376,7 +376,7 @@ function block_completion_progress_filter_visibility($activities, $userid, $cour
     $coursecontext = CONTEXT_COURSE::instance($courseid);
 
     // Keep only activities that are visible.
-    foreach ($activities as $index => $activity) {
+    foreach ($activities as $activity) {
 
         $coursemodule = $modinfo->cms[$activity['id']];
 
@@ -705,14 +705,21 @@ function block_completion_progress_percentage($activities, $completions) {
 }
 
 /**
- * Checks whether the current page is the My home page.
+ * Checks whether the given page is the Dashboard or Site home page.
  *
- * @return bool True when on the My home page.
+ * @param moodle_page $page the page to check, or the current page if not passed.
+ * @return boolean True when on the Dashboard or Site home page.
  */
-function block_completion_progress_on_site_page() {
-    global $SCRIPT, $COURSE;
+function block_completion_progress_on_site_page($page = null) {
+    global $PAGE;
 
-    return $SCRIPT === '/my/index.php' || $COURSE->id == 1;
+    $page = $page ?? $PAGE;
+    if (empty($page)) {
+        return false;   // Might be an asynchronous course copy.
+    }
+
+    $pagetypepatterns = matching_page_type_patterns_from_pattern($page->pagetype);
+    return in_array('my-*', $pagetypepatterns) || in_array('site-*', $pagetypepatterns);
 }
 
 /**
@@ -738,7 +745,7 @@ function block_completion_progress_exclusions ($courseid, $userid = null) {
     }
     $results = $DB->get_records_sql($query, $params);
     $exclusions = array();
-    foreach ($results as $key => $value) {
+    foreach ($results as $value) {
         $exclusions[] = $value->exclusion;
     }
     return $exclusions;

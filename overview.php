@@ -201,7 +201,11 @@ if ((substr($group, 0, 6) == 'group-') && ($groupid = intval(substr($group, 6)))
 
 
 // Get the list of users enrolled in the course.
-$picturefields = user_picture::fields('u');
+if ($CFG->branch < 311) {
+    $picturefields = user_picture::fields('u');
+} else {
+    $picturefields = core_user\fields::for_userpic()->get_sql('u', false, '', '', false)->selects;
+}
 $sql = "SELECT DISTINCT $picturefields, COALESCE(l.timeaccess, 0) AS lastonlinetime
           FROM {user} u
           JOIN {role_assignments} a ON (a.contextid = :contextid AND a.userid = u.id $rolewhere)
