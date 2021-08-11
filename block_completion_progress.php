@@ -70,7 +70,7 @@ class block_completion_progress extends block_base {
      * @return bool
      */
     public function instance_allow_multiple() {
-        return !block_completion_progress_on_site_page();
+        return !block_completion_progress_on_site_page($this->page);
     }
 
     /**
@@ -79,7 +79,7 @@ class block_completion_progress extends block_base {
      * @return bool
      */
     public function instance_allow_config() {
-        return !block_completion_progress_on_site_page();
+        return !block_completion_progress_on_site_page($this->page);
     }
 
     /**
@@ -119,7 +119,7 @@ class block_completion_progress extends block_base {
         }
 
         // Draw the multi-bar content for the Dashboard and Front page.
-        if (block_completion_progress_on_site_page()) {
+        if (block_completion_progress_on_site_page($this->page)) {
 
             if (!$CFG->enablecompletion) {
                 $this->content->text .= get_string('completion_not_enabled', 'block_completion_progress');
@@ -148,7 +148,7 @@ class block_completion_progress extends block_base {
                        AND bi.parentcontextid = :contextid
                   ORDER BY region, weight, bi.id";
 
-            foreach ($courses as $courseid => $course) {
+            foreach ($courses as $course) {
 
                 // Get specific block config and context.
                 $completion = new completion_info($course);
@@ -192,7 +192,7 @@ class block_completion_progress extends block_base {
                         ) {
                             $this->content->text .= HTML_WRITER::tag('p', s(format_string($blockinstance->config->progressTitle)));
                         }
-                        $submissions = block_completion_progress_student_submissions($course->id, $USER->id);
+                        $submissions = block_completion_progress_submissions($course->id, $USER->id);
                         $completions = block_completion_progress_completions($blockinstance->activities, $USER->id, $course,
                             $submissions);
                         $this->content->text .= block_completion_progress_bar($blockinstance->activities,
@@ -252,7 +252,7 @@ class block_completion_progress extends block_base {
 
             // Display progress bar.
             if (has_capability('block/completion_progress:showbar', $this->context)) {
-                $submissions = block_completion_progress_student_submissions($COURSE->id, $USER->id);
+                $submissions = block_completion_progress_submissions($COURSE->id, $USER->id);
                 $completions = block_completion_progress_completions($activities, $USER->id, $COURSE, $submissions);
                 $this->content->text .= block_completion_progress_bar(
                     $activities,
@@ -276,16 +276,20 @@ class block_completion_progress extends block_base {
         }
 
         // Organise access to JS.
-        $jsmodule = array(
-            'name' => 'block_completion_progress',
-            'fullpath' => '/blocks/completion_progress/module.js',
-            'requires' => array(),
-            'strings' => array(),
-        );
-        $arguments = array($blockinstancesonpage, array($USER->id));
-        $this->page->requires->js_init_call('M.block_completion_progress.setupScrolling', array(), false, $jsmodule);
-        $this->page->requires->js_init_call('M.block_completion_progress.init', $arguments, false, $jsmodule);
+        $this->page->requires->js_call_amd('block_completion_progress/progressbar', 'init', [
+            'instances' => $blockinstancesonpage,
+        ]);
+        $cachevalue = debugging() ? -1 : (int)get_config('block_completion_progress', 'cachevalue');
+        $this->page->requires->css('/blocks/completion_progress/css.php?v=' . $cachevalue);
 
         return $this->content;
+    }
+
+    /**
+     * Bumps a value to assist in caching of configured colours in css.php.
+     */
+    public static function increment_cache_value() {
+        $value = get_config('block_completion_progress', 'cachevalue') + 1;
+        set_config('cachevalue', $value, 'block_completion_progress');
     }
 }

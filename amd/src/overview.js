@@ -30,16 +30,6 @@ define(['core_user/participants'],
              * @param {object} options initialisation options.
              */
             init: function(options) {
-                if (options.moodleBranch <= 36) {
-                    require(['block_completion_progress/checkbox_toggleall_compat-lazy'],
-                        function() { });
-                } else if (options.moodleBranch == 37) {
-                    require(['core/checkbox-toggleall'],
-                        function(ToggleAll) {
-                            ToggleAll.init();
-                        });
-                }
-
                 Participants.init(options);
             }
         };
