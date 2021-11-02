@@ -19,11 +19,12 @@ Feature: Using block completion progress for a quiz
       | user     | course | role           |
       | student1 | C1     | student        |
       | teacher1 | C1     | editingteacher |
+    # 2 = Show activity as complete when conditions are met.
     And the following "activities" exist:
-      | activity | course | idnumber | name                    | timeclose  | enablecompletion |
-      | quiz     | C1     | Q1A      | Quiz 1A No deadline     | 0          | 1                |
-      | quiz     | C1     | Q1B      | Quiz 1B Past deadline   | 1337       | 1                |
-      | quiz     | C1     | Q1C      | Quiz 1C Future deadline | 9000000000 | 1                |
+      | activity | course | idnumber | name                    | timeclose  | enablecompletion | completionview | completion |
+      | quiz     | C1     | Q1A      | Quiz 1A No deadline     | 0          | 1                | 1              | 2 |
+      | quiz     | C1     | Q1B      | Quiz 1B Past deadline   | 1337       | 1                | 0              | 0 |
+      | quiz     | C1     | Q1C      | Quiz 1C Future deadline | 9000000000 | 1                | 0              | 0 |
     And the following "question categories" exist:
       | contextlevel | reference | name           |
       | Course       | C1        | Test questions |
@@ -41,12 +42,6 @@ Feature: Using block completion progress for a quiz
       | First question | 1    |
     Given I log in as "teacher1"
     And I am on "Course 1" course homepage with editing mode on
-    And I follow "Quiz 1A No deadline"
-    And I navigate to "Edit settings" in current page administration
-    And I set the following fields to these values:
-      | Completion tracking | Show activity as complete when conditions are met |
-      | Require view | 1 |
-    And I press "Save and return to course"
     And I add the "Completion Progress" block
     And I configure the "Completion Progress" block
     And I set the following fields to these values:
@@ -63,9 +58,7 @@ Feature: Using block completion progress for a quiz
     And I should see "Not completed" in the "Completion Progress" "block"
 
   Scenario: Submit the quizzes
-    Given I log in as "student1"
-    And I am on "Course 1" course homepage
-    And I follow "Quiz 1A No deadline"
+    Given I am on the "Quiz 1A No deadline" "mod_quiz > View" page logged in as "student1"
     And I press "Attempt quiz now"
     And I follow "Finish attempt ..."
     And I press "Submit all and finish"
