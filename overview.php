@@ -197,10 +197,11 @@ if ((substr($group, 0, 6) == 'group-') && ($groupid = intval(substr($group, 6)))
 
 
 // Get the list of users enrolled in the course.
-if ($CFG->branch < 311) {
-    $picturefields = user_picture::fields('u');
-} else {
+if (class_exists('core_user\fields')) {
     $picturefields = core_user\fields::for_userpic()->get_sql('u', false, '', '', false)->selects;
+} else {
+    // 3.10 and older.
+    $picturefields = user_picture::fields('u');
 }
 $sql = "SELECT DISTINCT $picturefields, COALESCE(l.timeaccess, 0) AS lastonlinetime
           FROM {user} u
@@ -402,15 +403,14 @@ if ($bulkoperations) {
     echo '</div>';
 
     $options = new stdClass();
-    $options->moodleBranch = $CFG->branch;
-    if ($CFG->branch < 39) {
-        $options->courseid = $course->id;
-        $options->noteStateNames = note_get_state_names();
-        $options->stateHelpIcon = $OUTPUT->help_icon('publishstate', 'notes');
-    } else {
+    $options->noteStateNames = note_get_state_names();
+    if (class_exists('core_user\table\participants')) {
         $options->uniqueid = $formattributes['data-table-unique-id'];
-        $options->noteStateNames = note_get_state_names();
         echo '<div class="d-none" data-region="state-help-icon">' . $OUTPUT->help_icon('publishstate', 'notes') . '</div>';
+    } else {
+        // 3.8 and older.
+        $options->courseid = $course->id;
+        $options->stateHelpIcon = $OUTPUT->help_icon('publishstate', 'notes');
     }
     $PAGE->requires->js_call_amd('block_completion_progress/overview', 'init', [$options]);
 }
