@@ -17,11 +17,12 @@
  * Completion Progress block progress bar behaviour.
  *
  * @module     block_completion_progress/progressbar
+ * @package    block_completion_progress
  * @copyright  2020 Jonathon Fowler <fowlerj@usq.edu.au>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['jquery'],
-    function($) {
+import * as DynamicTable from 'core_table/dynamic';
+import $ from 'jquery';
         /**
          * Show progress event information for a cell.
          * @param {Event} event
@@ -168,15 +169,32 @@ define(['jquery'],
             setupScroll(barcontainers);
         }
 
-        return /** @alias module:block_completion_progress/progressbar */ {
+        function setupBar(instanceids) {
+          for (var i = instanceids.length - 1; i >= 0; i--) {
+              initialiseBar(instanceids[i]);
+          }
+        }
             /**
              * Initialise progress bar instances.
              * @param {array} instanceids an array of progress bar instance ids
              */
-            init: function(instanceids) {
-                for (var i = instanceids.length - 1; i >= 0; i--) {
-                    initialiseBar(instanceids[i]);
-                }
-            },
-        };
-    });
+            export const init = (instanceids, uniqueid) => {
+              if (uniqueid) {
+                const Selectors = {
+                    bulkActionSelect: "#formactionid",
+                    bulkUserSelectedCheckBoxes: "input[data-togglegroup='participants-table'][data-toggle='slave']:checked",
+                    checkCountButton: "#checkall",
+                    showCountText: '[data-region="participant-count"]',
+                    showCountToggle: '[data-action="showcount"]',
+                    stateHelpIcon: '[data-region="state-help-icon"]',
+                    tableForm: uniqueId => `form[data-table-unique-id="${uniqueId}"]`,
+                };
+                const el = document.querySelector(Selectors.tableForm(uniqueid));
+                setupBar(instanceids);
+                el.addEventListener(DynamicTable.Events.tableContentRefreshed, function(){
+                  setupBar(instanceids);
+                },false);
+              } else {
+                setupBar(instanceids);
+              }
+            };
