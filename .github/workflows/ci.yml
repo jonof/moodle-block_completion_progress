@@ -23,9 +23,6 @@ jobs:
           - php: '7.2'
             database: 'pgsql'
             moodle-branch: 'MOODLE_39_STABLE'
-          - php: '7.2'
-            database: 'pgsql'
-            moodle-branch: 'MOODLE_38_STABLE'
 
     services:
       postgres:

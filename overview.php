@@ -52,10 +52,7 @@ $context = context_course::instance($courseid);
 
 $notesallowed = !empty($CFG->enablenotes) && has_capability('moodle/notes:manage', $context);
 $messagingallowed = !empty($CFG->messaging) && has_capability('moodle/site:sendmessage', $context);
-$bulkoperations = ($CFG->version >= 2017111300.00) &&
-    has_capability('moodle/course:bulkmessaging', $context) && (
-        $notesallowed || $messagingallowed
-    );
+$bulkoperations = has_capability('moodle/course:bulkmessaging', $context) && ($notesallowed || $messagingallowed);
 
 // Find the role to display, defaulting to students.
 $sql = "SELECT DISTINCT r.id, r.name, r.archetype
@@ -404,14 +401,8 @@ if ($bulkoperations) {
 
     $options = new stdClass();
     $options->noteStateNames = note_get_state_names();
-    if (class_exists('core_user\table\participants')) {
-        $options->uniqueid = $formattributes['data-table-unique-id'];
-        echo '<div class="d-none" data-region="state-help-icon">' . $OUTPUT->help_icon('publishstate', 'notes') . '</div>';
-    } else {
-        // 3.8 and older.
-        $options->courseid = $course->id;
-        $options->stateHelpIcon = $OUTPUT->help_icon('publishstate', 'notes');
-    }
+    $options->uniqueid = $formattributes['data-table-unique-id'];
+    echo '<div class="d-none" data-region="state-help-icon">' . $OUTPUT->help_icon('publishstate', 'notes') . '</div>';
     $PAGE->requires->js_call_amd('block_completion_progress/overview', 'init', [$options]);
 }
 echo html_writer::end_tag('form');

@@ -243,11 +243,8 @@ class quiz_completion_testcase extends \advanced_testcase {
      * @return quiz_attempt
      */
     private function submit_for_student($student, $quiz, $attemptnumber) {
-        // Before 3.8 quiz_prepare_and_start_new_attempt could not be passed the user id.
-        $this->setUser($student);
-
         $quizobj = \quiz::create($quiz->id, $student->id);
-        $attempt = quiz_prepare_and_start_new_attempt($quizobj, $attemptnumber, null);
+        $attempt = quiz_prepare_and_start_new_attempt($quizobj, $attemptnumber, null, false, [], [], $student->id);
         $attemptobj = \quiz_attempt::create($attempt->id);
 
         // Save a response for the essay in the first slot.
@@ -259,8 +256,6 @@ class quiz_completion_testcase extends \advanced_testcase {
 
         // Finish the attempt.
         $attemptobj->process_attempt(time(), true, false, 1);
-
-        $this->setUser(null);
 
         return $attemptobj;
     }

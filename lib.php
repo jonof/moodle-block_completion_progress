@@ -246,7 +246,7 @@ function block_completion_progress_modules_with_alternate_links() {
 
     $alternatelinks = array(
         'assign' => array(
-            'url' => '/mod/assign/view.php?id=:cmid&action=grading',
+            'url' => '/mod/assign/view.php?id=:cmid&action=grade&userid=:userid',
             'capability' => 'mod/assign:grade',
         ),
         'feedback' => array(
@@ -263,10 +263,6 @@ function block_completion_progress_modules_with_alternate_links() {
             'capability' => 'mod/quiz:viewreports',
         ),
     );
-
-    if ($CFG->version > 2015111604) {
-        $alternatelinks['assign']['url'] = '/mod/assign/view.php?id=:cmid&action=grade&userid=:userid';
-    }
 
     return $alternatelinks;
 }

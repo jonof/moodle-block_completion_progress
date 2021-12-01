@@ -30,7 +30,7 @@ require_once($CFG->dirroot . '/mod/assign/locallib.php');
 require_once($CFG->dirroot.'/blocks/completion_progress/lib.php');
 
 if (version_compare(PHPUnit\Runner\Version::id(), '8', '<')) {
-    // Moodle 3.8 to 3.9.
+    // Moodle 3.9.
     class_alias('block_completion_progress\tests\testcase_phpunit7', 'block_completion_progress\tests\testcase');
 } else {
     // Moodle 3.10 onwards.
