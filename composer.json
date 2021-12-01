@@ -1,0 +1,17 @@
+{
+    "name": "jonof/moodle-block_completion_progress",
+    "type": "moodle-block",
+    "description": "Moodle plugin for student time management.",
+    "homepage": "https://github.com/jonof/moodle-block_completion_progress",
+    "license": "GPL-3.0+",
+    "require": {
+        "composer/installers": "*"
+    },
+    "extra": {
+        "installer-name": "completion_progress"
+    },
+    "support": {
+        "issues": "https://github.com/jonof/moodle-block_completion_progress/issues",
+        "source": "https://github.com/jonof/moodle-block_completion_progress"
+    }
+}
