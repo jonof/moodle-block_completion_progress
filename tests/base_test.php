@@ -22,6 +22,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace block_completion_progress\tests;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -29,12 +30,14 @@ global $CFG;
 require_once($CFG->dirroot . '/mod/assign/locallib.php');
 require_once($CFG->dirroot.'/blocks/completion_progress/lib.php');
 
-if (version_compare(PHPUnit\Runner\Version::id(), '8', '<')) {
-    // Moodle 3.9.
-    class_alias('block_completion_progress\tests\testcase_phpunit7', 'block_completion_progress\tests\testcase');
-} else {
-    // Moodle 3.10 onwards.
-    class_alias('block_completion_progress\tests\testcase_phpunit8', 'block_completion_progress\tests\testcase');
+if (!class_exists('block_completion_progress\tests\testcase', false)) {
+    if (version_compare(\PHPUnit\Runner\Version::id(), '8', '<')) {
+        // Moodle 3.9.
+        class_alias('block_completion_progress\tests\testcase_phpunit7', 'block_completion_progress\tests\testcase');
+    } else {
+        // Moodle 3.10 onwards.
+        class_alias('block_completion_progress\tests\testcase_phpunit8', 'block_completion_progress\tests\testcase');
+    }
 }
 
 /**
@@ -44,7 +47,7 @@ if (version_compare(PHPUnit\Runner\Version::id(), '8', '<')) {
  * @copyright  2017 onwards Nelson Moller  {@link http://moodle.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class block_completion_progress_base_testcase extends block_completion_progress\tests\testcase {
+class base_testcase extends \block_completion_progress\tests\testcase {
     /**
      * The test course.
      * @var object
@@ -66,7 +69,7 @@ class block_completion_progress_base_testcase extends block_completion_progress\
     /**
      * Default number of students to create.
      */
-    const DEFAULT_STUDENT_COUNT = 3;
+    const DEFAULT_STUDENT_COUNT = 4;
 
     /**
      * Default number of teachers to create.
@@ -93,7 +96,9 @@ class block_completion_progress_base_testcase extends block_completion_progress\
 
         $this->students = array();
         for ($i = 0; $i < self::DEFAULT_STUDENT_COUNT; $i++) {
-            $this->students[] = $generator->create_and_enrol($this->course, 'student');
+            $status = $i == 3 ? ENROL_USER_SUSPENDED : null;
+            $this->students[] = $generator->create_and_enrol($this->course, 'student',
+                null, 'manual', 0, 0, $status);
         }
     }
 
@@ -103,107 +108,79 @@ class block_completion_progress_base_testcase extends block_completion_progress\
      * @param array $params Array of parameters to pass to the generator
      * @return assign Assign class.
      */
-    protected function create_instance($params=array()) {
+    protected function create_assign_instance($params=array()) {
         $generator = $this->getDataGenerator()->get_plugin_generator('mod_assign');
         $params['course'] = $this->course->id;
         $instance = $generator->create_instance($params);
         $cm = get_coursemodule_from_instance('assign', $instance->id);
-        $context = context_module::instance($cm->id);
-        return new assign($context, $cm, $this->course);
+        $context = \context_module::instance($cm->id);
+        return new \assign($context, $cm, $this->course);
     }
 
-    public function test_assign_get_completion_state() {
-        global $DB;
+    /**
+     * Check that a student's excluded grade hides the activity from the student's progress bar.
+     */
+    public function test_grade_excluded() {
+        global $DB, $PAGE;
+
+        $output = $PAGE->get_renderer('block_completion_progress');
 
         // Add a block.
-        $context = context_course::instance($this->course->id);
-        $config = (object)[
-          'orderby' => "orderbytime",
-          'longbars' => "squeeze",
-          'progressBarIcons' => "1",
-          'showpercentage' => "0",
-          'progressTitle' => "",
-          'activitiesincluded' => "activitycompletion",
-        ];
+        $context = \context_course::instance($this->course->id);
         $blockinfo = [
-          'parentcontextid' => $context->id,
-          'pagetypepattern' => 'course-view-*',
-          'showinsubcontexts' => 0,
-          'defaultweight' => 5,
-          'timecreated' => time(),
-          'timemodified' => time(),
-          'defaultregion' => 'side-post',
-          'configdata' => base64_encode(serialize($config)),
+            'parentcontextid' => $context->id,
+            'pagetypepattern' => 'course-view-*',
+            'showinsubcontexts' => 0,
+            'defaultweight' => 5,
+            'timecreated' => time(),
+            'timemodified' => time(),
+            'defaultregion' => 'side-post',
+            'configdata' => base64_encode(serialize((object)[
+                'orderby' => DEFAULT_COMPLETIONPROGRESS_ORDERBY,
+                'longbars' => DEFAULT_COMPLETIONPROGRESS_LONGBARS,
+                'progressBarIcons' => DEFAULT_COMPLETIONPROGRESS_PROGRESSBARICONS,
+                'showpercentage' => DEFAULT_COMPLETIONPROGRESS_SHOWPERCENTAGE,
+                'progressTitle' => "",
+                'activitiesincluded' => DEFAULT_COMPLETIONPROGRESS_ACTIVITIESINCLUDED,
+            ])),
         ];
-
         $blockinstance = $this->getDataGenerator()->create_block('completion_progress', $blockinfo);
-        $blockinstanceid = $blockinstance->id;
 
-        $assign = $this->create_instance([
+        $assign = $this->create_assign_instance([
           'submissiondrafts' => 0,
           'completionsubmit' => 1,
           'completion' => COMPLETION_TRACKING_AUTOMATIC
         ]);
 
-        $this->setUser($this->students[0]);
+        $gradeitem = \grade_item::fetch(['courseid' => $this->course->id,
+            'itemtype' => 'mod', 'itemmodule' => 'assign',
+            'iteminstance' => $assign->get_course_module()->instance]);
 
-        $result = assign_get_completion_state(
-          $this->course,
-          $assign->get_course_module(),
-          $this->students[0]->id,
-          false
-        );
-        $this->assertFalse($result);
+        // Set student 1's grade to be excluded.
+        $grade = $gradeitem->get_grade($this->students[1]->id);
+        $grade->set_excluded(1);
 
-        $submissions = block_completion_progress_submissions($this->course->id, $this->students[0]->id);
-        $config = unserialize(base64_decode($blockinfo['configdata']));
+        $config = unserialize(base64_decode($blockinstance->configdata));
         $activities = block_completion_progress_get_activities($this->course->id, $config);
 
-        $completions = block_completion_progress_completions($activities, $this->students[0]->id, $this->course,
-          $submissions);
-
-        $text = block_completion_progress_bar(
-          $activities,
-          $completions,
-          $config,
-          $this->students[0]->id,
-          $this->course,
-          $blockinstanceid
-        );
-
-        $this->assertStringContainsStringIgnoringCase('assign', $text, '');
-        $this->assertStringNotContainsStringIgnoringCase('quiz', $text, '');
-
-        // The status is futureNotCompleted.
-        $this->assertStringContainsString('futureNotCompleted', $text, '');
-
-        $submission = $assign->get_user_submission($this->students[0]->id, true);
-        $submission->status = ASSIGN_SUBMISSION_STATUS_SUBMITTED;
-        $DB->update_record('assign_submission', $submission);
-
-        $result = assign_get_completion_state(
-          $this->course,
-          $assign->get_course_module(),
-          $this->students[0]->id,
-          false
-        );
-        $this->assertTrue($result);
-
+        // Student 0 ought to see the activity.
         $submissions = block_completion_progress_submissions($this->course->id, $this->students[0]->id);
-        $completions = block_completion_progress_completions($activities, $this->students[0]->id, $this->course,
-          $submissions);
+        $exclusions = block_completion_progress_exclusions($this->course->id, $this->students[0]->id);
+        $activities = block_completion_progress_filter_visibility($activities, $this->students[0]->id, $this->course->id, $exclusions);
+        $completions = block_completion_progress_completions($activities, $this->students[0]->id, $this->course, $submissions);
 
-        $text = block_completion_progress_bar(
-          $activities,
-          $completions,
-          $config,
-          $this->students[0]->id,
-          $this->course,
-          $blockinstanceid
+        $this->assertEquals(
+            [$assign->get_course_module()->id => COMPLETION_INCOMPLETE],
+            $completions
         );
 
-        // The status is send but not finished.
-        $this->assertStringContainsString('submittedNotComplete', $text, '');
+        // Student 1 ought not see the activity.
+        $submissions = block_completion_progress_submissions($this->course->id, $this->students[1]->id);
+        $exclusions = block_completion_progress_exclusions($this->course->id, $this->students[1]->id);
+        $activities = block_completion_progress_filter_visibility($activities, $this->students[1]->id, $this->course->id, $exclusions);
+        $completions = block_completion_progress_completions($activities, $this->students[1]->id, $this->course, $submissions);
+
+        $this->assertEquals([], $completions);
     }
 
     /**

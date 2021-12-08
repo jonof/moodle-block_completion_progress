@@ -38,44 +38,18 @@ require_once($CFG->dirroot.'/mod/workshop/tests/fixtures/testable.php');
  * @copyright  2020 Jonathon Fowler <fowlerj@usq.edu.au>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class workshop_completion_testcase extends \advanced_testcase {
-    /**
-     * Assert a user's completion status for a course module.
-     * @param object $course
-     * @param object $student
-     * @param object $cm
-     * @param integer|string $status
-     */
-    private function assert_progress_completion($course, $student, $cm, $status) {
-        $activities = [ ['id' => $cm->id ]];
-        $submissions = block_completion_progress_submissions($course->id, $student->id);
-        $completions = block_completion_progress_completions($activities, $student->id,
-            $course, $submissions);
-        $this->assertEquals(
-            [$cm->id => $status],
-            $completions
-        );
-    }
-
-
+class workshop_completion_testcase extends \block_completion_progress\tests\completion_testcase_base {
     /**
      * Test completion determination in a Workshop activity with
      * pass/fail enabled.
      */
     public function test_workshop_passfail() {
-        global $CFG;
-
-        $CFG->enablecompletion = 1;
-        $this->resetAfterTest();
         $this->setAdminUser();
 
         $generator = $this->getDataGenerator();
 
-        $course = $generator->create_course([
-            'enablecompletion' => 1,
-        ]);
         $instance = $generator->create_module('workshop', [
-            'course' => $course->id,
+            'course' => $this->course->id,
             'grade' => 80,
             'gradinggrade' => 20,
             'completion' => COMPLETION_TRACKING_AUTOMATIC,
@@ -85,52 +59,45 @@ class workshop_completion_testcase extends \advanced_testcase {
         $cm = get_coursemodule_from_id('workshop', $instance->cmid);
 
         // Set the passing grades for submission and assessment.
-        $item = \grade_item::fetch(['courseid' => $course->id, 'itemtype' => 'mod',
+        $item = \grade_item::fetch(['courseid' => $this->course->id, 'itemtype' => 'mod',
             'itemmodule' => 'workshop', 'iteminstance' => $instance->id, 'itemnumber' => 0,
             'outcomeid' => null]);
         $item->gradepass = 40;
         $item->update();
 
-        $workshop = new \testable_workshop($instance, $cm, $course);
+        $workshop = new \testable_workshop($instance, $cm, $this->course);
 
         // Student 1 submits to the activity and gets graded correct.
-        $student1 = $generator->create_and_enrol($course, 'student');
-        $this->assert_progress_completion($course, $student1, $cm, COMPLETION_INCOMPLETE);
+        $student1 = $generator->create_and_enrol($this->course, 'student');
+        $this->assert_progress_completion($student1, $cm, COMPLETION_INCOMPLETE);
         $submission1 = $this->submit_for_student($student1, $workshop);
-        $this->assert_progress_completion($course, $student1, $cm, 'submitted');
+        $this->assert_progress_completion($student1, $cm, 'submitted');
         $this->grade_submission($submission1, $workshop, 75);      // Pass.
-        $this->assert_progress_completion($course, $student1, $cm, 'submitted');
+        $this->assert_progress_completion($student1, $cm, 'submitted');
         $workshop->switch_phase(\testable_workshop::PHASE_CLOSED);
-        $this->assert_progress_completion($course, $student1, $cm, COMPLETION_COMPLETE_PASS);
+        $this->assert_progress_completion($student1, $cm, COMPLETION_COMPLETE_PASS);
 
         // Student 2 submits to the activity and gets graded incorrect.
-        $student2 = $generator->create_and_enrol($course, 'student');
-        $this->assert_progress_completion($course, $student2, $cm, COMPLETION_INCOMPLETE);
+        $student2 = $generator->create_and_enrol($this->course, 'student');
+        $this->assert_progress_completion($student2, $cm, COMPLETION_INCOMPLETE);
         $submission2 = $this->submit_for_student($student2, $workshop);
-        $this->assert_progress_completion($course, $student2, $cm, 'submitted');
+        $this->assert_progress_completion($student2, $cm, 'submitted');
         $this->grade_submission($submission2, $workshop, 25);      // Fail.
-        $this->assert_progress_completion($course, $student2, $cm, 'submitted');
+        $this->assert_progress_completion($student2, $cm, 'submitted');
         $workshop->switch_phase(\testable_workshop::PHASE_CLOSED);
-        $this->assert_progress_completion($course, $student2, $cm, COMPLETION_COMPLETE_FAIL);
+        $this->assert_progress_completion($student2, $cm, COMPLETION_COMPLETE_FAIL);
     }
 
     /**
      * Test completion determination in an Workshop activity with basic completion.
      */
     public function test_workshop_basic() {
-        global $CFG;
-
-        $CFG->enablecompletion = 1;
-        $this->resetAfterTest();
         $this->setAdminUser();
 
         $generator = $this->getDataGenerator();
 
-        $course = $generator->create_course([
-            'enablecompletion' => 1,
-        ]);
         $instance = $generator->create_module('workshop', [
-            'course' => $course->id,
+            'course' => $this->course->id,
             'grade' => 80,
             'gradinggrade' => 20,
             'completion' => COMPLETION_TRACKING_AUTOMATIC,
@@ -139,27 +106,27 @@ class workshop_completion_testcase extends \advanced_testcase {
         ]);
         $cm = get_coursemodule_from_id('workshop', $instance->cmid);
 
-        $workshop = new \testable_workshop($instance, $cm, $course);
+        $workshop = new \testable_workshop($instance, $cm, $this->course);
 
         // Student 1 submits to the activity and gets graded correctly.
-        $student1 = $generator->create_and_enrol($course, 'student');
-        $this->assert_progress_completion($course, $student1, $cm, COMPLETION_INCOMPLETE);
+        $student1 = $generator->create_and_enrol($this->course, 'student');
+        $this->assert_progress_completion($student1, $cm, COMPLETION_INCOMPLETE);
         $submission1 = $this->submit_for_student($student1, $workshop);
-        $this->assert_progress_completion($course, $student1, $cm, 'submitted');
+        $this->assert_progress_completion($student1, $cm, 'submitted');
         $this->grade_submission($submission1, $workshop, 75);      // Pass.
-        $this->assert_progress_completion($course, $student1, $cm, 'submitted');
+        $this->assert_progress_completion($student1, $cm, 'submitted');
         $workshop->switch_phase(\testable_workshop::PHASE_CLOSED);
-        $this->assert_progress_completion($course, $student1, $cm, COMPLETION_COMPLETE);
+        $this->assert_progress_completion($student1, $cm, COMPLETION_COMPLETE);
 
         // Student 2 submits to the activity and gets graded incorrectly.
-        $student2 = $generator->create_and_enrol($course, 'student');
-        $this->assert_progress_completion($course, $student2, $cm, COMPLETION_INCOMPLETE);
+        $student2 = $generator->create_and_enrol($this->course, 'student');
+        $this->assert_progress_completion($student2, $cm, COMPLETION_INCOMPLETE);
         $submission2 = $this->submit_for_student($student2, $workshop);
-        $this->assert_progress_completion($course, $student2, $cm, 'submitted');
+        $this->assert_progress_completion($student2, $cm, 'submitted');
         $this->grade_submission($submission2, $workshop, 25);      // Fail.
-        $this->assert_progress_completion($course, $student2, $cm, 'submitted');
+        $this->assert_progress_completion($student2, $cm, 'submitted');
         $workshop->switch_phase(\testable_workshop::PHASE_CLOSED);
-        $this->assert_progress_completion($course, $student2, $cm, COMPLETION_COMPLETE);
+        $this->assert_progress_completion($student2, $cm, COMPLETION_COMPLETE);
     }
 
     /**

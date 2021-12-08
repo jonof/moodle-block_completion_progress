@@ -1,0 +1,115 @@
+<?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Completion unit tests common base for Completion Progress block.
+ *
+ * @package    block_completion_progress
+ * @copyright  2020 Jonathon Fowler <fowlerj@usq.edu.au>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+namespace block_completion_progress\tests;
+
+defined('MOODLE_INTERNAL') || die();
+
+global $CFG;
+require_once($CFG->dirroot.'/blocks/completion_progress/lib.php');
+
+if (!class_exists('block_completion_progress\tests\testcase', false)) {
+    if (version_compare(\PHPUnit\Runner\Version::id(), '8', '<')) {
+        // Moodle 3.9.
+        class_alias('block_completion_progress\tests\testcase_phpunit7', 'block_completion_progress\tests\testcase');
+    } else {
+        // Moodle 3.10 onwards.
+        class_alias('block_completion_progress\tests\testcase_phpunit8', 'block_completion_progress\tests\testcase');
+    }
+}
+
+/**
+ * Completion unit tests common base for Completion Progress block.
+ *
+ * @package    block_completion_progress
+ * @copyright  2020 Jonathon Fowler <fowlerj@usq.edu.au>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+abstract class completion_testcase_base extends \block_completion_progress\tests\testcase {
+    /**
+     * The test course.
+     * @var object
+     */
+    protected $course;
+
+    /**
+     * A completion_progress block instance in the test course.
+     * @var object
+     */
+    protected $blockinstance;
+
+
+    /**
+     * Setup function - we will create a course and add an assign instance to it.
+     */
+    protected function set_up() {
+        $this->resetAfterTest(true);
+
+        set_config('enablecompletion', 1);
+
+        $generator = $this->getDataGenerator();
+
+        $this->course = $generator->create_course([
+          'enablecompletion' => 1,
+        ]);
+
+        // Add a block.
+        $context = \context_course::instance($this->course->id);
+        $blockinfo = [
+            'parentcontextid' => $context->id,
+            'pagetypepattern' => 'course-view-*',
+            'showinsubcontexts' => 0,
+            'defaultweight' => 5,
+            'timecreated' => time(),
+            'timemodified' => time(),
+            'defaultregion' => 'side-post',
+            'configdata' => base64_encode(serialize((object)[
+                'orderby' => DEFAULT_COMPLETIONPROGRESS_ORDERBY,
+                'longbars' => DEFAULT_COMPLETIONPROGRESS_LONGBARS,
+                'progressBarIcons' => DEFAULT_COMPLETIONPROGRESS_PROGRESSBARICONS,
+                'showpercentage' => DEFAULT_COMPLETIONPROGRESS_SHOWPERCENTAGE,
+                'progressTitle' => "",
+                'activitiesincluded' => DEFAULT_COMPLETIONPROGRESS_ACTIVITIESINCLUDED,
+            ])),
+        ];
+        $this->blockinstance = $this->getDataGenerator()->create_block('completion_progress', $blockinfo);
+    }
+
+    /**
+     * Assert a user's completion status for a course module.
+     * @param object $student
+     * @param object $cm
+     * @param integer|string $status
+     */
+    protected function assert_progress_completion($student, $cm, $status) {
+        $activities = [ ['id' => $cm->id ]];
+        $submissions = block_completion_progress_submissions($this->course->id, $student->id);
+        $completions = block_completion_progress_completions($activities, $student->id,
+            $this->course, $submissions);
+        $this->assertEquals(
+            [$cm->id => $status],
+            $completions
+        );
+    }
+}
