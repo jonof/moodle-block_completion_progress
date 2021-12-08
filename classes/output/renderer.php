@@ -61,6 +61,10 @@ class renderer extends plugin_renderer_base {
         $usingrtl = right_to_left();
         $numactivities = count($activities);
 
+        if ($simple && $numactivities == 0) {
+            return get_string('no_visible_activities_message', 'block_completion_progress');
+        }
+
         $alternatelinks = array(
             'assign' => array(
                 'url' => '/mod/assign/view.php?id=:cmid&action=grade&userid=:userid',
@@ -264,7 +268,7 @@ class renderer extends plugin_renderer_base {
             $text = '';
             $text .= html_writer::empty_tag('img',
                     array('src' => $activity->icon, 'class' => 'moduleIcon', 'alt' => '', 'role' => 'presentation'));
-            $text .= s(format_string($activity->name));
+            $text .= $activity->name;
             if (!empty($activity->link) && (!empty($activity->available) || $simple)) {
                 $content .= $this->action_link($activity->link, $text, null, ['class' => 'action_link']);
             } else {

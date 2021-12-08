@@ -163,14 +163,7 @@
 }
 
 #page-blocks-completion_progress-overview .overviewTable {
-    margin: 10px 0;
-    width: 100%;
     table-layout: fixed;
-}
-#page-blocks-completion_progress-overview .overviewTable th,
-#page-blocks-completion_progress-overview .overviewTable td {
-    padding: 4px;
-    vertical-align: middle;
 }
 #page-blocks-completion_progress-overview .overviewTable .col-select {
     width: 2rem;
@@ -179,7 +172,7 @@
 #page-blocks-completion_progress-overview .overviewTable .col-fullname {
     width: 20%;
 }
-#page-blocks-completion_progress-overview .overviewTable .col-lastonline {
+#page-blocks-completion_progress-overview .overviewTable .col-timeaccess {
     width: 15%;
 }
 #page-blocks-completion_progress-overview .overviewTable .col-progressbar {
@@ -219,41 +212,10 @@
     text-align: center;
 }
 
-#page-blocks-completion_progress-overview .buttons {
-    margin-top: 20px;
-    text-align: left;
-}
-
-#page-blocks-completion_progress-overview .buttons label {
-    display: inline;
-    margin: 0 5px 0 10px;
-}
 #page-blocks-completion_progress-overview .progressoverviewmenus {
-    text-align: left;
-    margin-bottom: 5px;
+    margin-bottom: 1rem;
+}
+#page-blocks-completion_progress-overview .progressoverviewmenus .singleselect + .singleselect {
+    margin-left: 1rem;
 }
 
-#page-blocks-completion_progress-overview .progressoverviewmenus .singleselect {
-    text-align: left;
-    margin-right: 10px;
-}
-
-#page-blocks-completion_progress-overview .progressoverviewmenus form,
-#page-blocks-completion_progress-overview .progressoverviewmenus select,
-#page-blocks-completion_progress-overview .progressoverviewmenus div,
-#page-blocks-completion_progress-overview .paging,
-#page-blocks-completion_progress-overview #showall {
-    display: inline;
-}
-
-#page-blocks-completion_progress-overview #showall {
-    margin-left: 10px;
-}
-
-#page-blocks-completion_progress-overview .progressoverviewmenus select {
-    margin-left: 2px;
-}
-#page-blocks-completion_progress-overview .progressoverviewmenus select {
-    margin-left: 0;
-    margin-right: 2px;
-}

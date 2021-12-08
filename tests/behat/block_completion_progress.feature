@@ -59,7 +59,7 @@ Feature: Using block completion progress for a quiz
 
   Scenario: Submit the quizzes
     Given I am on the "Quiz 1A No deadline" "mod_quiz > View" page logged in as "student1"
-    And I press "Attempt quiz now"
+    And I click on "Attempt quiz" "link_or_button"
     And I follow "Finish attempt ..."
     And I press "Submit all and finish"
     And I am on "Course 1" course homepage

@@ -443,7 +443,7 @@ class completion_progress implements \renderable {
                     'modulename' => $modulename,
                     'id'         => $cm->id,
                     'instance'   => $cm->instance,
-                    'name'       => $cm->name,
+                    'name'       => $cm->get_formatted_name(),
                     'expected'   => $cm->completionexpected,
                     'section'    => $cm->sectionnum,
                     'position'   => array_search($cm->id, $sections[$cm->sectionnum]),

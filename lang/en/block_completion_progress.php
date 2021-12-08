@@ -65,6 +65,7 @@ $string['how_ordering_works'] = 'How ordering works';
 $string['how_ordering_works_help'] = '<p>There are two ways to order activities in the Completion Progress block.</p><ul><li><em>Time using "Expect completion on" date</em> (default)<br />The expected completion dates of activities/resources are used to order the bar. Where activities/resources don\'t have an expected completion date, ordering in the course is used instead. When this option is used, the NOW indicator is shown.</li><li><em>Ordering in course</em><br />Activities/resources are presented in the same order as they are on the course page. When this option is used, expected completion dates are ignored. When this option is used, the NOW indicator is not shown.</li></ul>';
 $string['how_selectactivities_works'] = 'How including activities works';
 $string['how_selectactivities_works_help'] = '<p>To manually select activities to be include in the bar, ensure that "Activities included" is set to "selected activities".</p><p>Only activities with activity completion settings set can be included.</p><p>Hold the CTRL key to select multiple activities.</p>';
+$string['indeterminate'] = '?';
 $string['lastonline'] = 'Last in course';
 $string['mouse_over_prompt'] = 'Mouse over or touch bar for info.';
 $string['no_activities_config_message'] = 'There are no activities or resources with activity completion set or no activities or resources have been selected. Set activity completion on activities and resources then configure this block.';
