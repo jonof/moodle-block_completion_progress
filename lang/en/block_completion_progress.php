@@ -99,3 +99,5 @@ $string['why_show_precentage_help'] = '<p>It is possible to show an overall perc
 $string['why_use_icons'] = 'Why you might want to use icons?';
 $string['why_use_icons_help'] = '<p>You may wish to add tick and cross icons in the Completion Progress to make this block more visually accessible for students with colour-blindness.</p><p>It may also make the meaning of the block clearer if you believe colours are not intuitive, either for cultural or personal reasons.</p>';
 $string['wrapafter'] = 'When wrapping, limit rows to';
+$string['roles_to_exclude'] = 'Roles to not display and not use and the block';
+$string['roles_to_exclude_desc'] = 'Roles list to not display or not use in this block and in the overview report. If an user owns one of theses roles the user will not appear in the block informations and his progress will not be displayed.';
