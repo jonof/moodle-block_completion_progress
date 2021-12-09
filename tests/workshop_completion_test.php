@@ -27,9 +27,11 @@ namespace block_completion_progress\tests;
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
-require_once($CFG->dirroot.'/blocks/completion_progress/lib.php');
 require_once($CFG->dirroot.'/mod/workshop/locallib.php');
 require_once($CFG->dirroot.'/mod/workshop/tests/fixtures/testable.php');
+
+use block_completion_progress\completion_progress;
+use block_completion_progress\defaults;
 
 /**
  * Workshop activity-related unit tests for Completion Progress block.

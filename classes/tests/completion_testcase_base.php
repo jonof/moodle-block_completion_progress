@@ -27,7 +27,9 @@ namespace block_completion_progress\tests;
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
-require_once($CFG->dirroot.'/blocks/completion_progress/lib.php');
+
+use block_completion_progress\completion_progress;
+use block_completion_progress\defaults;
 
 if (!class_exists('block_completion_progress\tests\testcase', false)) {
     if (version_compare(\PHPUnit\Runner\Version::id(), '8', '<')) {
@@ -85,12 +87,12 @@ abstract class completion_testcase_base extends \block_completion_progress\tests
             'timemodified' => time(),
             'defaultregion' => 'side-post',
             'configdata' => base64_encode(serialize((object)[
-                'orderby' => DEFAULT_COMPLETIONPROGRESS_ORDERBY,
-                'longbars' => DEFAULT_COMPLETIONPROGRESS_LONGBARS,
-                'progressBarIcons' => DEFAULT_COMPLETIONPROGRESS_PROGRESSBARICONS,
-                'showpercentage' => DEFAULT_COMPLETIONPROGRESS_SHOWPERCENTAGE,
+                'orderby' => defaults::ORDERBY,
+                'longbars' => defaults::LONGBARS,
+                'progressBarIcons' => defaults::PROGRESSBARICONS,
+                'showpercentage' => defaults::SHOWPERCENTAGE,
                 'progressTitle' => "",
-                'activitiesincluded' => DEFAULT_COMPLETIONPROGRESS_ACTIVITIESINCLUDED,
+                'activitiesincluded' => defaults::ACTIVITIESINCLUDED,
             ])),
         ];
         $this->blockinstance = $this->getDataGenerator()->create_block('completion_progress', $blockinfo);
@@ -103,10 +105,10 @@ abstract class completion_testcase_base extends \block_completion_progress\tests
      * @param integer|string $status
      */
     protected function assert_progress_completion($student, $cm, $status) {
-        $activities = [ ['id' => $cm->id ]];
-        $submissions = block_completion_progress_submissions($this->course->id, $student->id);
-        $completions = block_completion_progress_completions($activities, $student->id,
-            $this->course, $submissions);
+        $progress = (new completion_progress($this->course))
+                    ->for_user($student)
+                    ->for_block_instance($this->blockinstance);
+        $completions = $progress->get_completions();
         $this->assertEquals(
             [$cm->id => $status],
             $completions

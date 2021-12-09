@@ -25,7 +25,8 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-require_once($CFG->dirroot.'/blocks/completion_progress/lib.php');
+use block_completion_progress\completion_progress;
+use block_completion_progress\defaults;
 
 /**
  * Completion Progress block class
@@ -70,7 +71,7 @@ class block_completion_progress extends block_base {
      * @return bool
      */
     public function instance_allow_multiple() {
-        return !block_completion_progress_on_site_page($this->page);
+        return !self::on_site_page($this->page);
     }
 
     /**
@@ -79,7 +80,7 @@ class block_completion_progress extends block_base {
      * @return bool
      */
     public function instance_allow_config() {
-        return !block_completion_progress_on_site_page($this->page);
+        return !self::on_site_page($this->page);
     }
 
     /**
@@ -102,8 +103,6 @@ class block_completion_progress extends block_base {
      * @return string
      */
     public function get_content() {
-        global $USER, $COURSE, $CFG, $OUTPUT, $DB;
-
         // If content has already been generated, don't waste time generating it again.
         if ($this->content !== null) {
             return $this->content;
@@ -111,178 +110,189 @@ class block_completion_progress extends block_base {
         $this->content = new stdClass;
         $this->content->text = '';
         $this->content->footer = '';
-        $blockinstancesonpage = array();
+        $barinstances = array();
 
         // Guests do not have any progress. Don't show them the block.
         if (!isloggedin() or isguestuser()) {
             return $this->content;
         }
 
-        // Draw the multi-bar content for the Dashboard and Front page.
-        if (block_completion_progress_on_site_page($this->page)) {
-
-            if (!$CFG->enablecompletion) {
-                $this->content->text .= get_string('completion_not_enabled', 'block_completion_progress');
+        if (self::on_site_page($this->page)) {
+            // Draw the multi-bar content for the Dashboard and Front page.
+            if (!$this->prepare_dashboard_content($barinstances)) {
                 return $this->content;
-            }
-
-            // Show a message when the user is not enrolled in any courses.
-            $courses = enrol_get_my_courses();
-            if (($this->page->user_is_editing() || is_siteadmin()) && empty($courses)) {
-                $this->content->text = get_string('no_courses', 'block_completion_progress');
-                return $this->content;
-            }
-
-            $coursenametoshow = get_config('block_completion_progress', 'coursenametoshow') ?:
-                DEFAULT_COMPLETIONPROGRESS_COURSENAMETOSHOW;
-            $sql = "SELECT bi.id,
-                           bp.id AS blockpositionid,
-                           COALESCE(bp.region, bi.defaultregion) AS region,
-                           COALESCE(bp.weight, bi.defaultweight) AS weight,
-                           COALESCE(bp.visible, 1) AS visible,
-                           bi.configdata
-                      FROM {block_instances} bi
-                 LEFT JOIN {block_positions} bp ON bp.blockinstanceid = bi.id
-                                               AND ".$DB->sql_like('bp.pagetype', ':pagetype', false)."
-                     WHERE bi.blockname = 'completion_progress'
-                       AND bi.parentcontextid = :contextid
-                  ORDER BY region, weight, bi.id";
-
-            foreach ($courses as $course) {
-
-                // Get specific block config and context.
-                $completion = new completion_info($course);
-                if ($course->visible && $completion->is_enabled()) {
-                    $context = CONTEXT_COURSE::instance($course->id);
-                    $params = array('contextid' => $context->id, 'pagetype' => 'course-view-%');
-                    $blockinstances = $DB->get_records_sql($sql, $params);
-                    $exclusions = block_completion_progress_exclusions($course->id, $USER->id);
-                    foreach ($blockinstances as $blockid => $blockinstance) {
-                        $blockinstance->config = unserialize(base64_decode($blockinstance->configdata));
-                        $blockinstance->activities = block_completion_progress_get_activities($course->id, $blockinstance->config);
-                        $blockinstance->activities = block_completion_progress_filter_visibility($blockinstance->activities,
-                                                         $USER->id, $course->id, $exclusions);
-                        $blockcontext = CONTEXT_BLOCK::instance($blockid);
-                        if (
-                            !has_capability('block/completion_progress:showbar', $blockcontext) ||
-                            $blockinstance->visible == 0 ||
-                            empty($blockinstance->activities) ||
-                            (
-                                !empty($blockinstance->config->group) &&
-                                !has_capability('moodle/site:accessallgroups', $context) &&
-                                !block_completion_progress_group_membership($blockinstance->config->group, $course->id, $USER->id)
-                            )
-                        ) {
-                            unset($blockinstances[$blockid]);
-                        }
-                    }
-                    $blockinstancesonpage = array_merge($blockinstancesonpage, array_keys($blockinstances));
-
-                    // Output the Progress Bar.
-                    if (!empty($blockinstances)) {
-                        $courselink = new moodle_url('/course/view.php', array('id' => $course->id));
-                        $linktext = HTML_WRITER::tag('h3', s(format_string($course->$coursenametoshow)));
-                        $this->content->text .= HTML_WRITER::link($courselink, $linktext);
-                    }
-                    foreach ($blockinstances as $blockid => $blockinstance) {
-                        if (
-                            isset($blockinstance->config) &&
-                            isset($blockinstance->config->progressTitle) &&
-                            $blockinstance->config->progressTitle != ''
-                        ) {
-                            $this->content->text .= HTML_WRITER::tag('p', s(format_string($blockinstance->config->progressTitle)));
-                        }
-                        $submissions = block_completion_progress_submissions($course->id, $USER->id);
-                        $completions = block_completion_progress_completions($blockinstance->activities, $USER->id, $course,
-                            $submissions);
-                        $this->content->text .= block_completion_progress_bar($blockinstance->activities,
-                                                                    $completions,
-                                                                    $blockinstance->config,
-                                                                    $USER->id,
-                                                                    $course->id,
-                                                                    $blockinstance->id);
-                    }
-                }
-            }
-
-            // Show a message explaining lack of bars, but only while editing is on.
-            if ($this->page->user_is_editing() && $this->content->text == '') {
-                $this->content->text = get_string('no_blocks', 'block_completion_progress');
             }
 
         } else {
             // Gather content for block on regular course.
-
-            // Check if user is in group for block.
-            if (
-                !empty($this->config->group) &&
-                !has_capability('moodle/site:accessallgroups', $this->context) &&
-                !block_completion_progress_group_membership($this->config->group, $COURSE->id, $USER->id)
-            ) {
+            if (!$this->prepare_course_content($barinstances)) {
                 return $this->content;
-            }
-
-            // Check if completion is enabled at site level.
-            if (!$CFG->enablecompletion) {
-                if (has_capability('moodle/block:edit', $this->context)) {
-                    $this->content->text .= get_string('completion_not_enabled', 'block_completion_progress');
-                }
-                return $this->content;
-            }
-
-            // Check if completion is enabled at course level.
-            $completion = new completion_info($COURSE);
-            if (!$completion->is_enabled()) {
-                if (has_capability('moodle/block:edit', $this->context)) {
-                    $this->content->text .= get_string('completion_not_enabled_course', 'block_completion_progress');
-                }
-                return $this->content;
-            }
-
-            // Check if any activities/resources have been created.
-            $exclusions = block_completion_progress_exclusions($COURSE->id, $USER->id);
-            $activities = block_completion_progress_get_activities($COURSE->id, $this->config);
-            $activities = block_completion_progress_filter_visibility($activities, $USER->id, $COURSE->id, $exclusions);
-            if (empty($activities)) {
-                if (has_capability('moodle/block:edit', $this->context)) {
-                    $this->content->text .= get_string('no_activities_config_message', 'block_completion_progress');
-                }
-                return $this->content;
-            }
-
-            // Display progress bar.
-            if (has_capability('block/completion_progress:showbar', $this->context)) {
-                $submissions = block_completion_progress_submissions($COURSE->id, $USER->id);
-                $completions = block_completion_progress_completions($activities, $USER->id, $COURSE, $submissions);
-                $this->content->text .= block_completion_progress_bar(
-                    $activities,
-                    $completions,
-                    $this->config,
-                    $USER->id,
-                    $COURSE->id,
-                    $this->instance->id
-                );
-            }
-            $blockinstancesonpage = array($this->instance->id);
-
-            // Allow teachers to access the overview page.
-            if (has_capability('block/completion_progress:overview', $this->context)) {
-                $parameters = array('instanceid' => $this->instance->id, 'courseid' => $COURSE->id, 'sesskey' => sesskey());
-                $url = new moodle_url('/blocks/completion_progress/overview.php', $parameters);
-                $label = get_string('overview', 'block_completion_progress');
-                $options = array('class' => 'overviewButton');
-                $this->content->text .= $OUTPUT->single_button($url, $label, 'post', $options);
             }
         }
 
         // Organise access to JS.
         $this->page->requires->js_call_amd('block_completion_progress/progressbar', 'init', [
-            'instances' => $blockinstancesonpage,
+            'instances' => $barinstances,
         ]);
         $cachevalue = debugging() ? -1 : (int)get_config('block_completion_progress', 'cachevalue');
         $this->page->requires->css('/blocks/completion_progress/css.php?v=' . $cachevalue);
 
         return $this->content;
+    }
+
+    /**
+     * Produce content for the Dashboard or Front page.
+     * @param array $barinstances receives block instance ids
+     * @return boolean false if an early exit
+     */
+    protected function prepare_dashboard_content(&$barinstances) {
+        global $USER, $CFG, $DB;
+
+        $output = $this->page->get_renderer('block_completion_progress');
+
+        if (!$CFG->enablecompletion) {
+            $this->content->text .= get_string('completion_not_enabled', 'block_completion_progress');
+            return false;
+        }
+
+        // Show a message when the user is not enrolled in any courses.
+        $courses = enrol_get_my_courses();
+        if (($this->page->user_is_editing() || is_siteadmin()) && empty($courses)) {
+            $this->content->text = get_string('no_courses', 'block_completion_progress');
+            return false;
+        }
+
+        $coursenametoshow = get_config('block_completion_progress', 'coursenametoshow') ?:
+            defaults::COURSENAMETOSHOW;
+        $sql = "SELECT bi.id,
+                       COALESCE(bp.visible, 1) AS visible,
+                       bi.configdata
+                  FROM {block_instances} bi
+             LEFT JOIN {block_positions} bp ON bp.blockinstanceid = bi.id
+                                           AND ".$DB->sql_like('bp.pagetype', ':pagetype', false)."
+                 WHERE bi.blockname = 'completion_progress'
+                   AND bi.parentcontextid = :contextid
+              ORDER BY COALESCE(bp.region, bi.defaultregion),
+                       COALESCE(bp.weight, bi.defaultweight),
+                       bi.id";
+
+        foreach ($courses as $course) {
+            // Get specific block config and context.
+            $courseprogress = new completion_progress($course);
+            if (!$course->visible || !$courseprogress->get_completion_info()->is_enabled()) {
+                continue;
+            }
+
+            $courseprogress->for_user($USER);
+            $blockprogresses = [];
+
+            $params = ['contextid' => $courseprogress->get_context()->id, 'pagetype' => 'course-view-%'];
+            foreach ($DB->get_records_sql($sql, $params) as $birec) {
+                $blockprogress = (clone $courseprogress)->for_block_instance($birec);
+                $blockinstance = $blockprogress->get_block_instance();
+                $blockconfig = $blockprogress->get_block_config();
+                if (!has_capability('block/completion_progress:showbar', context_block::instance($blockinstance->id)) ||
+                        !$blockinstance->visible ||
+                        !$blockprogress->has_visible_activities()) {
+                    continue;
+                }
+                if (!empty($blockconfig->group) &&
+                        !has_capability('moodle/site:accessallgroups', $courseprogress->get_context()) &&
+                        !$this->check_group_membership($blockconfig->group, $course->id)) {
+                    continue;
+                }
+
+                $blockprogresses[$blockinstance->id] = $blockprogress;
+                $barinstances[] = $blockinstance->id;
+            }
+
+            // Output the Progress Bar.
+            if (!empty($blockprogresses)) {
+                $courselink = new moodle_url('/course/view.php', array('id' => $course->id));
+                $linktext = html_writer::tag('h3', s(format_string($course->$coursenametoshow)));
+                $this->content->text .= html_writer::link($courselink, $linktext);
+            }
+            foreach ($blockprogresses as $blockprogress) {
+                $blockinstance = $blockprogress->get_block_instance();
+                $blockconfig = $blockprogress->get_block_config();
+                if (($blockconfig->progressTitle ?? '') !== '') {
+                    $this->content->text .= html_writer::tag('p', s(format_string($blockconfig->progressTitle)));
+                }
+                $this->content->text .= $output->render($blockprogress);
+            }
+        }
+
+        // Show a message explaining lack of bars, but only while editing is on.
+        if ($this->page->user_is_editing() && $this->content->text == '') {
+            $this->content->text = get_string('no_blocks', 'block_completion_progress');
+        }
+
+        return true;
+    }
+
+    /**
+     * Produce content for a course page.
+     * @param array $barinstances receives block instance ids
+     * @return boolean false if an early exit
+     */
+    protected function prepare_course_content(&$barinstances) {
+        global $USER, $COURSE, $CFG, $OUTPUT;
+
+        $output = $this->page->get_renderer('block_completion_progress');
+
+        // Check if user is in group for block.
+        if (
+            !empty($this->config->group) &&
+            !has_capability('moodle/site:accessallgroups', $this->context) &&
+            !$this->check_group_membership($this->config->group, $COURSE->id)
+        ) {
+            return false;
+        }
+
+        // Check if completion is enabled at site level.
+        if (!$CFG->enablecompletion) {
+            if (has_capability('moodle/block:edit', $this->context)) {
+                $this->content->text .= get_string('completion_not_enabled', 'block_completion_progress');
+            }
+            return false;
+        }
+
+        $progress = new completion_progress($COURSE);
+
+        // Check if completion is enabled at course level.
+        if (!$progress->get_completion_info()->is_enabled()) {
+            if (has_capability('moodle/block:edit', $this->context)) {
+                $this->content->text .= get_string('completion_not_enabled_course', 'block_completion_progress');
+            }
+            return false;
+        }
+
+        $progress->for_user($USER)->for_block_instance($this->instance);
+
+        // Check if any activities/resources have been created.
+        if (!$progress->has_visible_activities()) {
+            if (has_capability('moodle/block:edit', $this->context)) {
+                $this->content->text .= get_string('no_activities_config_message', 'block_completion_progress');
+            }
+            return false;
+        }
+
+        // Display progress bar.
+        if (has_capability('block/completion_progress:showbar', $this->context)) {
+            $this->content->text .= $output->render($progress);
+        }
+        $barinstances = array($this->instance->id);
+
+        // Allow teachers to access the overview page.
+        if (has_capability('block/completion_progress:overview', $this->context)) {
+            $parameters = array('instanceid' => $this->instance->id, 'courseid' => $COURSE->id, 'sesskey' => sesskey());
+            $url = new moodle_url('/blocks/completion_progress/overview.php', $parameters);
+            $label = get_string('overview', 'block_completion_progress');
+            $options = array('class' => 'overviewButton');
+            $this->content->text .= $OUTPUT->single_button($url, $label, 'post', $options);
+        }
+
+        return true;
     }
 
     /**
@@ -292,4 +302,44 @@ class block_completion_progress extends block_base {
         $value = get_config('block_completion_progress', 'cachevalue') + 1;
         set_config('cachevalue', $value, 'block_completion_progress');
     }
+
+    /**
+     * Determines whether the current user is a member of a given group or grouping
+     *
+     * @param string $group    The group or grouping identifier starting with 'group-' or 'grouping-'
+     * @param int    $courseid The ID of the course containing the block instance
+     * @return boolean value indicating membership
+     */
+    private function check_group_membership($group, $courseid) {
+        global $USER;
+
+        if ($group === '0') {
+            return true;
+        } else if ((substr($group, 0, 6) == 'group-') && ($groupid = intval(substr($group, 6)))) {
+            return groups_is_member($groupid, $USER->id);
+        } else if ((substr($group, 0, 9) == 'grouping-') && ($groupingid = intval(substr($group, 9)))) {
+            return array_key_exists($groupingid, groups_get_user_groups($courseid, $USER->id));
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks whether the given page is the Dashboard or Site home page.
+     *
+     * @param moodle_page $page the page to check, or the current page if not passed.
+     * @return boolean True when on the Dashboard or Site home page.
+     */
+    public static function on_site_page($page = null) {
+        global $PAGE;   // phpcs:ignore moodle.PHP.ForbiddenGlobalUse.BadGlobal
+
+        $page = $page ?? $PAGE; // phpcs:ignore moodle.PHP.ForbiddenGlobalUse.BadGlobal
+        if (empty($page)) {
+            return false;   // Might be an asynchronous course copy.
+        }
+
+        $pagetypepatterns = matching_page_type_patterns_from_pattern($page->pagetype);
+        return in_array('my-*', $pagetypepatterns) || in_array('site-*', $pagetypepatterns);
+    }
+
 }

@@ -27,9 +27,11 @@ namespace block_completion_progress\tests;
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
-require_once($CFG->dirroot.'/blocks/completion_progress/lib.php');
 require_once($CFG->dirroot.'/mod/assign/locallib.php');
 require_once($CFG->dirroot.'/mod/assign/tests/fixtures/testable_assign.php');
+
+use block_completion_progress\completion_progress;
+use block_completion_progress\defaults;
 
 /**
  * Assignment activity-related unit tests for Completion Progress block.
@@ -67,21 +69,10 @@ class assign_completion_testcase extends \block_completion_progress\tests\comple
         );
         $this->assertFalse($result);
 
-        $submissions = block_completion_progress_submissions($this->course->id, $student1->id);
-        $config = unserialize(base64_decode($this->blockinstance->configdata));
-        $activities = block_completion_progress_get_activities($this->course->id, $config);
-
-        $completions = block_completion_progress_completions($activities, $student1->id, $this->course,
-          $submissions);
-
-        $text = block_completion_progress_bar(
-          $activities,
-          $completions,
-          $config,
-          $student1->id,
-          $this->course,
-          $this->blockinstance->id
-        );
+        $progress = (new completion_progress($this->course))
+                    ->for_user($student1)
+                    ->for_block_instance($this->blockinstance);
+        $text = $output->render($progress);
 
         $this->assertStringContainsStringIgnoringCase('assign', $text, '');
         $this->assertStringNotContainsStringIgnoringCase('quiz', $text, '');
@@ -101,18 +92,10 @@ class assign_completion_testcase extends \block_completion_progress\tests\comple
         );
         $this->assertTrue($result);
 
-        $submissions = block_completion_progress_submissions($this->course->id, $student1->id);
-        $completions = block_completion_progress_completions($activities, $student1->id, $this->course,
-          $submissions);
-
-        $text = block_completion_progress_bar(
-          $activities,
-          $completions,
-          $config,
-          $student1->id,
-          $this->course,
-          $this->blockinstance->id
-        );
+        $progress = (new completion_progress($this->course))
+                    ->for_user($student1)
+                    ->for_block_instance($this->blockinstance);
+        $text = $output->render($progress);
 
         // The status is send but not finished.
         $this->assertStringContainsString('submittedNotComplete', $text, '');

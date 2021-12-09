@@ -27,9 +27,11 @@ namespace block_completion_progress\tests;
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
-require_once($CFG->dirroot.'/blocks/completion_progress/lib.php');
 require_once($CFG->dirroot.'/mod/quiz/lib.php');
 require_once($CFG->dirroot.'/mod/quiz/locallib.php');
+
+use block_completion_progress\completion_progress;
+use block_completion_progress\defaults;
 
 /**
  * Quiz activity-related unit tests for Completion Progress block.

@@ -24,7 +24,7 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-require_once($CFG->dirroot.'/blocks/completion_progress/lib.php');
+use block_completion_progress\defaults;
 
 if ($ADMIN->fulltree) {
 
@@ -32,7 +32,7 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configselect('block_completion_progress/wrapafter',
         get_string('wrapafter', 'block_completion_progress'),
         '',
-        DEFAULT_COMPLETIONPROGRESS_WRAPAFTER,
+        defaults::WRAPAFTER,
         $options)
     );
 
@@ -44,7 +44,7 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configselect('block_completion_progress/defaultlongbars',
         get_string('defaultlongbars', 'block_completion_progress'),
         '',
-        DEFAULT_COMPLETIONPROGRESS_LONGBARS,
+        defaults::LONGBARS,
         $options)
     );
 
@@ -55,7 +55,7 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configselect('block_completion_progress/coursenametoshow',
         get_string('coursenametoshow', 'block_completion_progress'),
         '',
-        DEFAULT_COMPLETIONPROGRESS_COURSENAMETOSHOW,
+        defaults::COURSENAMETOSHOW,
         $options)
     );
 
@@ -94,16 +94,16 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configcheckbox('block_completion_progress/showinactive',
         get_string('showinactive', 'block_completion_progress'),
         '',
-        DEFAULT_COMPLETIONPROGRESS_SHOWINACTIVE)
+        defaults::SHOWINACTIVE)
     );
     $settings->add(new admin_setting_configcheckbox('block_completion_progress/showlastincourse',
         get_string('showlastincourse', 'block_completion_progress'),
         '',
-        DEFAULT_COMPLETIONPROGRESS_SHOWLASTINCOURSE)
+        defaults::SHOWLASTINCOURSE)
     );
     $settings->add(new admin_setting_configcheckbox('block_completion_progress/forceiconsinbar',
         get_string('forceiconsinbar', 'block_completion_progress'),
         '',
-        DEFAULT_COMPLETIONPROGRESS_FORCEICONSINBAR)
+        defaults::FORCEICONSINBAR)
     );
 }

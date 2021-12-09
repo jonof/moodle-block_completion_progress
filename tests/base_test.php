@@ -28,7 +28,11 @@ defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 require_once($CFG->dirroot . '/mod/assign/locallib.php');
-require_once($CFG->dirroot.'/blocks/completion_progress/lib.php');
+require_once($CFG->dirroot.'/blocks/moodleblock.class.php');
+require_once($CFG->dirroot.'/blocks/completion_progress/block_completion_progress.php');
+
+use block_completion_progress\completion_progress;
+use block_completion_progress\defaults;
 
 if (!class_exists('block_completion_progress\tests\testcase', false)) {
     if (version_compare(\PHPUnit\Runner\Version::id(), '8', '<')) {
@@ -136,12 +140,12 @@ class base_testcase extends \block_completion_progress\tests\testcase {
             'timemodified' => time(),
             'defaultregion' => 'side-post',
             'configdata' => base64_encode(serialize((object)[
-                'orderby' => DEFAULT_COMPLETIONPROGRESS_ORDERBY,
-                'longbars' => DEFAULT_COMPLETIONPROGRESS_LONGBARS,
-                'progressBarIcons' => DEFAULT_COMPLETIONPROGRESS_PROGRESSBARICONS,
-                'showpercentage' => DEFAULT_COMPLETIONPROGRESS_SHOWPERCENTAGE,
+                'orderby' => defaults::ORDERBY,
+                'longbars' => defaults::LONGBARS,
+                'progressBarIcons' => defaults::PROGRESSBARICONS,
+                'showpercentage' => defaults::SHOWPERCENTAGE,
                 'progressTitle' => "",
-                'activitiesincluded' => DEFAULT_COMPLETIONPROGRESS_ACTIVITIESINCLUDED,
+                'activitiesincluded' => defaults::ACTIVITIESINCLUDED,
             ])),
         ];
         $blockinstance = $this->getDataGenerator()->create_block('completion_progress', $blockinfo);
@@ -160,27 +164,20 @@ class base_testcase extends \block_completion_progress\tests\testcase {
         $grade = $gradeitem->get_grade($this->students[1]->id);
         $grade->set_excluded(1);
 
-        $config = unserialize(base64_decode($blockinstance->configdata));
-        $activities = block_completion_progress_get_activities($this->course->id, $config);
-
         // Student 0 ought to see the activity.
-        $submissions = block_completion_progress_submissions($this->course->id, $this->students[0]->id);
-        $exclusions = block_completion_progress_exclusions($this->course->id, $this->students[0]->id);
-        $activities = block_completion_progress_filter_visibility($activities, $this->students[0]->id, $this->course->id, $exclusions);
-        $completions = block_completion_progress_completions($activities, $this->students[0]->id, $this->course, $submissions);
-
+        $progress = (new completion_progress($this->course))
+                    ->for_user($this->students[0])
+                    ->for_block_instance($blockinstance);
         $this->assertEquals(
             [$assign->get_course_module()->id => COMPLETION_INCOMPLETE],
-            $completions
+            $progress->get_completions()
         );
 
         // Student 1 ought not see the activity.
-        $submissions = block_completion_progress_submissions($this->course->id, $this->students[1]->id);
-        $exclusions = block_completion_progress_exclusions($this->course->id, $this->students[1]->id);
-        $activities = block_completion_progress_filter_visibility($activities, $this->students[1]->id, $this->course->id, $exclusions);
-        $completions = block_completion_progress_completions($activities, $this->students[1]->id, $this->course, $submissions);
-
-        $this->assertEquals([], $completions);
+        $progress = (new completion_progress($this->course))
+                    ->for_user($this->students[1])
+                    ->for_block_instance($blockinstance);
+        $this->assertEquals([], $progress->get_completions());
     }
 
     /**
@@ -189,17 +186,17 @@ class base_testcase extends \block_completion_progress\tests\testcase {
     public function test_on_site_page() {
         $page = new \moodle_page();
         $page->set_pagetype('site-index');
-        $this->assertTrue(block_completion_progress_on_site_page($page));
+        $this->assertTrue(\block_completion_progress::on_site_page($page));
 
         $page = new \moodle_page();
         $page->set_pagetype('my-index');
-        $this->assertTrue(block_completion_progress_on_site_page($page));
+        $this->assertTrue(\block_completion_progress::on_site_page($page));
 
         $page = new \moodle_page();
         $page->set_pagetype('course-view');
-        $this->assertFalse(block_completion_progress_on_site_page($page));
+        $this->assertFalse(\block_completion_progress::on_site_page($page));
 
         $page = new \moodle_page();
-        $this->assertFalse(block_completion_progress_on_site_page($page));
+        $this->assertFalse(\block_completion_progress::on_site_page($page));
     }
 }

@@ -85,10 +85,6 @@
     margin-top: 1.6rem;
 }
 
-#page-blocks-completion_progress-overview .block_completion_progress .progressBarCell {
-    position: inherit;
-}
-
 .block_completion_progress .progressBarCell .nowDiv {
     position: absolute;
     top: -100%;

@@ -25,7 +25,10 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-require_once($CFG->dirroot.'/blocks/completion_progress/lib.php');
+use block_completion_progress\completion_progress;
+use block_completion_progress\defaults;
+
+require_once($CFG->dirroot.'/blocks/completion_progress/block_completion_progress.php');
 
 /**
  * Completion Progress block config form class
@@ -41,11 +44,11 @@ class block_completion_progress_edit_form extends block_edit_form {
      */
     protected function specific_definition($mform) {
         global $COURSE, $OUTPUT;
-        $activities = block_completion_progress_get_activities($COURSE->id, null, 'orderbycourse');
-        $numactivies = count($activities);
+        $progress = (new completion_progress($COURSE))->for_block_instance($this->block->instance);
+        $activities = $progress->get_activities(completion_progress::ORDERBY_COURSE);
 
         // The My home version is not configurable.
-        if (block_completion_progress_on_site_page()) {
+        if (block_completion_progress::on_site_page()) {
             return;
         }
 
@@ -55,20 +58,23 @@ class block_completion_progress_edit_form extends block_edit_form {
         // Control order of items in Progress Bar.
         $expectedbystring = get_string('completionexpected', 'completion');
         $options = array(
-            'orderbytime'   => get_string('config_orderby_due_time', 'block_completion_progress', $expectedbystring),
-            'orderbycourse' => get_string('config_orderby_course_order', 'block_completion_progress'),
+            completion_progress::ORDERBY_TIME   => get_string('config_orderby_due_time',
+                'block_completion_progress', $expectedbystring),
+            completion_progress::ORDERBY_COURSE => get_string('config_orderby_course_order',
+                'block_completion_progress'),
         );
         $label = get_string('config_orderby', 'block_completion_progress');
         $mform->addElement('select', 'config_orderby', $label, $options);
-        $mform->setDefault('config_orderby', DEFAULT_COMPLETIONPROGRESS_ORDERBY);
+        $mform->setDefault('config_orderby', defaults::ORDERBY);
         $mform->addHelpButton('config_orderby', 'how_ordering_works', 'block_completion_progress');
 
         // Check if all elements have an expect completion by time set.
         $allwithexpected = true;
-        $i = 0;
-        while ($i < $numactivies && $allwithexpected) {
-            $allwithexpected = $activities[$i]['expected'] != 0;
-            $i++;
+        foreach ($activities as $activity) {
+            if ($activity->expected == 0) {
+                $allwithexpected = false;
+                break;
+            }
         }
         if (!$allwithexpected) {
             $warningstring = get_string('not_all_expected_set', 'block_completion_progress', $expectedbystring);
@@ -84,7 +90,7 @@ class block_completion_progress_edit_form extends block_edit_form {
         );
         $label = get_string('config_longbars', 'block_completion_progress');
         $mform->addElement('select', 'config_longbars', $label, $options);
-        $defaultlongbars = get_config('block_completion_progress', 'defaultlongbars') ?: DEFAULT_COMPLETIONPROGRESS_LONGBARS;
+        $defaultlongbars = get_config('block_completion_progress', 'defaultlongbars') ?: defaults::LONGBARS;
         $mform->setDefault('config_longbars', $defaultlongbars);
         $mform->addHelpButton('config_longbars', 'how_longbars_works', 'block_completion_progress');
 
@@ -94,14 +100,14 @@ class block_completion_progress_edit_form extends block_edit_form {
                                get_string('config_icons', 'block_completion_progress').' '.
                                $OUTPUT->pix_icon('tick', '', 'block_completion_progress', array('class' => 'iconOnConfig')).
                                $OUTPUT->pix_icon('cross', '', 'block_completion_progress', array('class' => 'iconOnConfig')));
-            $mform->setDefault('config_progressBarIcons', DEFAULT_COMPLETIONPROGRESS_PROGRESSBARICONS);
+            $mform->setDefault('config_progressBarIcons', defaults::PROGRESSBARICONS);
             $mform->addHelpButton('config_progressBarIcons', 'why_use_icons', 'block_completion_progress');
         }
 
         // Allow progress percentage to be turned on for students.
         $mform->addElement('selectyesno', 'config_showpercentage',
                            get_string('config_percentage', 'block_completion_progress'));
-        $mform->setDefault('config_showpercentage', DEFAULT_COMPLETIONPROGRESS_SHOWPERCENTAGE);
+        $mform->setDefault('config_showpercentage', defaults::SHOWPERCENTAGE);
         $mform->addHelpButton('config_showpercentage', 'why_show_precentage', 'block_completion_progress');
 
         // Allow the block to be visible to a single group or grouping.
@@ -138,7 +144,7 @@ class block_completion_progress_edit_form extends block_edit_form {
         );
         $label = get_string('config_activitiesincluded', 'block_completion_progress');
         $mform->addElement('select', 'config_activitiesincluded', $label, $options);
-        $mform->setDefault('config_activitiesincluded', DEFAULT_COMPLETIONPROGRESS_ACTIVITIESINCLUDED);
+        $mform->setDefault('config_activitiesincluded', defaults::ACTIVITIESINCLUDED);
         $mform->addHelpButton('config_activitiesincluded', 'how_activitiesincluded_works', 'block_completion_progress');
         $mform->setAdvanced('config_activitiesincluded', true);
 
@@ -150,12 +156,12 @@ class block_completion_progress_edit_form extends block_edit_form {
         } else {
             $options = array();
             foreach ($activities as $activity) {
-                $options[$activity['type'].'-'.$activity['instance']] = $activity['name'];
+                $options[$activity->type.'-'.$activity->instance] = format_string($activity->name);
             }
             $label = get_string('config_selectactivities', 'block_completion_progress');
             $mform->addElement('select', 'config_selectactivities', $label, $options);
             $mform->getElement('config_selectactivities')->setMultiple(true);
-            $mform->getElement('config_selectactivities')->setSize($numactivies);
+            $mform->getElement('config_selectactivities')->setSize(count($activities));
             $mform->setAdvanced('config_selectactivities', true);
             $mform->disabledif('config_selectactivities', 'config_activitiesincluded', 'neq', 'selectedactivities');
             $mform->addHelpButton('config_selectactivities', 'how_selectactivities_works', 'block_completion_progress');
