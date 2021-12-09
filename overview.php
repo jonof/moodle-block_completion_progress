@@ -45,6 +45,7 @@ $courseid = required_param('courseid', PARAM_INT);
 $page     = optional_param('page', 0, PARAM_INT); // Which page to show.
 $perpage  = optional_param('perpage', DEFAULT_PAGE_SIZE, PARAM_INT); // How many per page.
 $group    = optional_param('group', 0, PARAM_ALPHANUMEXT); // Group selected.
+$section  = optional_param('section', 0, PARAM_INT); // Section selected.
 
 // Determine course and context.
 $course = $DB->get_record('course', array('id' => $courseid), '*', MUST_EXIST);
@@ -87,6 +88,7 @@ $PAGE->set_url(
         'page'       => $page,
         'perpage'    => $perpage,
         'group'      => $group,
+        'section'    => $section,
         'sesskey'    => sesskey(),
         'role'       => $roleselected,
     )
@@ -114,14 +116,14 @@ echo $OUTPUT->heading($title, 2);
 echo $OUTPUT->container_start('block_completion_progress');
 
 // Check if activities/resources have been selected in config.
-$activities = block_completion_progress_get_activities($courseid, $config);
-if ($activities == null) {
+$activities = block_completion_progress_get_activities($courseid, $config, $section);
+if ($activities == null && empty($section)) {
     echo get_string('no_activities_message', 'block_completion_progress');
     echo $OUTPUT->container_end();
     echo $OUTPUT->footer();
     die();
 }
-if (empty($activities)) {
+if (empty($activities) && empty($section)) {
     echo get_string('no_visible_activities_message', 'block_completion_progress');
     echo $OUTPUT->container_end();
     echo $OUTPUT->footer();
@@ -178,6 +180,22 @@ foreach ($roles as $role) {
 }
 echo '&nbsp;' . get_string('role') . '&nbsp;';
 echo $OUTPUT->single_select($PAGE->url, 'role', $rolestodisplay, $roleselected);
+
+// Output the sections menu.
+$sql = "SELECT DISTINCT s.id, s.section
+          FROM {course_sections} s
+         WHERE s.course = :courseid
+           AND s.sequence <> ''";
+$params = array('courseid' => $courseid);
+$sectionrecords = $DB->get_records_sql($sql, $params);
+$sections = array_values($sectionrecords);
+$numberofsections = count($sections);
+$sectionstodisplay = array(0 => get_string('allsections', 'block_completion_progress'));
+for ($i = 0; $i < $numberofsections; $i++) {
+    $sectionstodisplay[$sections[$i]->id] = get_section_name($courseid, $sections[$i]->section);
+}
+echo '&nbsp;' .get_string('section') . '&nbsp;';
+echo $OUTPUT->single_select($PAGE->url, 'section', $sectionstodisplay, $section);
 echo $OUTPUT->container_end();
 
 // Apply group restrictions.

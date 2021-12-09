@@ -279,7 +279,7 @@ function block_completion_progress_modules_with_alternate_links() {
  * @param string $forceorder An override for the course order setting
  * @return array Activities with completion settings in the course
  */
-function block_completion_progress_get_activities($courseid, $config = null, $forceorder = null) {
+function block_completion_progress_get_activities($courseid, $config = null, $section = null, $forceorder = null) {
     $modinfo = get_fast_modinfo($courseid, -1);
     $sections = $modinfo->get_sections();
     $activities = array();
@@ -292,7 +292,8 @@ function block_completion_progress_get_activities($courseid, $config = null, $fo
                         !isset($config->activitiesincluded) || (
                             $config->activitiesincluded != 'selectedactivities' ||
                                 !empty($config->selectactivities) &&
-                                in_array($module.'-'.$cm->instance, $config->selectactivities))))
+                                in_array($module.'-'.$cm->instance, $config->selectactivities)))) && (
+                    empty($section) || $cm->section == $section)
             ) {
                 $activities[] = array (
                     'type'       => $module,
