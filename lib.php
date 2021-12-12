@@ -222,6 +222,70 @@ function block_completion_progress_submissions($courseid, $userid = 0) {
                 'gmavg' => QUIZ_GRADEAVERAGE,
             ],
         ],
+                [
+            'module' => 'forum',
+            'query' => "SELECT ". $DB->sql_concat('fd.userid', "'-'", 'c.id') ." AS id,
+                      fd.userid, c.id AS cmid, f.completiondiscussions,
+                      CASE 
+                        WHEN (
+                            c.completiongradeitemnumber<>0
+                        ) THEN 1
+                        ELSE 0
+                        END AS graded
+                      FROM {forum} f
+                        INNER JOIN {forum_discussions} fd ON fd.forum = f.id
+                        INNER JOIN {forum_posts} fp ON fp.discussion = fd.id
+                        INNER JOIN {course_modules} c ON c.instance = f.id
+                        INNER JOIN {modules} m ON m.name = 'forum' AND m.id = c.module
+                      WHERE f.course = :courseid
+                        AND c.completion=2
+                        AND (c.completionview = 0 
+                          OR (SELECT cmd.viewed FROM {course_modules_completion} cmd 
+                            WHERE cmd.coursemoduleid = c.id AND cmd.userid = fd.userid)=1
+                        )
+                        AND (f.completionreplies=0
+                          OR ((SELECT COUNT(fp1.id) FROM {forum_posts} fp1 JOIN {forum_discussions} fd1 ON fp1.discussion = fd1.id
+                            WHERE fp1.userid = fd.userid AND fd1.forum = f.id AND fp.parent <> 0) >= f.completionreplies)
+                        )
+                        AND (f.completionposts = 0 
+                          OR ((SELECT COUNT(fp2.id) FROM {forum_posts} fp2 JOIN {forum_discussions} fd2 ON fp2.discussion = fd2.id
+                            WHERE fp2.userid = fd.userid AND fd2.forum = f.id) >= f.completionposts)
+                        )
+                      GROUP BY fd.userid, c.id
+                      HAVING COUNT(fd.id) >= f.completiondiscussions
+                      ",
+            'params' => [],
+        ],
+        [
+            'module' => 'data',
+            'query' => "SELECT ". $DB->sql_concat('dr.userid', "'-'", 'c.id') ." AS id,
+                      dr.userid, c.id AS cmid,
+                      CASE 
+                        WHEN (
+                            c.completion=2 
+                            AND (c.completionview = 0 OR (SELECT cmd.viewed FROM {course_modules_completion} cmd WHERE cmd.coursemoduleid = c.id AND cmd.userid = dr.userid)=1)
+                            AND COUNT(dr.id)>=d.completionentries
+                            AND c.completiongradeitemnumber<>0
+                        ) THEN 1
+                        ELSE 0 
+                      END AS graded
+                     FROM {data_records} dr
+                       INNER JOIN {data} d ON d.id = dr.dataid
+                       INNER JOIN {course_modules} c ON c.instance = d.id
+                       INNER JOIN {modules} m ON m.name = 'data' AND m.id = c.module
+                    WHERE d.course = :courseid
+                      AND c.completion=2
+                      AND (c.completionview = 0 
+                        OR (SELECT cmd.viewed FROM {course_modules_completion} cmd 
+                            WHERE cmd.coursemoduleid = c.id AND cmd.userid = dr.userid)=1
+                      )
+                      AND (d.completionentries = 0 
+                        OR (SELECT COUNT(dr1.id) FROM {data_records} dr1 
+                            WHERE dr1.dataid = d.id AND dr1.userid = dr.userid) >= d.completionentries
+                      )
+                   GROUP BY dr.userid, c.id",
+            'params' => [],
+        ],
     );
 
     foreach ($queries as $spec) {
