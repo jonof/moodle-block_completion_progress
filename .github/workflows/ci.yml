@@ -11,10 +11,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - php: '7.4'
+          - php: '8.0'
             database: 'pgsql'
             moodle-branch: 'master'
-          - php: '7.3'
+          - php: '7.4'
             database: 'mariadb'
             moodle-branch: 'MOODLE_311_STABLE'
           - php: '7.3'
