@@ -104,7 +104,7 @@ if (has_capability('moodle/site:accessallgroups', $context)) {
         $groupoptions[0] = get_string('allparticipants');
     }
 } else {
-    $allgroups = groups_get_all_groups($course, $USER->id);
+    $allgroups = groups_get_all_groups($course->id, $USER->id);
     $allgroupings = [];
 }
 foreach ($allgroups as $rec) {
