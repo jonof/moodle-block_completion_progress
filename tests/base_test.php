@@ -451,4 +451,52 @@ class base_testcase extends \block_completion_progress\tests\testcase {
         $this->assertContains('Instance 1', array_column($configdata, 'progressTitle'));
         $this->assertContains('Instance 2', array_column($configdata, 'progressTitle'));
     }
+
+    /**
+     * Test course modules view urls.
+     */
+    public function test_view_urls() {
+        global $DB, $PAGE;
+
+        $output = $PAGE->get_renderer('block_completion_progress');
+
+        // Add a block.
+        $context = \context_course::instance($this->course->id);
+        $blockinstance = $this->getDataGenerator()->create_block('completion_progress', [
+            'parentcontextid' => $context->id,
+            'pagetypepattern' => 'course-view-*',
+            'showinsubcontexts' => 0,
+            'defaultweight' => 5,
+            'timecreated' => time(),
+            'timemodified' => time(),
+            'defaultregion' => 'side-post',
+            'configdata' => base64_encode(serialize((object)[
+                'orderby' => defaults::ORDERBY,
+                'longbars' => defaults::LONGBARS,
+                'progressBarIcons' => defaults::PROGRESSBARICONS,
+                'showpercentage' => defaults::SHOWPERCENTAGE,
+                'progressTitle' => "",
+                'activitiesincluded' => defaults::ACTIVITIESINCLUDED,
+            ])),
+        ]);
+
+        $pageinstance = $this->getDataGenerator()->create_module('page', [
+            'course' => $this->course->id,
+            'completion' => COMPLETION_TRACKING_MANUAL
+        ]);
+        $labelinstance = $this->getDataGenerator()->create_module('label', [
+            'course' => $this->course->id,
+            'completion' => COMPLETION_TRACKING_MANUAL
+        ]);
+
+        $modinfo = get_fast_modinfo($this->course);
+        $pagecm = $modinfo->get_cm($pageinstance->cmid);
+
+        $progress = (new completion_progress($this->course))
+                    ->for_user($this->students[0])
+                    ->for_block_instance($blockinstance);
+        $activities = $progress->get_activities();
+        $this->assertEquals($pagecm->url->out(), $activities[0]->url);
+        $this->assertEquals('', $activities[1]->url);
+    }
 }
