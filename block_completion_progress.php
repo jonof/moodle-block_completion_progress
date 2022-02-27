@@ -331,7 +331,7 @@ class block_completion_progress extends block_base {
      * @return boolean True when on the Dashboard or Site home page.
      */
     public static function on_site_page($page = null) {
-        global $PAGE;   // phpcs:ignore moodle.PHP.ForbiddenGlobalUse.BadGlobal
+        global $PAGE, $SCRIPT;   // phpcs:ignore moodle.PHP.ForbiddenGlobalUse.BadGlobal
 
         $page = $page ?? $PAGE; // phpcs:ignore moodle.PHP.ForbiddenGlobalUse.BadGlobal
         if (empty($page)) {
@@ -339,7 +339,12 @@ class block_completion_progress extends block_base {
         }
 
         $pagetypepatterns = matching_page_type_patterns_from_pattern($page->pagetype);
-        return in_array('my-*', $pagetypepatterns) || in_array('site-*', $pagetypepatterns);
+
+        $ismy = in_array('my-*', $pagetypepatterns);
+        $issite = in_array('site-*', $pagetypepatterns);
+        $isajax = $SCRIPT == '/lib/ajax/service.php';
+
+        return !$isajax && ($ismy || $issite);
     }
 
 }
