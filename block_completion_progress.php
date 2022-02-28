@@ -117,6 +117,9 @@ class block_completion_progress extends block_base {
             return $this->content;
         }
 
+        if (AJAX_SCRIPT) {
+            return $this->content;
+        }
         if (self::on_site_page($this->page)) {
             // Draw the multi-bar content for the Dashboard and Front page.
             if (!$this->prepare_dashboard_content($barinstances)) {
