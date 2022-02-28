@@ -321,22 +321,134 @@ class base_testcase extends \block_completion_progress\tests\testcase {
     }
 
     /**
-     * Test checking page types.
+     * Test checking of pages at site-level or not.
      */
     public function test_on_site_page() {
+        global $PAGE;
+
+        $generator = $this->getDataGenerator()->get_plugin_generator('mod_assign');
+        $instance = $generator->create_instance(['course' => $this->course->id]);
+        $cm = get_coursemodule_from_instance('assign', $instance->id);
+
+        // Front page.
         $page = new \moodle_page();
         $page->set_pagetype('site-index');
-        $this->assertTrue(\block_completion_progress::on_site_page($page));
+        $page->set_context(\context_course::instance(SITEID));
+        $this->assertTrue(\block_completion_progress::on_site_page($page), 'front page');
 
+        // Dashboard.
         $page = new \moodle_page();
         $page->set_pagetype('my-index');
-        $this->assertTrue(\block_completion_progress::on_site_page($page));
+        $page->set_context(\context_user::instance(get_admin()->id));
+        $this->assertTrue(\block_completion_progress::on_site_page($page), 'dashboard');
 
+        // Course.
         $page = new \moodle_page();
-        $page->set_pagetype('course-view');
-        $this->assertFalse(\block_completion_progress::on_site_page($page));
+        $page->set_pagetype('course-view-topics');
+        $page->set_context(\context_course::instance($this->course->id));
+        $this->assertFalse(\block_completion_progress::on_site_page($page), 'course');
 
+        // Activity, possible by making a course block viewable on all page types.
         $page = new \moodle_page();
-        $this->assertFalse(\block_completion_progress::on_site_page($page));
+        $page->set_pagetype('mod-assign-grader');
+        $page->set_context(\context_module::instance($cm->id));
+        $this->assertFalse(\block_completion_progress::on_site_page($page), 'activity');
+
+        // AJAX-loaded fragment within a course module context.
+        $page = new \moodle_page();
+        $page->set_pagetype('site-index');
+        $page->set_context(\context_module::instance($cm->id));
+        $this->assertFalse(\block_completion_progress::on_site_page($page), 'ajax');
+
+        // An uninitialised page. This has a default system context.
+        $page = new \moodle_page();
+        $this->assertTrue(\block_completion_progress::on_site_page($page), 'uninitialised');
+
+        // Something very unusual.
+        $PAGE = null;
+        $this->assertFalse(\block_completion_progress::on_site_page(null), 'oddity');
+    }
+
+    /**
+     * Test that asynchronous course copy preserves all expected block instances.
+     */
+    public function test_course_copy() {
+        global $DB;
+
+        $this->setAdminUser();
+
+        $context = \context_course::instance($this->course->id);
+        $generator = $this->getDataGenerator();
+        $block1data = [
+            'parentcontextid' => $context->id,
+            'pagetypepattern' => 'course-view-*',
+            'showinsubcontexts' => 0,
+            'defaultweight' => 5,
+            'timecreated' => time(),
+            'timemodified' => time(),
+            'defaultregion' => 'side-post',
+            'configdata' => base64_encode(serialize((object)[
+                'orderby' => defaults::ORDERBY,
+                'longbars' => defaults::LONGBARS,
+                'progressBarIcons' => 0,    // Non-default.
+                'showpercentage' => defaults::SHOWPERCENTAGE,
+                'progressTitle' => "Instance 1",
+                'activitiesincluded' => defaults::ACTIVITIESINCLUDED,
+            ])),
+        ];
+        $generator->create_block('completion_progress', $block1data);
+        $block2data = [
+            'parentcontextid' => $context->id,
+            'pagetypepattern' => 'course-view-*',
+            'showinsubcontexts' => 0,
+            'defaultweight' => 5,
+            'timecreated' => time(),
+            'timemodified' => time(),
+            'defaultregion' => 'side-post',
+            'configdata' => base64_encode(serialize((object)[
+                'orderby' => defaults::ORDERBY,
+                'longbars' => defaults::LONGBARS,
+                'progressBarIcons' => 0,    // Non-default.
+                'showpercentage' => defaults::SHOWPERCENTAGE,
+                'progressTitle' => "Instance 2",
+                'activitiesincluded' => defaults::ACTIVITIESINCLUDED,
+            ])),
+        ];
+        $generator->create_block('completion_progress', $block2data);
+
+        $mdata = new \stdClass;
+        $mdata->courseid = $this->course->id;
+        $mdata->fullname = $this->course->fullname . ' Copy';
+        $mdata->shortname = $this->course->shortname . ' Copy';
+        $mdata->category = $this->course->category;
+        $mdata->visible = 1;
+        $mdata->startdate = $this->course->startdate;
+        $mdata->enddate = $this->course->enddate;
+        $mdata->idnumber = $this->course->idnumber . '_copy';
+        $mdata->userdata = 0;
+        $backupcopy = new \core_backup\copy\copy($mdata);
+        $backupcopy->create_copy();
+
+        $now = time();
+        $task = \core\task\manager::get_next_adhoc_task($now);
+        $this->assertInstanceOf('\\core\\task\\asynchronous_copy_task', $task);
+        $this->expectOutputRegex("/Course copy/");
+        $task->execute();
+        \core\task\manager::adhoc_task_complete($task);
+
+        $copy = $DB->get_record('course', ['idnumber' => $mdata->idnumber]);
+        $context = \context_course::instance($copy->id);
+        $blocks = $DB->get_records('block_instances', ['blockname' => 'completion_progress',
+            'parentcontextid' => $context->id]);
+        $configdata = array_map(
+            function ($record) {
+                return unserialize(base64_decode($record->configdata));
+            },
+            $blocks
+        );
+
+        $this->assertCount(2, $blocks);
+        $this->assertContains('Instance 1', array_column($configdata, 'progressTitle'));
+        $this->assertContains('Instance 2', array_column($configdata, 'progressTitle'));
     }
 }

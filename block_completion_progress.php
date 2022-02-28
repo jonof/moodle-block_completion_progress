@@ -325,7 +325,7 @@ class block_completion_progress extends block_base {
     }
 
     /**
-     * Checks whether the given page is the Dashboard or Site home page.
+     * Checks whether the given page is site-level (Dashboard or Front page) or not.
      *
      * @param moodle_page $page the page to check, or the current page if not passed.
      * @return boolean True when on the Dashboard or Site home page.
@@ -334,12 +334,19 @@ class block_completion_progress extends block_base {
         global $PAGE;   // phpcs:ignore moodle.PHP.ForbiddenGlobalUse.BadGlobal
 
         $page = $page ?? $PAGE; // phpcs:ignore moodle.PHP.ForbiddenGlobalUse.BadGlobal
-        if (empty($page)) {
-            return false;   // Might be an asynchronous course copy.
-        }
+        $context = $page->context ?? null;
 
-        $pagetypepatterns = matching_page_type_patterns_from_pattern($page->pagetype);
-        return in_array('my-*', $pagetypepatterns) || in_array('site-*', $pagetypepatterns);
+        if (!$page || !$context) {
+            return false;
+        } else if ($context->contextlevel === CONTEXT_SYSTEM && $page->requestorigin === 'restore') {
+            return false; // When restoring from a backup, pretend the page is course-level.
+        } else if ($context->contextlevel === CONTEXT_COURSE && $context->instanceid == SITEID) {
+            return true;  // Front page.
+        } else if ($context->contextlevel < CONTEXT_COURSE) {
+            return true;  // System, user (i.e. dashboard), course category.
+        } else {
+            return false;
+        }
     }
 
 }
