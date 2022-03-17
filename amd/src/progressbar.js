@@ -20,8 +20,8 @@
  * @copyright  2020 Jonathon Fowler <fowlerj@usq.edu.au>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['jquery'],
-    function($) {
+define(['jquery', 'core/pubsub', 'core/utils'],
+    function($, PubSub, Utils) {
         /**
          * Show progress event information for a cell.
          * @param {Event} event
@@ -81,13 +81,13 @@ define(['jquery'],
          * Show or hide the scroll arrows based on the visible position.
          */
         function checkArrows() {
-            var threshold = 10;
             var barrow = $(this);
             var barcontainer = barrow.closest('.block_completion_progress .barContainer');
             var leftarrow = barcontainer.find('.left-arrow-svg');
             var rightarrow = barcontainer.find('.right-arrow-svg');
             var scrolled = barrow.prop('scrollLeft');
             var scrollWidth = barrow.prop('scrollWidth') - barrow.prop('offsetWidth');
+            var threshold = Math.floor(barrow.find('.progressBarCell:first-child').width() * 0.25);
 
             if (document.dir === 'rtl') {
                 scrolled = -scrolled;
@@ -123,6 +123,19 @@ define(['jquery'],
         function setupScroll(barcontainers) {
             var barrows = barcontainers.find('.barRow');
 
+            /**
+             * Check arrow visibility for each of the bar rows.
+             */
+            function checkEachBar() {
+                barrows.each(checkArrows);
+            }
+
+            barrows.scroll(checkArrows);
+            $(window).resize(checkEachBar);
+            PubSub.subscribe('nav-drawer-toggle-end', checkEachBar);  // Boost ≤3.11.
+            $(document).on('theme_boost/drawers:shown theme_boost/drawers:hidden',
+                Utils.debounce(checkEachBar, 250));     // Boost ≥4.0.
+
             // On page load, place the 'now' marker in the centre of the scrolled bar
             // and adjust which arrows should be visible.
             $(function() {
@@ -141,11 +154,6 @@ define(['jquery'],
 
             barcontainers.on('click', '.left-arrow-svg', -1, scrollContainer);
             barcontainers.on('click', '.right-arrow-svg', 1, scrollContainer);
-
-            barrows.on('scroll', checkArrows);
-            $(window).resize(function() {
-                barrows.each(checkArrows);
-            });
         }
 
         /**
