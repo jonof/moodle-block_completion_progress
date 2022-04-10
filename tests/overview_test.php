@@ -55,6 +55,12 @@ class overview_test extends \block_completion_progress\tests\testcase {
     private $students = [];
 
     /**
+     * Groups.
+     * @var array
+     */
+    private $groups = [];
+
+    /**
      * Number of students to create.
      */
     const STUDENT_COUNT = 4;
@@ -75,10 +81,17 @@ class overview_test extends \block_completion_progress\tests\testcase {
 
         $this->teachers[0] = $generator->create_and_enrol($this->course, 'teacher');
 
+        $this->groups[0] = $generator->create_group(['courseid' => $this->course->id]);
+        $this->groups[1] = $generator->create_group(['courseid' => $this->course->id]);
+
         for ($i = 0; $i < self::STUDENT_COUNT; $i++) {
             $status = $i >= 3 ? ENROL_USER_SUSPENDED : null;
             $this->students[$i] = $generator->create_and_enrol($this->course, 'student',
                 null, 'manual', 0, 0, $status);
+
+            // Students are put into even/odd groups.
+            $generator->create_group_member(['groupid' => $this->groups[$i % 2]->id,
+                'userid' => $this->students[$i]->id]);
         }
     }
 
@@ -168,6 +181,20 @@ class overview_test extends \block_completion_progress\tests\testcase {
         $this->assertStringContainsString('<input id="user'.$this->students[3]->id.'" ', $text);
         $this->assertStringContainsString('col-timeaccess', $text);
         $this->assertStringContainsString('barWithIcons', $text);
+
+        // Test that group filtering works.
+        $progress = (new completion_progress($this->course))->for_overview()->for_block_instance($blockinstance);
+        $table = new \block_completion_progress\table\overview($progress, [$this->groups[0]->id], 0, true);
+        $table->define_baseurl('/');
+
+        ob_start();
+        $table->out(30, false);
+        $text = ob_get_clean();
+
+        $this->assertStringContainsString('<input id="user'.$this->students[0]->id.'" ', $text);
+        $this->assertStringNotContainsString('<input id="user'.$this->students[1]->id.'" ', $text);
+        $this->assertStringContainsString('<input id="user'.$this->students[2]->id.'" ', $text);
+        $this->assertStringNotContainsString('<input id="user'.$this->students[3]->id.'" ', $text);
     }
 
     /**

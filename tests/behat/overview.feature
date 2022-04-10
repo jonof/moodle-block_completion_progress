@@ -11,6 +11,7 @@ Feature: Using Completion Progress block overview
       | student2 | Student | 2 | student2@example.com |
       | student3 | Student | 3 | student3@example.com |
       | teacher1 | Teacher | 1 | teacher1@example.com |
+      | teacher2 | Teacher | 2 | teacher2@example.com |
     And the following config values are set as admin:
       | enablecompletion | 1 |
       | enableavailability | 1 |
@@ -25,6 +26,17 @@ Feature: Using Completion Progress block overview
       | student2 | C1     | student        |
       | student3 | C1     | student        |
       | teacher1 | C1     | editingteacher |
+      | teacher2 | C1     | teacher        |
+    And the following "groups" exist:
+      | name    | course | idnumber |
+      | Group 1 | C1     | G1       |
+      | Group 2 | C1     | G2       |
+    And the following "group members" exist:
+      | user     | group |
+      | student1 | G1    |
+      | student2 | G2    |
+      | teacher2 | G1    |
+      | teacher2 | G2    |
     # 2 = Show activity as complete when conditions are met.
     And the following "activities" exist:
       | activity | course | idnumber | name                    | timeclose  | enablecompletion | completionview | completion |
@@ -50,6 +62,22 @@ Feature: Using Completion Progress block overview
     And I am on "Course 1" course homepage with editing mode on
     And I add the "Completion Progress" block
     And I log out
+
+  Scenario: Editing teacher sees all members by default
+    Given I log in as "teacher1"
+    And I am on "Course 1" course homepage
+    When I click on "Overview of students" "button" in the "Completion Progress" "block"
+    Then I should see "Student 1"
+    And I should see "Student 2"
+    And I should see "Student 3"
+
+  Scenario: Non-editing teacher sees their group members by default
+    Given I log in as "teacher2"
+    And I am on "Course 1" course homepage
+    When I click on "Overview of students" "button" in the "Completion Progress" "block"
+    Then I should see "Student 1"
+    And I should see "Student 2"
+    And I should not see "Student 3"
 
   Scenario: Select all selects all
     Given I log in as "teacher1"
