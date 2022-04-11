@@ -25,8 +25,6 @@
 
 namespace block_completion_progress\output;
 
-defined('MOODLE_INTERNAL') || die;
-
 use block_completion_progress\completion_progress;
 use block_completion_progress\defaults;
 use plugin_renderer_base;

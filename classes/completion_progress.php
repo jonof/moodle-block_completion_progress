@@ -25,8 +25,6 @@
 
 namespace block_completion_progress;
 
-defined('MOODLE_INTERNAL') || die;
-
 use stdClass;
 use completion_info;
 use context_course;

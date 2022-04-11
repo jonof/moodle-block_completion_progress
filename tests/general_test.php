@@ -15,14 +15,14 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Basic unit tests for block_completion_progress.
+ * General unit tests for block_completion_progress.
  *
  * @package    block_completion_progress
  * @copyright  2017 onwards Nelson Moller  {@link http://moodle.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace block_completion_progress\tests;
+namespace block_completion_progress;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -34,30 +34,14 @@ require_once($CFG->dirroot.'/blocks/completion_progress/block_completion_progres
 use block_completion_progress\completion_progress;
 use block_completion_progress\defaults;
 
-if (!class_exists('block_completion_progress\tests\testcase', false)) {
-    if (version_compare(\PHPUnit\Runner\Version::id(), '8', '<')) {
-        // Moodle 3.9.
-        class_alias('block_completion_progress\tests\testcase_phpunit7', 'block_completion_progress\tests\testcase');
-    } else {
-        // Moodle 3.10 onwards.
-        class_alias('block_completion_progress\tests\testcase_phpunit8', 'block_completion_progress\tests\testcase');
-    }
-}
-
 /**
- * Basic unit tests for block_completion_progress.
+ * General unit tests for block_completion_progress.
  *
  * @package    block_completion_progress
  * @copyright  2017 onwards Nelson Moller  {@link http://moodle.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class base_testcase extends \block_completion_progress\tests\testcase {
-    /**
-     * The test course.
-     * @var object
-     */
-    private $course;
-
+class general_test extends \block_completion_progress\tests\testcase {
     /**
      * Teacher users.
      * @var array
@@ -71,17 +55,12 @@ class base_testcase extends \block_completion_progress\tests\testcase {
     private $students = [];
 
     /**
-     * Default number of students to create.
+     * Number of students to create.
      */
-    const DEFAULT_STUDENT_COUNT = 4;
+    const STUDENT_COUNT = 4;
 
     /**
-     * Default number of teachers to create.
-     */
-    const DEFAULT_TEACHER_COUNT = 1;
-
-    /**
-     * Setup function - we will create a course and add an assign instance to it.
+     * Create a course and add enrol users to it.
      */
     protected function set_up() {
         $this->resetAfterTest(true);
@@ -93,15 +72,12 @@ class base_testcase extends \block_completion_progress\tests\testcase {
         $this->course = $generator->create_course([
           'enablecompletion' => 1,
         ]);
-        $this->teachers = [];
-        for ($i = 0; $i < self::DEFAULT_TEACHER_COUNT; $i++) {
-            $this->teachers[] = $generator->create_and_enrol($this->course, 'teacher');
-        }
 
-        $this->students = array();
-        for ($i = 0; $i < self::DEFAULT_STUDENT_COUNT; $i++) {
-            $status = $i == 3 ? ENROL_USER_SUSPENDED : null;
-            $this->students[] = $generator->create_and_enrol($this->course, 'student',
+        $this->teachers[0] = $generator->create_and_enrol($this->course, 'teacher');
+
+        for ($i = 0; $i < self::STUDENT_COUNT; $i++) {
+            $status = $i >= 3 ? ENROL_USER_SUSPENDED : null;
+            $this->students[$i] = $generator->create_and_enrol($this->course, 'student',
                 null, 'manual', 0, 0, $status);
         }
     }
@@ -123,6 +99,7 @@ class base_testcase extends \block_completion_progress\tests\testcase {
 
     /**
      * Check that a student's excluded grade hides the activity from the student's progress bar.
+     * @covers \block_completion_progress\completion_progress
      */
     public function test_grade_excluded() {
         global $DB, $PAGE;
@@ -181,147 +158,8 @@ class base_testcase extends \block_completion_progress\tests\testcase {
     }
 
     /**
-     * Test optional settings' effects on the overview table.
-     */
-    public function test_overview_options() {
-        global $DB, $PAGE;
-
-        $output = $PAGE->get_renderer('block_completion_progress');
-
-        // Add a block.
-        $context = \context_course::instance($this->course->id);
-        $blockinfo = [
-            'parentcontextid' => $context->id,
-            'pagetypepattern' => 'course-view-*',
-            'showinsubcontexts' => 0,
-            'defaultweight' => 5,
-            'timecreated' => time(),
-            'timemodified' => time(),
-            'defaultregion' => 'side-post',
-            'configdata' => base64_encode(serialize((object)[
-                'orderby' => defaults::ORDERBY,
-                'longbars' => defaults::LONGBARS,
-                'progressBarIcons' => 0,    // Non-default.
-                'showpercentage' => defaults::SHOWPERCENTAGE,
-                'progressTitle' => "",
-                'activitiesincluded' => defaults::ACTIVITIESINCLUDED,
-            ])),
-        ];
-        $blockinstance = $this->getDataGenerator()->create_block('completion_progress', $blockinfo);
-
-        $assign = $this->create_assign_instance([
-          'submissiondrafts' => 0,
-          'completionsubmit' => 1,
-          'completion' => COMPLETION_TRACKING_AUTOMATIC
-        ]);
-
-        $PAGE->set_url('/');
-
-        // Test inactive student is hidden and 'last in course' column is hidden.
-        set_config('showinactive', 0, 'block_completion_progress');
-        set_config('showlastincourse', 0, 'block_completion_progress');
-        set_config('forceiconsinbar', 0, 'block_completion_progress');
-        $progress = (new completion_progress($this->course))->for_overview()->for_block_instance($blockinstance);
-        $table = new \block_completion_progress\table\overview($progress, [], 0, true);
-        $table->define_baseurl('/');
-
-        ob_start();
-        $table->out(30, false);
-        $text = ob_get_clean();
-
-        $this->assertStringContainsString('<input id="user'.$this->students[0]->id.'" ', $text);
-        $this->assertStringNotContainsString('<input id="user'.$this->students[3]->id.'" ', $text);
-        $this->assertStringNotContainsString('col-timeaccess', $text);
-        $this->assertStringNotContainsString('barWithIcons', $text);
-
-        // Test inactive student is visible and 'last in course' column is shown.
-        set_config('showinactive', 1, 'block_completion_progress');
-        set_config('showlastincourse', 1, 'block_completion_progress');
-        set_config('forceiconsinbar', 1, 'block_completion_progress');
-        $progress = (new completion_progress($this->course))->for_overview()->for_block_instance($blockinstance);
-        $table = new \block_completion_progress\table\overview($progress, [], 0, true);
-        $table->define_baseurl('/');
-
-        ob_start();
-        $table->out(30, false);
-        $text = ob_get_clean();
-
-        $this->assertStringContainsString('<input id="user'.$this->students[0]->id.'" ', $text);
-        $this->assertStringContainsString('<input id="user'.$this->students[3]->id.'" ', $text);
-        $this->assertStringContainsString('col-timeaccess', $text);
-        $this->assertStringContainsString('barWithIcons', $text);
-    }
-
-    /**
-     * Test that the overview table correctly sorts by progress.
-     */
-    public function test_overview_percentage_sort() {
-        global $DB, $PAGE;
-
-        $PAGE->set_url('/');
-        $output = $PAGE->get_renderer('block_completion_progress');
-        $generator = $this->getDataGenerator();
-
-        // Add a block.
-        $context = \context_course::instance($this->course->id);
-        $blockinfo = [
-            'parentcontextid' => $context->id,
-            'pagetypepattern' => 'course-view-*',
-            'showinsubcontexts' => 0,
-            'defaultweight' => 5,
-            'timecreated' => time(),
-            'timemodified' => time(),
-            'defaultregion' => 'side-post',
-            'configdata' => base64_encode(serialize((object)[
-                'orderby' => defaults::ORDERBY,
-                'longbars' => defaults::LONGBARS,
-                'progressBarIcons' => 0,    // Non-default.
-                'showpercentage' => defaults::SHOWPERCENTAGE,
-                'progressTitle' => "",
-                'activitiesincluded' => defaults::ACTIVITIESINCLUDED,
-            ])),
-        ];
-        $blockinstance = $generator->create_block('completion_progress', $blockinfo);
-
-        $page1 = $generator->create_module('page', [
-            'course' => $this->course->id,
-            'completion' => COMPLETION_TRACKING_MANUAL
-        ]);
-        $page1cm = get_coursemodule_from_id('page', $page1->cmid);
-        $page2 = $generator->create_module('page', [
-            'course' => $this->course->id,
-            'completion' => COMPLETION_TRACKING_MANUAL
-        ]);
-        $page2cm = get_coursemodule_from_id('page', $page2->cmid);
-
-        $completion = new \completion_info($this->course);
-
-        // Set student 2 as having completed both pages.
-        $completion->update_state($page1cm, COMPLETION_COMPLETE, $this->students[2]->id);
-        $completion->update_state($page2cm, COMPLETION_COMPLETE, $this->students[2]->id);
-
-        // Set student 0 as having completed one page.
-        $completion->update_state($page1cm, COMPLETION_COMPLETE, $this->students[0]->id);
-
-        $progress = (new completion_progress($this->course))->for_overview()->for_block_instance($blockinstance);
-        $table = new \block_completion_progress\table\overview($progress, [], 0, true);
-        $table->set_sortdata([['sortby' => 'progress', 'sortorder' => SORT_DESC]]);
-        $table->define_baseurl('/');
-
-        ob_start();
-        $table->out(5, false);
-        $text = ob_get_clean();
-
-        // Student 2 then Student 0 then Student 1.
-        $student0pos = strpos($text, '<input id="user'.$this->students[0]->id.'" ');
-        $student1pos = strpos($text, '<input id="user'.$this->students[1]->id.'" ');
-        $student2pos = strpos($text, '<input id="user'.$this->students[2]->id.'" ');
-        $this->assertGreaterThan($student2pos, $student0pos, 'Student 2 > Student 0');
-        $this->assertGreaterThan($student0pos, $student1pos, 'Student 0 > Student 1');
-    }
-
-    /**
      * Test checking of pages at site-level or not.
+     * @covers \block_completion_progress
      */
     public function test_on_site_page() {
         global $PAGE;
@@ -371,6 +209,7 @@ class base_testcase extends \block_completion_progress\tests\testcase {
 
     /**
      * Test that asynchronous course copy preserves all expected block instances.
+     * @covers \restore_completion_progress_block_task
      */
     public function test_course_copy() {
         global $DB;
@@ -454,6 +293,7 @@ class base_testcase extends \block_completion_progress\tests\testcase {
 
     /**
      * Test course modules view urls.
+     * @covers \block_completion_progress\completion_progress
      */
     public function test_view_urls() {
         global $DB, $PAGE;

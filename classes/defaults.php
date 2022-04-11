@@ -25,8 +25,6 @@
 
 namespace block_completion_progress;
 
-defined('MOODLE_INTERNAL') || die;
-
 /**
  * Completion Progress defaults.
  *

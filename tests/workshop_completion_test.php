@@ -22,7 +22,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace block_completion_progress\tests;
+namespace block_completion_progress;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -40,10 +40,10 @@ use block_completion_progress\defaults;
  * @copyright  2020 Jonathon Fowler <fowlerj@usq.edu.au>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class workshop_completion_testcase extends \block_completion_progress\tests\completion_testcase_base {
+class workshop_completion_test extends \block_completion_progress\tests\completion_testcase {
     /**
-     * Test completion determination in a Workshop activity with
-     * pass/fail enabled.
+     * Test completion determination in a Workshop activity with pass/fail enabled.
+     * @covers \block_completion_progress\completion_progress
      */
     public function test_workshop_passfail() {
         $this->setAdminUser();
@@ -92,6 +92,7 @@ class workshop_completion_testcase extends \block_completion_progress\tests\comp
 
     /**
      * Test completion determination in an Workshop activity with basic completion.
+     * @covers \block_completion_progress\completion_progress
      */
     public function test_workshop_basic() {
         $this->setAdminUser();

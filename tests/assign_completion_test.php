@@ -22,7 +22,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace block_completion_progress\tests;
+namespace block_completion_progress;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -40,7 +40,11 @@ use block_completion_progress\defaults;
  * @copyright  2020 Jonathon Fowler <fowlerj@usq.edu.au>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class assign_completion_testcase extends \block_completion_progress\tests\completion_testcase_base {
+class assign_completion_test extends \block_completion_progress\tests\completion_testcase {
+    /**
+     * Test assignment completion state changes.
+     * @covers \block_completion_progress\completion_progress
+     */
     public function test_assign_get_completion_state() {
         global $DB, $PAGE;
 
@@ -102,8 +106,8 @@ class assign_completion_testcase extends \block_completion_progress\tests\comple
     }
 
     /**
-     * Test completion determination in an Assignment activity with
-     * pass/fail enabled.
+     * Test completion determination in an Assignment activity with pass/fail enabled.
+     * @covers \block_completion_progress\completion_progress
      */
     public function test_assign_passfail() {
         $generator = $this->getDataGenerator();
@@ -154,6 +158,7 @@ class assign_completion_testcase extends \block_completion_progress\tests\comple
 
     /**
      * Test completion determination in an Assignment activity with basic completion.
+     * @covers \block_completion_progress\completion_progress
      */
     public function test_assign_basic() {
         $generator = $this->getDataGenerator();
@@ -212,6 +217,7 @@ class assign_completion_testcase extends \block_completion_progress\tests\comple
      *
      * @param integer $requireallteammemberssubmit
      *
+     * @covers \block_completion_progress\completion_progress
      * @dataProvider teamsubmission_provider
      */
     public function test_teamsubmission($requireallteammemberssubmit) {

@@ -31,16 +31,6 @@ global $CFG;
 use block_completion_progress\completion_progress;
 use block_completion_progress\defaults;
 
-if (!class_exists('block_completion_progress\tests\testcase', false)) {
-    if (version_compare(\PHPUnit\Runner\Version::id(), '8', '<')) {
-        // Moodle 3.9.
-        class_alias('block_completion_progress\tests\testcase_phpunit7', 'block_completion_progress\tests\testcase');
-    } else {
-        // Moodle 3.10 onwards.
-        class_alias('block_completion_progress\tests\testcase_phpunit8', 'block_completion_progress\tests\testcase');
-    }
-}
-
 /**
  * Completion unit tests common base for Completion Progress block.
  *
@@ -48,7 +38,7 @@ if (!class_exists('block_completion_progress\tests\testcase', false)) {
  * @copyright  2020 Jonathon Fowler <fowlerj@usq.edu.au>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-abstract class completion_testcase_base extends \block_completion_progress\tests\testcase {
+abstract class completion_testcase extends \block_completion_progress\tests\testcase {
     /**
      * The test course.
      * @var object

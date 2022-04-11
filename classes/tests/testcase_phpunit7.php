@@ -24,8 +24,6 @@
 
 namespace block_completion_progress\tests;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Compatibility shim for older PHPunit versions.
  *

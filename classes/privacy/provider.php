@@ -24,8 +24,6 @@
 
 namespace block_completion_progress\privacy;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Privacy Subsystem for block_completion_progress implementing null_provider.
  *

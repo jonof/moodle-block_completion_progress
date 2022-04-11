@@ -15,22 +15,21 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * block_completion_progress data generator
+ * Test case compatibility shim.
  *
  * @package    block_completion_progress
- * @category   test
- * @copyright  2018 Michael Aherne
+ * @copyright  2022 Jonathon Fowler <fowlerj@usq.edu.au>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-/**
- * Completion progress block data generator class
- *
- * @package    block_completion_progress
- * @category   test
- * @copyright  2018 Michael Aherne
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-class block_completion_progress_generator extends testing_block_generator {
+namespace block_completion_progress\tests;
 
+defined('MOODLE_INTERNAL') || die();
+
+if (version_compare(\PHPUnit\Runner\Version::id(), '8', '<')) {
+    // Moodle 3.9.
+    class_alias('block_completion_progress\tests\testcase_phpunit7', 'block_completion_progress\tests\testcase');
+} else {
+    // Moodle 3.10 onwards.
+    class_alias('block_completion_progress\tests\testcase_phpunit8', 'block_completion_progress\tests\testcase');
 }
