@@ -194,16 +194,17 @@ class completion_progress implements \renderable {
     /**
      * Specialise for a particular block instance.
      * @param stdClass $instance Instance record.
+     * @param boolean $selectedonly Whether to filter by configured selected items.
      * @return self
      */
-    public function for_block_instance(stdClass $instance): self {
+    public function for_block_instance(stdClass $instance, $selectedonly = true): self {
         if ($this->blockinstance) {
             throw new coding_exception('cannot re-specialise for a different block instance');
         }
         $this->blockinstance = $instance;
         $this->blockconfig = (object)(array)unserialize(base64_decode($instance->configdata ?? ''));
 
-        $this->load_activities();
+        $this->load_activities($selectedonly);
         $this->filter_visible_activities();
 
         return $this;
@@ -417,11 +418,14 @@ class completion_progress implements \renderable {
     /**
      * Loads activities with completion set in current course.
      *
+     * @param boolean $selectedonly Whether to filter by configured selected items.
      * @return array
      */
-    protected function load_activities() {
+    protected function load_activities($selectedonly) {
         $modinfo = get_fast_modinfo($this->course, -1);
         $sections = $modinfo->get_sections();
+        $selectedonly = $selectedonly && ($this->blockconfig->activitiesincluded ?? '') === 'selectedactivities';
+        $selectedcms = $this->blockconfig->selectactivities ?? [];
 
         $this->activities = [];
 
@@ -431,8 +435,7 @@ class completion_progress implements \renderable {
                 if ($cm->completion == COMPLETION_TRACKING_NONE) {
                     continue;
                 }
-                if (($this->blockconfig->activitiesincluded ?? '') === 'selectedactivities' &&
-                        !in_array($module.'-'.$cm->instance, $this->blockconfig->selectactivities ?? [])) {
+                if ($selectedonly && !in_array($module.'-'.$cm->instance, $selectedcms)) {
                     continue;
                 }
 

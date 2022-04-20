@@ -44,7 +44,7 @@ class block_completion_progress_edit_form extends block_edit_form {
      */
     protected function specific_definition($mform) {
         global $COURSE, $OUTPUT;
-        $progress = (new completion_progress($COURSE))->for_block_instance($this->block->instance);
+        $progress = (new completion_progress($COURSE))->for_block_instance($this->block->instance, false);
         $activities = $progress->get_activities(completion_progress::ORDERBY_COURSE);
 
         // The My home version is not configurable.
