@@ -132,9 +132,9 @@ define(['jquery', 'core/pubsub', 'core/utils'],
 
             barrows.scroll(checkArrows);
             $(window).resize(checkEachBar);
-            PubSub.subscribe('nav-drawer-toggle-end', checkEachBar);  // Boost ≤3.11.
+            PubSub.subscribe('nav-drawer-toggle-end', checkEachBar); // Boost ≤3.11.
             $(document).on('theme_boost/drawers:shown theme_boost/drawers:hidden',
-                Utils.debounce(checkEachBar, 250));     // Boost ≥4.0.
+                Utils.debounce(checkEachBar, 250)); // Boost ≥4.0.
 
             // On page load, place the 'now' marker in the centre of the scrolled bar
             // and adjust which arrows should be visible.
