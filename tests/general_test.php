@@ -30,6 +30,7 @@ global $CFG;
 require_once($CFG->dirroot . '/mod/assign/locallib.php');
 require_once($CFG->dirroot.'/blocks/moodleblock.class.php');
 require_once($CFG->dirroot.'/blocks/completion_progress/block_completion_progress.php');
+require_once($CFG->dirroot . '/backup/util/includes/backup_includes.php');
 
 use block_completion_progress\completion_progress;
 use block_completion_progress\defaults;
@@ -265,8 +266,16 @@ class general_test extends \block_completion_progress\tests\testcase {
         $mdata->enddate = $this->course->enddate;
         $mdata->idnumber = $this->course->idnumber . '_copy';
         $mdata->userdata = 0;
-        $backupcopy = new \core_backup\copy\copy($mdata);
-        $backupcopy->create_copy();
+
+        if (method_exists('\copy_helper', 'process_formdata')) {
+            // Moodle 3.11 or higherr.
+            $copydata = \copy_helper::process_formdata($mdata);
+            \copy_helper::create_copy($copydata);
+        } else {
+            // Moodle 3.10 or older.
+            $backupcopy = new \core_backup\copy\copy($mdata);
+            $backupcopy->create_copy();
+        }
 
         $now = time();
         $task = \core\task\manager::get_next_adhoc_task($now);
