@@ -50,7 +50,7 @@ class completion_progress implements \renderable {
     const ORDERBY_TIME = 'orderbytime';
 
     /**
-     * Sort activities by title.
+     * Sort activities by name.
      */
     const ORDERBY_NAME = 'orderbyname';
 
@@ -427,11 +427,7 @@ class completion_progress implements \renderable {
      * @return integer
      */
     private function sorter_orderbyname($a, $b): int {
-        if ($a->section != $b->section) {
-            return $a->section <=> $b->section;
-        } else {
-            return $a->name <=> $b->name;
-        }
+        return $a->name <=> $b->name;
     }
 
     /**
