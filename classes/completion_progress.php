@@ -50,6 +50,11 @@ class completion_progress implements \renderable {
     const ORDERBY_TIME = 'orderbytime';
 
     /**
+     * Sort activities by title.
+     */
+    const ORDERBY_NAME = 'orderbyname';
+
+    /**
      * The course.
      * @var object
      */
@@ -414,6 +419,20 @@ class completion_progress implements \renderable {
         }
     }
 
+    /**
+     * Used to compare two activity entries based on activityname.
+     *
+     * @param array $a
+     * @param array $b
+     * @return integer
+     */
+    private function sorter_orderbyname($a, $b): int {
+        if ($a->section != $b->section) {
+            return $a->section <=> $b->section;
+        } else {
+            return $a->name <=> $b->name;
+        }
+    }
 
     /**
      * Loads activities with completion set in current course.
