@@ -64,6 +64,8 @@ class block_completion_progress_edit_form extends block_edit_form {
                 'block_completion_progress'),
             completion_progress::ORDERBY_NAME => get_string('config_orderby_name',
                 'block_completion_progress'),
+            completion_progress::ORDERBY_IDNUMBER => get_string('config_orderby_idnumber',
+                'block_completion_progress'),
         );
         $label = get_string('config_orderby', 'block_completion_progress');
         $mform->addElement('select', 'config_orderby', $label, $options);
