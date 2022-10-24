@@ -42,7 +42,7 @@ $colours = array(
 );
 foreach ($colours as $classname => $stringkey) {
     $colour = get_config('block_completion_progress', $stringkey) ?:
-        get_string('block_completion_progress', $stringkey);
+        get_string($stringkey, 'block_completion_progress');
     $css .= ".block_completion_progress .progressBarCell.$classname { ";
     $css .= "background-color: $colour;";
     $css .= " }\n";
