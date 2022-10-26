@@ -29,7 +29,20 @@ define(['core_user/participants'],
              * @param {object} options initialisation options.
              */
             init: function(options) {
+                var form = document.getElementById('participantsform');
+                var action = document.getElementById('formactionid');
+
+                /**
+                 * Manage the activation of the 'With selected users' control.
+                 */
+                function checkaction() {
+                    action.disabled = (form.querySelector('input.usercheckbox:checked') === null);
+                }
+
                 Participants.init(options);
+
+                checkaction();
+                form.addEventListener('change', checkaction);
             }
         };
     });
