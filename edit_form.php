@@ -115,7 +115,7 @@ class block_completion_progress_edit_form extends block_edit_form {
         $groupings = groups_get_all_groupings($COURSE->id);
         if (!empty($groups) || !empty($groupings)) {
             $options = array();
-            $options[0] = get_string('allparticipants');
+            $options['0'] = get_string('allparticipants');
             foreach ($groups as $group) {
                 $options['group-' . $group->id] = format_string($group->name);
             }

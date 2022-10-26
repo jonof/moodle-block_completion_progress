@@ -61,6 +61,13 @@ class block_completion_progress extends block_base {
         if (isset($this->config->progressTitle) && trim($this->config->progressTitle) != '') {
             $this->title = format_string($this->config->progressTitle);
         }
+
+        // Work around a quirk of in_array('opt', [0 => 0]) returning true on
+        // PHP <8.0, causing the configuration form's 'config_group' element to
+        // declare all its options 'selected'.
+        if (isset($this->config->group)) {
+            $this->config->group = (string)$this->config->group;
+        }
     }
 
     /**

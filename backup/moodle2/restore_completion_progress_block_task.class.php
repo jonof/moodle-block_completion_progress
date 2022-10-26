@@ -46,7 +46,7 @@ class restore_completion_progress_block_task extends restore_block_task {
         if ($configdata = $DB->get_field('block_instances', 'configdata', array('id' => $id))) {
             $config = (array)unserialize(base64_decode($configdata));
             $newactivities = array();
-            $newgroup = 0;
+            $newgroup = '0';
 
             if (isset($config['selectactivities'])) {
                 // Translate the old config information to the target course values.
@@ -78,7 +78,7 @@ class restore_completion_progress_block_task extends restore_block_task {
                         $newgroup = $matches['type'] . '-' . $rec->newitemid;
                     }
                 }
-                if ($newgroup === 0) {
+                if ($newgroup === '0') {
                     $this->get_logger()->process('Restored completion_progress block has a ' .
                         'group/grouping setting that was not restored', backup::LOG_WARNING);
                 }

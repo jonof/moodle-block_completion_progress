@@ -219,6 +219,7 @@ class general_test extends \block_completion_progress\tests\testcase {
 
         $context = \context_course::instance($this->course->id);
         $generator = $this->getDataGenerator();
+        $group = $generator->create_group(['courseid' => $this->course->id, 'idnumber' => 'g1']);
         $block1data = [
             'parentcontextid' => $context->id,
             'pagetypepattern' => 'course-view-*',
@@ -234,6 +235,7 @@ class general_test extends \block_completion_progress\tests\testcase {
                 'showpercentage' => defaults::SHOWPERCENTAGE,
                 'progressTitle' => "Instance 1",
                 'activitiesincluded' => defaults::ACTIVITIESINCLUDED,
+                'group' => 'group-' . $group->id,
             ])),
         ];
         $generator->create_block('completion_progress', $block1data);
@@ -268,7 +270,7 @@ class general_test extends \block_completion_progress\tests\testcase {
         $mdata->userdata = 0;
 
         if (method_exists('\copy_helper', 'process_formdata')) {
-            // Moodle 3.11 or higherr.
+            // Moodle 3.11 or higher.
             $copydata = \copy_helper::process_formdata($mdata);
             \copy_helper::create_copy($copydata);
         } else {
@@ -286,18 +288,25 @@ class general_test extends \block_completion_progress\tests\testcase {
 
         $copy = $DB->get_record('course', ['idnumber' => $mdata->idnumber]);
         $context = \context_course::instance($copy->id);
+        $copygroup = groups_get_group_by_idnumber($copy->id, 'g1');
+
         $blocks = $DB->get_records('block_instances', ['blockname' => 'completion_progress',
             'parentcontextid' => $context->id]);
-        $configdata = array_map(
-            function ($record) {
-                return unserialize(base64_decode($record->configdata));
-            },
-            $blocks
-        );
-
         $this->assertCount(2, $blocks);
-        $this->assertContains('Instance 1', array_column($configdata, 'progressTitle'));
-        $this->assertContains('Instance 2', array_column($configdata, 'progressTitle'));
+
+        array_walk($blocks, function ($record) {
+            $record->config = unserialize(base64_decode($record->configdata));
+        });
+        $copyblockmap = array_flip(array_map(function ($record) {
+            return $record->config->progressTitle;
+        }, $blocks));
+
+        // Ensure both block instances were copied.
+        $this->assertArrayHasKey('Instance 1', $copyblockmap);
+        $this->assertArrayHasKey('Instance 2', $copyblockmap);
+
+        // Ensure the configured group got remapped by the copy.
+        $this->assertEquals('group-' . $copygroup->id, $blocks[ $copyblockmap['Instance 1'] ]->config->group);
     }
 
     /**
