@@ -14,6 +14,9 @@ jobs:
           - php: '8.0'
             database: 'pgsql'
             moodle-branch: 'master'
+          - php: '8.0'
+            database: 'pgsql'
+            moodle-branch: 'MOODLE_401_STABLE'
           - php: '7.4'
             database: 'mariadb'
             moodle-branch: 'MOODLE_400_STABLE'
@@ -48,7 +51,7 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         path: plugin
 
