@@ -24,8 +24,6 @@
 
 namespace block_completion_progress\tests;
 
-defined('MOODLE_INTERNAL') || die();
-
 if (version_compare(\PHPUnit\Runner\Version::id(), '8', '<')) {
     // Moodle 3.9.
     class_alias('block_completion_progress\tests\testcase_phpunit7', 'block_completion_progress\tests\testcase');

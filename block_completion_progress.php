@@ -118,7 +118,7 @@ class block_completion_progress extends block_base {
         $barinstances = array();
 
         // Guests do not have any progress. Don't show them the block.
-        if (!isloggedin() or isguestuser()) {
+        if (!isloggedin() || isguestuser()) {
             return $this->content;
         }
 
