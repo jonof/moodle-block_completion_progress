@@ -449,6 +449,7 @@ class completion_progress implements \renderable {
                     'section'    => $cm->sectionnum,
                     'position'   => array_search($cm->id, $sections[$cm->sectionnum]),
                     'url'        => $cm->url instanceof \moodle_url ? $cm->url->out() : '',
+                    'onclick'    => $cm->onclick,
                     'context'    => $cm->context,
                     'icon'       => $cm->get_icon_url(),
                     'available'  => $cm->available,

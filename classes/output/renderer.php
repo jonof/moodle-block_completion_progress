@@ -268,7 +268,11 @@ class renderer extends plugin_renderer_base {
                     array('src' => $activity->icon, 'class' => 'moduleIcon', 'alt' => '', 'role' => 'presentation'));
             $text .= $activity->name;
             if (!empty($activity->link) && (!empty($activity->available) || $simple)) {
-                $content .= $this->action_link($activity->link, $text, null, ['class' => 'action_link']);
+                $attrs = ['class' => 'action_link'];
+                if (!empty($activity->onclick)) {
+                    $attrs['onclick'] = $activity->onclick;
+                }
+                $content .= $this->action_link($activity->link, $text, null, $attrs);
             } else {
                 $content .= $text;
             }

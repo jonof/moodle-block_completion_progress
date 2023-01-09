@@ -61,7 +61,11 @@ define(['jquery', 'core/pubsub', 'core/utils'],
             var container = cell.closest('.block_completion_progress .barContainer');
             var infotoshow = container.siblings('#' + cell.data('infoRef'));
             var infolink = infotoshow.find('a.action_link');
-            document.location = infolink.prop('href');
+            if (infolink.prop('onclick') !== null) {
+                infolink.click();
+            } else {
+                document.location = infolink.prop('href');
+            }
         }
 
         /**
