@@ -306,7 +306,7 @@ class general_test extends \block_completion_progress\tests\testcase {
         $this->assertArrayHasKey('Instance 2', $copyblockmap);
 
         // Ensure the configured group got remapped by the copy.
-        $this->assertEquals('group-' . $copygroup->id, $blocks[ $copyblockmap['Instance 1'] ]->config->group);
+        $this->assertEquals('group-' . $copygroup->id, $blocks[$copyblockmap['Instance 1']]->config->group);
     }
 
     /**
