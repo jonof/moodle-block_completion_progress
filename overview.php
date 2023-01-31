@@ -71,7 +71,6 @@ $PAGE->set_url(
         'page'       => $page,
         'perpage'    => $perpage,
         'group'      => $group,
-        'sesskey'    => sesskey(),
         'role'       => $role,
     )
 );
@@ -88,7 +87,6 @@ $PAGE->requires->css('/blocks/completion_progress/css.php?v=' . $cachevalue);
 // Check user is logged in and capable of accessing the Overview.
 require_login($course, false);
 require_capability('block/completion_progress:overview', $blockcontext);
-confirm_sesskey();
 
 $progress = (new completion_progress($course))
     ->for_overview()

@@ -290,11 +290,11 @@ class block_completion_progress extends block_base {
 
         // Allow teachers to access the overview page.
         if (has_capability('block/completion_progress:overview', $this->context)) {
-            $parameters = array('instanceid' => $this->instance->id, 'courseid' => $COURSE->id, 'sesskey' => sesskey());
+            $parameters = array('instanceid' => $this->instance->id, 'courseid' => $COURSE->id);
             $url = new moodle_url('/blocks/completion_progress/overview.php', $parameters);
             $label = get_string('overview', 'block_completion_progress');
             $options = array('class' => 'overviewButton');
-            $this->content->text .= $OUTPUT->single_button($url, $label, 'post', $options);
+            $this->content->text .= $OUTPUT->single_button($url, $label, 'get', $options);
         }
 
         return true;
