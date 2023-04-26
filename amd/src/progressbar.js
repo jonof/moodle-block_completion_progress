@@ -169,10 +169,17 @@ define(['jquery', 'core/pubsub', 'core/utils'],
                 '.barContainer[data-instanceid="' + instanceid + '"]');
 
             // Show information elements on hover or tap.
-            barcontainers.on('touchstart mouseover', '.progressBarCell', showInfo);
+            barcontainers.on('touchstart mouseover focus', '.progressBarCell', showInfo);
 
             // Navigate to the activity when its cell is clicked.
             barcontainers.on('click', '.progressBarCell[data-haslink=true]', viewActivity);
+
+            barcontainers.keypress(function(e) {
+                if(e.which == 13){
+                    $('#searchButton').click();//Trigger search button click event
+                }
+            });
+
 
             // Show all information elements when the 'show all' link is clicked.
             barcontainers.siblings('.progressEventInfo').find('.progressShowAllInfo').click(showAllInfo);
