@@ -257,7 +257,12 @@ class quiz_completion_test extends \block_completion_progress\tests\completion_t
         $update->timemodified = time();
         $update->sumgrades = $quba->get_total_mark();
         $DB->update_record('quiz_attempts', $update);
-        quiz_save_best_grade($attemptobj->get_quiz(), $attemptobj->get_userid());
+
+        if (class_exists('mod_quiz\grade_calculator')) {
+            $attemptobj->get_quizobj()->get_grade_calculator()->recompute_final_grade($attemptobj->get_userid());
+        } else {
+            quiz_save_best_grade($attemptobj->get_quiz(), $attemptobj->get_userid());
+        }
 
         $this->setUser(null);
     }
