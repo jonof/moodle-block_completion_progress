@@ -139,7 +139,7 @@ class block_completion_progress extends block_base {
         $this->page->requires->js_call_amd('block_completion_progress/progressbar', 'init', [
             'instances' => $barinstances,
         ]);
-        $cachevalue = debugging() ? -1 : (int)get_config('block_completion_progress', 'cachevalue');
+        $cachevalue = debugging('', DEBUG_DEVELOPER) ? -1 : (int)get_config('block_completion_progress', 'cachevalue');
         $this->page->requires->css('/blocks/completion_progress/css.php?v=' . $cachevalue);
 
         return $this->content;
