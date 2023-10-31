@@ -38,7 +38,7 @@ use block_completion_progress\defaults;
  * @copyright  2020 Jonathon Fowler <fowlerj@usq.edu.au>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-abstract class completion_testcase extends \block_completion_progress\tests\testcase {
+abstract class completion_testcase extends \advanced_testcase {
     /**
      * The test course.
      * @var object
@@ -55,7 +55,7 @@ abstract class completion_testcase extends \block_completion_progress\tests\test
     /**
      * Setup function - we will create a course and add an assign instance to it.
      */
-    protected function set_up() {
+    protected function setUp(): void {
         $this->resetAfterTest(true);
 
         set_config('enablecompletion', 1);

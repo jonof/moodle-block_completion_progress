@@ -42,7 +42,7 @@ use block_completion_progress\defaults;
  * @copyright  2017 onwards Nelson Moller  {@link http://moodle.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class general_test extends \block_completion_progress\tests\testcase {
+class general_test extends \advanced_testcase {
     /**
      * Teacher users.
      * @var array
@@ -63,7 +63,7 @@ class general_test extends \block_completion_progress\tests\testcase {
     /**
      * Create a course and add enrol users to it.
      */
-    protected function set_up() {
+    protected function setUp(): void {
         $this->resetAfterTest(true);
 
         set_config('enablecompletion', 1);
@@ -89,7 +89,7 @@ class general_test extends \block_completion_progress\tests\testcase {
      * @param array $params Array of parameters to pass to the generator
      * @return assign Assign class.
      */
-    protected function create_assign_instance($params=array()) {
+    protected function create_assign_instance($params) {
         $generator = $this->getDataGenerator()->get_plugin_generator('mod_assign');
         $params['course'] = $this->course->id;
         $instance = $generator->create_instance($params);

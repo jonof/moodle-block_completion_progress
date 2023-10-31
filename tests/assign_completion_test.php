@@ -54,55 +54,58 @@ class assign_completion_test extends \block_completion_progress\tests\completion
         $instance = $generator->create_module('assign', [
             'course' => $this->course->id,
             'submissiondrafts' => 0,
+            'assignsubmission_onlinetext_enabled' => 1,
+            'assignsubmission_file_enabled' => 0,
             'completionsubmit' => 1,
+            'completionusegrade' => 1,
+            'completionpassgrade' => 0,
             'completion' => COMPLETION_TRACKING_AUTOMATIC
         ]);
         $cm = get_coursemodule_from_instance('assign', $instance->id);
         $context = \context_module::instance($cm->id);
         $assign = new \assign($context, $cm, $this->course);
+        $completion = new \completion_info($this->course);
 
         $student1 = $generator->create_and_enrol($this->course, 'student');
 
         $this->setUser($student1);
 
-        $result = assign_get_completion_state(
-          $this->course,
-          $assign->get_course_module(),
-          $student1->id,
-          false
-        );
-        $this->assertFalse($result);
+        $result = $completion->get_data($assign->get_course_module(), false, $student1->id);
+        $this->assertSame(COMPLETION_INCOMPLETE, $result->customcompletion['completionsubmit'], 'no submission');
+        $this->assertSame(COMPLETION_INCOMPLETE, $result->completionstate, 'no submission');
 
         $progress = (new completion_progress($this->course))
                     ->for_user($student1)
                     ->for_block_instance($this->blockinstance);
         $text = $output->render($progress);
 
-        $this->assertStringContainsStringIgnoringCase('assign', $text, '');
-        $this->assertStringNotContainsStringIgnoringCase('quiz', $text, '');
+        $this->assertStringContainsStringIgnoringCase('assign', $text, 'no submission');
+        $this->assertStringNotContainsStringIgnoringCase('quiz', $text, 'no submission');
 
-        // The status is futureNotCompleted.
-        $this->assertStringContainsString('futureNotCompleted', $text, '');
+        // Not yet submitted, nor completed.
+        $this->assertStringContainsString('futureNotCompleted', $text, 'no submission');
 
         $submission = $assign->get_user_submission($student1->id, true);
-        $submission->status = ASSIGN_SUBMISSION_STATUS_SUBMITTED;
-        $DB->update_record('assign_submission', $submission);
+        $data = (object)[
+            'userid' => $student1->id,
+            'onlinetext_editor' => ['text' => 'Text', 'format' => FORMAT_PLAIN],
+        ];
+        $notices = [];
+        $this->assertTrue($assign->save_submission($data, $notices), 'submitted awaiting grade');
+        $this->assertEmpty($notices, 'submitted awaiting grade');
 
-        $result = assign_get_completion_state(
-          $this->course,
-          $assign->get_course_module(),
-          $student1->id,
-          false
-        );
-        $this->assertTrue($result);
+        $result = $completion->get_data($assign->get_course_module(), false, $student1->id);
+        $this->assertSame(COMPLETION_COMPLETE, $result->customcompletion['completionsubmit'], 'submitted awaiting grade');
+        $this->assertSame(COMPLETION_INCOMPLETE, $result->completiongrade, 'submitted awaiting grade');
+        $this->assertSame(COMPLETION_INCOMPLETE, $result->completionstate, 'submitted awaiting grade');
 
         $progress = (new completion_progress($this->course))
                     ->for_user($student1)
                     ->for_block_instance($this->blockinstance);
         $text = $output->render($progress);
 
-        // The status is send but not finished.
-        $this->assertStringContainsString('submittedNotComplete', $text, '');
+        // Submitted and awaiting a grade, so not completed.
+        $this->assertStringContainsString('submittedNotComplete', $text, 'submitted awaiting grade');
     }
 
     /**
