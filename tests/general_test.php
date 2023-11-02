@@ -131,12 +131,15 @@ class general_test extends \advanced_testcase {
         $assign = $this->create_assign_instance([
           'submissiondrafts' => 0,
           'completionsubmit' => 1,
-          'completion' => COMPLETION_TRACKING_AUTOMATIC
+          'completion' => COMPLETION_TRACKING_AUTOMATIC,
         ]);
 
-        $gradeitem = \grade_item::fetch(['courseid' => $this->course->id,
-            'itemtype' => 'mod', 'itemmodule' => 'assign',
-            'iteminstance' => $assign->get_course_module()->instance]);
+        $gradeitem = \grade_item::fetch([
+            'courseid' => $this->course->id,
+            'itemtype' => 'mod',
+            'itemmodule' => 'assign',
+            'iteminstance' => $assign->get_course_module()->instance,
+        ]);
 
         // Set student 1's grade to be excluded.
         $grade = $gradeitem->get_grade($this->students[1]->id);
@@ -290,8 +293,10 @@ class general_test extends \advanced_testcase {
         $context = \context_course::instance($copy->id);
         $copygroup = groups_get_group_by_idnumber($copy->id, 'g1');
 
-        $blocks = $DB->get_records('block_instances', ['blockname' => 'completion_progress',
-            'parentcontextid' => $context->id]);
+        $blocks = $DB->get_records('block_instances', [
+            'blockname' => 'completion_progress',
+            'parentcontextid' => $context->id,
+        ]);
         $this->assertCount(2, $blocks);
 
         array_walk($blocks, function ($record) {
@@ -340,11 +345,11 @@ class general_test extends \advanced_testcase {
 
         $pageinstance = $this->getDataGenerator()->create_module('page', [
             'course' => $this->course->id,
-            'completion' => COMPLETION_TRACKING_MANUAL
+            'completion' => COMPLETION_TRACKING_MANUAL,
         ]);
         $labelinstance = $this->getDataGenerator()->create_module('label', [
             'course' => $this->course->id,
-            'completion' => COMPLETION_TRACKING_MANUAL
+            'completion' => COMPLETION_TRACKING_MANUAL,
         ]);
 
         $modinfo = get_fast_modinfo($this->course);

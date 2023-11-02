@@ -43,15 +43,15 @@ class restore_completion_progress_block_task extends restore_block_task {
         // Get restored course id.
         $courseid = $this->get_courseid();
 
-        if ($configdata = $DB->get_field('block_instances', 'configdata', array('id' => $id))) {
+        if ($configdata = $DB->get_field('block_instances', 'configdata', ['id' => $id])) {
             $config = (array)unserialize(base64_decode($configdata));
-            $newactivities = array();
+            $newactivities = [];
             $newgroup = '0';
 
             if (isset($config['selectactivities'])) {
                 // Translate the old config information to the target course values.
                 foreach ($config['selectactivities'] as $value) {
-                    $matches = array();
+                    $matches = [];
                     preg_match('/(.+)-(\d+)/', $value, $matches);
                     if (!empty($matches)) {
                         $module = $matches[1];
@@ -88,7 +88,7 @@ class restore_completion_progress_block_task extends restore_block_task {
             $config['selectactivities'] = $newactivities;
             $config['group'] = $newgroup;
             $configdata = base64_encode(serialize((object)$config));
-            $DB->set_field('block_instances', 'configdata', $configdata, array('id' => $id));
+            $DB->set_field('block_instances', 'configdata', $configdata, ['id' => $id]);
         }
     }
 
@@ -110,7 +110,7 @@ class restore_completion_progress_block_task extends restore_block_task {
      * @return array An empty array
      */
     public function get_fileareas() {
-        return array();
+        return [];
     }
 
     /**
@@ -119,7 +119,7 @@ class restore_completion_progress_block_task extends restore_block_task {
      * @return array An empty array
      */
     public function get_configdata_encoded_attributes() {
-        return array();
+        return [];
     }
 
     /**
@@ -128,7 +128,7 @@ class restore_completion_progress_block_task extends restore_block_task {
      * @return array An empty array
      */
     public static function define_decode_contents() {
-        return array();
+        return [];
     }
 
     /**
@@ -137,6 +137,6 @@ class restore_completion_progress_block_task extends restore_block_task {
      * @return array An empty array
      */
     public static function define_decode_rules() {
-        return array();
+        return [];
     }
 }

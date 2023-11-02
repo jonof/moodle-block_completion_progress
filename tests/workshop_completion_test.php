@@ -61,9 +61,14 @@ class workshop_completion_test extends \block_completion_progress\tests\completi
         $cm = get_coursemodule_from_id('workshop', $instance->cmid);
 
         // Set the passing grades for submission and assessment.
-        $item = \grade_item::fetch(['courseid' => $this->course->id, 'itemtype' => 'mod',
-            'itemmodule' => 'workshop', 'iteminstance' => $instance->id, 'itemnumber' => 0,
-            'outcomeid' => null]);
+        $item = \grade_item::fetch([
+            'courseid' => $this->course->id,
+            'itemtype' => 'mod',
+            'itemmodule' => 'workshop',
+            'iteminstance' => $instance->id,
+            'itemnumber' => 0,
+            'outcomeid' => null,
+        ]);
         $item->gradepass = 40;
         $item->update();
 
@@ -144,9 +149,9 @@ class workshop_completion_test extends \block_completion_progress\tests\completi
 
         $generator = $this->getDataGenerator()->get_plugin_generator('mod_workshop');
 
-        $id = $generator->create_submission($workshop->id, $student->id, array(
+        $id = $generator->create_submission($workshop->id, $student->id, [
             'title' => 'Submission',
-        ));
+        ]);
         return $DB->get_record('workshop_submissions', ['id' => $id]);
     }
 
@@ -160,8 +165,12 @@ class workshop_completion_test extends \block_completion_progress\tests\completi
      */
     protected function grade_submission($submission, $workshop, $grade) {
         $workshop->aggregate_submission_grades_process([
-            (object)['submissionid' => $submission->id, 'submissiongrade' => null,
-                'weight' => 1, 'grade' => $grade],
+            (object)[
+                'submissionid' => $submission->id,
+                'submissiongrade' => null,
+                'weight' => 1,
+                'grade' => $grade,
+            ],
         ]);
     }
 }

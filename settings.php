@@ -28,7 +28,7 @@ use block_completion_progress\defaults;
 
 if ($ADMIN->fulltree) {
 
-    $options = array(10 => 10, 12 => 12, 14 => 14, 16 => 16, 18 => 18, 20 => 20);
+    $options = [10 => 10, 12 => 12, 14 => 14, 16 => 16, 18 => 18, 20 => 20];
     $settings->add(new admin_setting_configselect('block_completion_progress/wrapafter',
         get_string('wrapafter', 'block_completion_progress'),
         '',
@@ -36,11 +36,11 @@ if ($ADMIN->fulltree) {
         $options)
     );
 
-    $options = array(
+    $options = [
         'squeeze' => get_string('config_squeeze', 'block_completion_progress'),
         'scroll' => get_string('config_scroll', 'block_completion_progress'),
         'wrap' => get_string('config_wrap', 'block_completion_progress'),
-    );
+    ];
     $settings->add(new admin_setting_configselect('block_completion_progress/defaultlongbars',
         get_string('defaultlongbars', 'block_completion_progress'),
         '',
@@ -48,10 +48,10 @@ if ($ADMIN->fulltree) {
         $options)
     );
 
-    $options = array(
+    $options = [
         'shortname' => get_string('shortname', 'block_completion_progress'),
-        'fullname' => get_string('fullname', 'block_completion_progress')
-    );
+        'fullname' => get_string('fullname', 'block_completion_progress'),
+    ];
     $settings->add(new admin_setting_configselect('block_completion_progress/coursenametoshow',
         get_string('coursenametoshow', 'block_completion_progress'),
         '',

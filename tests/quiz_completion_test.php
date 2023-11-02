@@ -51,12 +51,12 @@ class quiz_completion_test extends \block_completion_progress\tests\completion_t
      * A data provider supplying each of the possible quiz grade methods.
      * @return array
      */
-    public function grademethod_provider(): array {
+    public static function grademethod_provider(): array {
         return [
-            'QUIZ_GRADEHIGHEST' => [ QUIZ_GRADEHIGHEST, ],
-            'QUIZ_GRADEAVERAGE' => [ QUIZ_GRADEAVERAGE, ],
-            'QUIZ_ATTEMPTFIRST' => [ QUIZ_ATTEMPTFIRST, ],
-            'QUIZ_ATTEMPTLAST' => [ QUIZ_ATTEMPTLAST, ],
+            'QUIZ_GRADEHIGHEST' => [ QUIZ_GRADEHIGHEST ],
+            'QUIZ_GRADEAVERAGE' => [ QUIZ_GRADEAVERAGE ],
+            'QUIZ_ATTEMPTFIRST' => [ QUIZ_ATTEMPTFIRST ],
+            'QUIZ_ATTEMPTLAST' => [ QUIZ_ATTEMPTLAST ],
         ];
     }
 
@@ -86,8 +86,13 @@ class quiz_completion_test extends \block_completion_progress\tests\completion_t
         $cm = get_coursemodule_from_id('quiz', $instance->cmid);
 
         // Set the passing grade.
-        $item = \grade_item::fetch(['courseid' => $this->course->id, 'itemtype' => 'mod',
-            'itemmodule' => 'quiz', 'iteminstance' => $instance->id, 'outcomeid' => null]);
+        $item = \grade_item::fetch([
+            'courseid' => $this->course->id,
+            'itemtype' => 'mod',
+            'itemmodule' => 'quiz',
+            'iteminstance' => $instance->id,
+            'outcomeid' => null,
+        ]);
         $item->gradepass = 50;
         $item->update();
 

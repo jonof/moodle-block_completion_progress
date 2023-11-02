@@ -59,7 +59,7 @@ class assign_completion_test extends \block_completion_progress\tests\completion
             'completionsubmit' => 1,
             'completionusegrade' => 1,
             'completionpassgrade' => 0,
-            'completion' => COMPLETION_TRACKING_AUTOMATIC
+            'completion' => COMPLETION_TRACKING_AUTOMATIC,
         ]);
         $cm = get_coursemodule_from_instance('assign', $instance->id);
         $context = \context_module::instance($cm->id);
@@ -88,7 +88,10 @@ class assign_completion_test extends \block_completion_progress\tests\completion
         $submission = $assign->get_user_submission($student1->id, true);
         $data = (object)[
             'userid' => $student1->id,
-            'onlinetext_editor' => ['text' => 'Text', 'format' => FORMAT_PLAIN],
+            'onlinetext_editor' => [
+                'text' => 'Text',
+                'format' => FORMAT_PLAIN,
+            ],
         ];
         $notices = [];
         $this->assertTrue($assign->save_submission($data, $notices), 'submitted awaiting grade');
@@ -128,8 +131,13 @@ class assign_completion_test extends \block_completion_progress\tests\completion
         $cm = get_coursemodule_from_id('assign', $instance->cmid);
 
         // Set the passing grade.
-        $item = \grade_item::fetch(['courseid' => $this->course->id, 'itemtype' => 'mod',
-            'itemmodule' => 'assign', 'iteminstance' => $instance->id, 'outcomeid' => null]);
+        $item = \grade_item::fetch([
+            'courseid' => $this->course->id,
+            'itemtype' => 'mod',
+            'itemmodule' => 'assign',
+            'iteminstance' => $instance->id,
+            'outcomeid' => null,
+        ]);
         $item->gradepass = 50;
         $item->update();
 
@@ -207,10 +215,10 @@ class assign_completion_test extends \block_completion_progress\tests\completion
      * A data provider supplying each of the possible quiz grade methods.
      * @return array
      */
-    public function teamsubmission_provider(): array {
+    public static function teamsubmission_provider(): array {
         return [
-            'one-per-group' => [ 0, ],
-            'per-member'    => [ 1, ],
+            'one-per-group' => [ 0 ],
+            'per-member'    => [ 1 ],
         ];
     }
 
@@ -281,8 +289,13 @@ class assign_completion_test extends \block_completion_progress\tests\completion
 
         } else {
             // Set the passing grade.
-            $item = \grade_item::fetch(['courseid' => $this->course->id, 'itemtype' => 'mod',
-                'itemmodule' => 'assign', 'iteminstance' => $instance->id, 'outcomeid' => null]);
+            $item = \grade_item::fetch([
+                'courseid' => $this->course->id,
+                'itemtype' => 'mod',
+                'itemmodule' => 'assign',
+                'iteminstance' => $instance->id,
+                'outcomeid' => null,
+            ]);
             $item->gradepass = 50;
             $item->update();
 
@@ -321,7 +334,7 @@ class assign_completion_test extends \block_completion_progress\tests\completion
                 'itemid' => file_get_unused_draft_itemid(),
                 'text' => 'Text',
                 'format' => FORMAT_HTML,
-            ]
+            ],
         ], $notices);
 
         $assign->submit_for_grading((object) [

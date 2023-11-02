@@ -34,12 +34,12 @@ $cachevalue = optional_param('v', -1, PARAM_INT);
 $css = '';
 
 // Emit colours configuration.
-$colours = array(
+$colours = [
     'completed' => 'completed_colour',
     'submittedNotComplete' => 'submittednotcomplete_colour',
     'notCompleted' => 'notCompleted_colour',
-    'futureNotCompleted' => 'futureNotCompleted_colour'
-);
+    'futureNotCompleted' => 'futureNotCompleted_colour',
+];
 foreach ($colours as $classname => $stringkey) {
     $colour = get_config('block_completion_progress', $stringkey) ?:
         get_string($stringkey, 'block_completion_progress');

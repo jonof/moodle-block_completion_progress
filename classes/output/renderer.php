@@ -63,25 +63,25 @@ class renderer extends plugin_renderer_base {
             return get_string('no_visible_activities_message', 'block_completion_progress');
         }
 
-        $alternatelinks = array(
-            'assign' => array(
+        $alternatelinks = [
+            'assign' => [
                 'url' => '/mod/assign/view.php?id=:cmid&action=grade&userid=:userid',
                 'capability' => 'mod/assign:grade',
-            ),
-            'feedback' => array(
+            ],
+            'feedback' => [
                 // Breaks if anonymous feedback is collected.
                 'url' => '/mod/feedback/show_entries.php?id=:cmid&do_show=showoneentry&userid=:userid',
                 'capability' => 'mod/feedback:viewreports',
-            ),
-            'lesson' => array(
+            ],
+            'lesson' => [
                 'url' => '/mod/lesson/report.php?id=:cmid&action=reportdetail&userid=:userid',
                 'capability' => 'mod/lesson:viewreports',
-            ),
-            'quiz' => array(
+            ],
+            'quiz' => [
                 'url' => '/mod/quiz/report.php?id=:cmid&mode=overview',
                 'capability' => 'mod/quiz:viewreports',
-            ),
-        );
+            ],
+        ];
 
         // Get relevant block instance settings or use defaults.
         if (get_config('block_completion_progress', 'forceiconsinbar') == 0) {
@@ -97,9 +97,9 @@ class renderer extends plugin_renderer_base {
         $displaynow = $orderby == completion_progress::ORDERBY_TIME;
         $showpercentage = $config->showpercentage ?? defaults::SHOWPERCENTAGE;
 
-        $rowoptions = array('style' => '');
-        $cellsoptions = array('style' => '');
-        $barclasses = array('barRow');
+        $rowoptions = ['style' => ''];
+        $cellsoptions = ['style' => ''];
+        $barclasses = ['barRow'];
 
         $content .= html_writer::start_div('barContainer', ['data-instanceid' => $instance]);
 
@@ -120,10 +120,10 @@ class renderer extends plugin_renderer_base {
             $displaynow = false;
         }
         if ($longbars == 'scroll') {
-            $leftpoly = html_writer::tag('polygon', '', array('points' => '30,0 0,15 30,30', 'class' => 'triangle-polygon'));
-            $rightpoly = html_writer::tag('polygon', '', array('points' => '0,0 30,15 0,30', 'class' => 'triangle-polygon'));
-            $content .= html_writer::tag('svg', $leftpoly, array('class' => 'left-arrow-svg', 'height' => '30', 'width' => '30'));
-            $content .= html_writer::tag('svg', $rightpoly, array('class' => 'right-arrow-svg', 'height' => '30', 'width' => '30'));
+            $leftpoly = html_writer::tag('polygon', '', ['points' => '30,0 0,15 30,30', 'class' => 'triangle-polygon']);
+            $rightpoly = html_writer::tag('polygon', '', ['points' => '0,0 30,15 0,30', 'class' => 'triangle-polygon']);
+            $content .= html_writer::tag('svg', $leftpoly, ['class' => 'left-arrow-svg', 'height' => '30', 'width' => '30']);
+            $content .= html_writer::tag('svg', $rightpoly, ['class' => 'right-arrow-svg', 'height' => '30', 'width' => '30']);
         }
         $barclasses[] = 'barMode' . ucfirst($longbars);
         if ($useicons) {
@@ -141,8 +141,8 @@ class renderer extends plugin_renderer_base {
                 $nowpos++;
             }
             $nowstring = get_string('now_indicator', 'block_completion_progress');
-            $leftarrowimg = $this->pix_icon('left', $nowstring, 'block_completion_progress', array('class' => 'nowicon'));
-            $rightarrowimg = $this->pix_icon('right', $nowstring, 'block_completion_progress', array('class' => 'nowicon'));
+            $leftarrowimg = $this->pix_icon('left', $nowstring, 'block_completion_progress', ['class' => 'nowicon']);
+            $rightarrowimg = $this->pix_icon('right', $nowstring, 'block_completion_progress', ['class' => 'nowicon']);
         }
 
         // Determine links to activities.
@@ -151,12 +151,12 @@ class renderer extends plugin_renderer_base {
                 array_key_exists($activities[$i]->type, $alternatelinks) &&
                 has_capability($alternatelinks[$activities[$i]->type]['capability'], $activities[$i]->context)
             ) {
-                $substitutions = array(
+                $substitutions = [
                     '/:courseid/' => $courseid,
                     '/:eventid/'  => $activities[$i]->instance,
                     '/:cmid/'     => $activities[$i]->id,
                     '/:userid/'   => $userid,
-                );
+                ];
                 $link = $alternatelinks[$activities[$i]->type]['url'];
                 $link = preg_replace(array_keys($substitutions), array_values($substitutions), $link);
                 $activities[$i]->link = $CFG->wwwroot.$link;
@@ -174,10 +174,10 @@ class renderer extends plugin_renderer_base {
 
             // A cell in the progress bar.
             $cellcontent = '';
-            $celloptions = array(
+            $celloptions = [
                 'class' => 'progressBarCell',
                 'data-info-ref' => 'progressBarInfo'.$instance.'-'.$userid.'-'.$activity->id,
-            );
+            ];
             if ($complete === 'submitted') {
                 $celloptions['class'] .= ' submittedNotComplete';
 
@@ -229,20 +229,20 @@ class renderer extends plugin_renderer_base {
         if ($showpercentage && !$simple) {
             $progress = $progress->get_percentage();
             $percentagecontent = get_string('progress', 'block_completion_progress').': '.$progress.'%';
-            $percentageoptions = array('class' => 'progressPercentage');
+            $percentageoptions = ['class' => 'progressPercentage'];
             $content .= html_writer::tag('div', $percentagecontent, $percentageoptions);
         }
 
         // Add the info box below the table.
-        $divoptions = array('class' => 'progressEventInfo',
-                            'id' => 'progressBarInfo'.$instance.'-'.$userid.'-info');
+        $divoptions = [
+            'class' => 'progressEventInfo',
+            'id' => 'progressBarInfo'.$instance.'-'.$userid.'-info',
+        ];
         $content .= html_writer::start_tag('div', $divoptions);
         if (!$simple) {
             $content .= get_string('mouse_over_prompt', 'block_completion_progress');
             $content .= ' ';
-            $attributes = array (
-                'class' => 'accesshide progressShowAllInfo',
-            );
+            $attributes = ['class' => 'accesshide progressShowAllInfo'];
             $content .= html_writer::link('#', get_string('showallinfo', 'block_completion_progress'), $attributes);
         }
         $content .= html_writer::end_tag('div');
@@ -258,14 +258,16 @@ class renderer extends plugin_renderer_base {
 
         foreach ($activities as $activity) {
             $completed = $completions[$activity->id] ?? null;
-            $divoptions = array('class' => 'progressEventInfo',
-                                'id' => 'progressBarInfo'.$instance.'-'.$userid.'-'.$activity->id,
-                                'style' => 'display: none;');
+            $divoptions = [
+                'class' => 'progressEventInfo',
+                'id' => 'progressBarInfo'.$instance.'-'.$userid.'-'.$activity->id,
+                'style' => 'display: none;',
+            ];
             $content .= html_writer::start_tag('div', $divoptions);
 
             $text = '';
             $text .= html_writer::empty_tag('img',
-                    array('src' => $activity->icon, 'class' => 'moduleIcon', 'alt' => '', 'role' => 'presentation'));
+                    ['src' => $activity->icon, 'class' => 'moduleIcon', 'alt' => '', 'role' => 'presentation']);
             $text .= $activity->name;
             if (!empty($activity->link) && (!empty($activity->available) || $simple)) {
                 $attrs = ['class' => 'action_link'];
@@ -299,10 +301,10 @@ class renderer extends plugin_renderer_base {
                     $altattribute .= '(' . $strsubmitted . ')';
                 }
             }
-            $content .= $this->pix_icon($icon, $altattribute, 'block_completion_progress', array('class' => 'iconInInfo'));
+            $content .= $this->pix_icon($icon, $altattribute, 'block_completion_progress', ['class' => 'iconInInfo']);
             $content .= html_writer::empty_tag('br');
             if ($activity->expected != 0) {
-                $content .= html_writer::start_tag('div', array('class' => 'expectedBy'));
+                $content .= html_writer::start_tag('div', ['class' => 'expectedBy']);
                 $content .= $strtimeexpected.': ';
                 $content .= userdate($activity->expected, $strdateformat, $CFG->timezone);
                 $content .= html_writer::end_tag('div');
