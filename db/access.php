@@ -24,50 +24,50 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$capabilities = array (
-    'block/completion_progress:overview' => array (
+$capabilities = [
+    'block/completion_progress:overview' => [
         'riskbitmask'   => RISK_PERSONAL,
         'captype'       => 'read',
         'contextlevel'  => CONTEXT_BLOCK,
-        'archetypes'    => array (
+        'archetypes'    => [
             'teacher'           => CAP_ALLOW,
             'editingteacher'    => CAP_ALLOW,
             'manager'           => CAP_ALLOW,
-            'coursecreator'     => CAP_ALLOW
-        )
-    ),
+            'coursecreator'     => CAP_ALLOW,
+        ],
+    ],
 
-    'block/completion_progress:showbar' => array (
+    'block/completion_progress:showbar' => [
         'captype'       => 'read',
         'contextlevel'  => CONTEXT_BLOCK,
-        'archetypes'    => array (
+        'archetypes'    => [
             'teacher'           => CAP_ALLOW,
             'editingteacher'    => CAP_ALLOW,
             'student'           => CAP_ALLOW,
-        )
-    ),
+        ],
+    ],
 
-    'block/completion_progress:addinstance' => array(
+    'block/completion_progress:addinstance' => [
         'riskbitmask' => RISK_PERSONAL,
         'captype' => 'write',
         'contextlevel' => CONTEXT_BLOCK,
-        'archetypes' => array(
+        'archetypes' => [
             'editingteacher' => CAP_ALLOW,
             'manager'        => CAP_ALLOW,
-            'coursecreator'  => CAP_ALLOW
-        ),
+            'coursecreator'  => CAP_ALLOW,
+        ],
 
-        'clonepermissionsfrom' => 'moodle/site:manageblocks'
-    ),
+        'clonepermissionsfrom' => 'moodle/site:manageblocks',
+    ],
 
-    'block/completion_progress:myaddinstance' => array(
+    'block/completion_progress:myaddinstance' => [
         'riskbitmask' => RISK_PERSONAL,
         'captype' => 'read',
         'contextlevel' => CONTEXT_SYSTEM,
-        'archetypes' => array(
-            'user' => CAP_ALLOW
-        ),
+        'archetypes' => [
+            'user' => CAP_ALLOW,
+        ],
 
-        'clonepermissionsfrom' => 'moodle/my:manageblocks'
-    ),
-);
+        'clonepermissionsfrom' => 'moodle/my:manageblocks',
+    ],
+];

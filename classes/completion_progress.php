@@ -622,7 +622,7 @@ class completion_progress implements \renderable {
         }
 
         // Queries to deliver instance IDs of activities with submissions by user.
-        $queries = array (
+        $queries = [
             [
                 // Assignments with individual submission, or groups requiring a submission per user,
                 // or ungrouped users in a group submission situation.
@@ -736,7 +736,7 @@ class completion_progress implements \renderable {
                     'gmavg' => QUIZ_GRADEAVERAGE,
                 ],
             ],
-        );
+        ];
 
         $this->submissions = [];
         foreach ($queries as $spec) {

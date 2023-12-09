@@ -50,11 +50,11 @@ $role     = optional_param('role', null, PARAM_INT);
 $download = optional_param('download', '', PARAM_ALPHA);
 
 // Determine course and context.
-$course = $DB->get_record('course', array('id' => $courseid), '*', MUST_EXIST);
+$course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
 $context = context_course::instance($courseid);
 
 // Get specific block config and context.
-$block = $DB->get_record('block_instances', array('id' => $id), '*', MUST_EXIST);
+$block = $DB->get_record('block_instances', ['id' => $id], '*', MUST_EXIST);
 $blockcontext = context_block::instance($id);
 
 $notesallowed = !empty($CFG->enablenotes) && has_capability('moodle/notes:manage', $context);
@@ -65,14 +65,14 @@ $bulkoperations = has_capability('moodle/course:bulkmessaging', $context) && ($n
 $PAGE->set_course($course);
 $PAGE->set_url(
     '/blocks/completion_progress/overview.php',
-    array(
+    [
         'instanceid' => $id,
         'courseid'   => $courseid,
         'page'       => $page,
         'perpage'    => $perpage,
         'group'      => $group,
         'role'       => $role,
-    )
+    ]
 );
 $PAGE->set_context($context);
 $title = get_string('overview', 'block_completion_progress');
@@ -131,7 +131,7 @@ $sql = "SELECT DISTINCT r.id, r.name, r.shortname, r.archetype, r.sortorder
         ORDER BY r.sortorder";
 $params = ['contextid' => $context->id];
 $roles = role_fix_names($DB->get_records_sql($sql, $params), $context);
-$roleoptions = array(0 => get_string('allparticipants'));
+$roleoptions = [0 => get_string('allparticipants')];
 foreach ($roles as $rec) {
     if ($role === null && $rec->archetype === 'student') {
         $role = $rec->id;  // First student role is the default.
@@ -182,12 +182,12 @@ if ($roleoptions) {
 echo $output->container_end();
 
 // Form for messaging selected participants.
-$formattributes = array('action' => $CFG->wwwroot.'/user/action_redir.php', 'method' => 'post', 'id' => 'participantsform');
+$formattributes = ['action' => $CFG->wwwroot.'/user/action_redir.php', 'method' => 'post', 'id' => 'participantsform'];
 $formattributes['data-course-id'] = $course->id;
 $formattributes['data-table-unique-id'] = 'block-completion_progress-overview-' . $course->id;
 echo html_writer::start_tag('form', $formattributes);
-echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()));
-echo html_writer::empty_tag('input', array('type' => 'hidden', 'name' => 'returnto', 'value' => s($PAGE->url->out(false))));
+echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'sesskey', 'value' => sesskey()]);
+echo html_writer::empty_tag('input', ['type' => 'hidden', 'name' => 'returnto', 'value' => s($PAGE->url->out(false))]);
 
 // Imitate a 3.9 dynamic table enough to fool the core_user/participants JS code, until
 // next time it changes again.
@@ -211,18 +211,18 @@ if ($table->totalrows > $perpage || $perpage == SHOW_ALL_PAGE_SIZE) {
     if ($perpage < SHOW_ALL_PAGE_SIZE) {
         $perpageurl->param('perpage', SHOW_ALL_PAGE_SIZE);
         echo $output->container(html_writer::link($perpageurl,
-            get_string('showall', '', $table->totalrows)), array(), 'showall');
+            get_string('showall', '', $table->totalrows)), [], 'showall');
     } else {
         $perpageurl->param('perpage', DEFAULT_PAGE_SIZE);
         echo $output->container(html_writer::link($perpageurl,
-            get_string('showperpage', '', DEFAULT_PAGE_SIZE)), array(), 'showall');
+            get_string('showperpage', '', DEFAULT_PAGE_SIZE)), [], 'showall');
     }
 }
 
 if ($bulkoperations) {
     echo '<br /><div class="form-inline m-1">';
 
-    $displaylist = array();
+    $displaylist = [];
     if ($messagingallowed) {
         $displaylist['#messageselect'] = get_string('messageselectadd');
     }
@@ -230,8 +230,8 @@ if ($bulkoperations) {
         $displaylist['#addgroupnote'] = get_string('addnewnote', 'notes');
     }
 
-    echo html_writer::tag('label', get_string("withselectedusers"), array('for' => 'formactionid'));
-    echo html_writer::select($displaylist, 'formaction', '', array('' => 'choosedots'), array('id' => 'formactionid'));
+    echo html_writer::tag('label', get_string("withselectedusers"), ['for' => 'formactionid']);
+    echo html_writer::select($displaylist, 'formaction', '', ['' => 'choosedots'], ['id' => 'formactionid']);
 
     echo '<input type="hidden" name="id" value="'.$course->id.'" />';
     echo '<noscript style="display:inline">';
@@ -251,7 +251,7 @@ echo $table->download_buttons();
 
 // Organise access to JS for progress bars.
 $PAGE->requires->js_call_amd('block_completion_progress/progressbar', 'init', [
-    'instances' => array($block->id),
+    'instances' => [$block->id],
 ]);
 
 echo $output->container_end();

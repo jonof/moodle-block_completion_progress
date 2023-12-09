@@ -149,7 +149,7 @@ class overview_test extends \advanced_testcase {
         $assign = $this->create_assign_instance([
           'submissiondrafts' => 0,
           'completionsubmit' => 1,
-          'completion' => COMPLETION_TRACKING_AUTOMATIC
+          'completion' => COMPLETION_TRACKING_AUTOMATIC,
         ]);
 
         $PAGE->set_url('/');
@@ -237,12 +237,12 @@ class overview_test extends \advanced_testcase {
 
         $page1 = $generator->create_module('page', [
             'course' => $this->course->id,
-            'completion' => COMPLETION_TRACKING_MANUAL
+            'completion' => COMPLETION_TRACKING_MANUAL,
         ]);
         $page1cm = get_coursemodule_from_id('page', $page1->cmid);
         $page2 = $generator->create_module('page', [
             'course' => $this->course->id,
-            'completion' => COMPLETION_TRACKING_MANUAL
+            'completion' => COMPLETION_TRACKING_MANUAL,
         ]);
         $page2cm = get_coursemodule_from_id('page', $page2->cmid);
 

@@ -53,10 +53,10 @@ class quiz_completion_test extends \block_completion_progress\tests\completion_t
      */
     public function grademethod_provider(): array {
         return [
-            'QUIZ_GRADEHIGHEST' => [ QUIZ_GRADEHIGHEST, ],
-            'QUIZ_GRADEAVERAGE' => [ QUIZ_GRADEAVERAGE, ],
-            'QUIZ_ATTEMPTFIRST' => [ QUIZ_ATTEMPTFIRST, ],
-            'QUIZ_ATTEMPTLAST' => [ QUIZ_ATTEMPTLAST, ],
+            'QUIZ_GRADEHIGHEST' => [ QUIZ_GRADEHIGHEST ],
+            'QUIZ_GRADEAVERAGE' => [ QUIZ_GRADEAVERAGE ],
+            'QUIZ_ATTEMPTFIRST' => [ QUIZ_ATTEMPTFIRST ],
+            'QUIZ_ATTEMPTLAST' => [ QUIZ_ATTEMPTLAST ],
         ];
     }
 

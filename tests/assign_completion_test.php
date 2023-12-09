@@ -59,7 +59,7 @@ class assign_completion_test extends \block_completion_progress\tests\completion
             'completionsubmit' => 1,
             'completionusegrade' => 1,
             'completionpassgrade' => 0,
-            'completion' => COMPLETION_TRACKING_AUTOMATIC
+            'completion' => COMPLETION_TRACKING_AUTOMATIC,
         ]);
         $cm = get_coursemodule_from_instance('assign', $instance->id);
         $context = \context_module::instance($cm->id);
@@ -209,8 +209,8 @@ class assign_completion_test extends \block_completion_progress\tests\completion
      */
     public function teamsubmission_provider(): array {
         return [
-            'one-per-group' => [ 0, ],
-            'per-member'    => [ 1, ],
+            'one-per-group' => [ 0 ],
+            'per-member'    => [ 1 ],
         ];
     }
 
@@ -321,7 +321,7 @@ class assign_completion_test extends \block_completion_progress\tests\completion
                 'itemid' => file_get_unused_draft_itemid(),
                 'text' => 'Text',
                 'format' => FORMAT_HTML,
-            ]
+            ],
         ], $notices);
 
         $assign->submit_for_grading((object) [
