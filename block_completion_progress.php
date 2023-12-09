@@ -94,12 +94,12 @@ class block_completion_progress extends block_base {
      * @return array
      */
     public function applicable_formats() {
-        return array(
+        return [
             'course-view'    => true,
             'site'           => true,
             'mod'            => false,
-            'my'             => true
-        );
+            'my'             => true,
+        ];
     }
 
     /**
@@ -115,7 +115,7 @@ class block_completion_progress extends block_base {
         $this->content = new stdClass;
         $this->content->text = '';
         $this->content->footer = '';
-        $barinstances = array();
+        $barinstances = [];
 
         // Guests do not have any progress. Don't show them the block.
         if (!isloggedin() || isguestuser()) {
@@ -213,7 +213,7 @@ class block_completion_progress extends block_base {
 
             // Output the Progress Bar.
             if (!empty($blockprogresses)) {
-                $courselink = new moodle_url('/course/view.php', array('id' => $course->id));
+                $courselink = new moodle_url('/course/view.php', ['id' => $course->id]);
                 $linktext = html_writer::tag('h3', s(format_string($course->$coursenametoshow)));
                 $this->content->text .= html_writer::link($courselink, $linktext);
             }
@@ -286,14 +286,14 @@ class block_completion_progress extends block_base {
         if (has_capability('block/completion_progress:showbar', $this->context)) {
             $this->content->text .= $output->render($progress);
         }
-        $barinstances = array($this->instance->id);
+        $barinstances = [$this->instance->id];
 
         // Allow teachers to access the overview page.
         if (has_capability('block/completion_progress:overview', $this->context)) {
-            $parameters = array('instanceid' => $this->instance->id, 'courseid' => $COURSE->id);
+            $parameters = ['instanceid' => $this->instance->id, 'courseid' => $COURSE->id];
             $url = new moodle_url('/blocks/completion_progress/overview.php', $parameters);
             $label = get_string('overview', 'block_completion_progress');
-            $options = array('class' => 'overviewButton');
+            $options = ['class' => 'overviewButton'];
             $this->content->text .= $OUTPUT->single_button($url, $label, 'get', $options);
         }
 

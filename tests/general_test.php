@@ -44,6 +44,12 @@ use block_completion_progress\defaults;
  */
 class general_test extends \advanced_testcase {
     /**
+     * Course.
+     * @var stdClass
+     */
+    private $course;
+
+    /**
      * Teacher users.
      * @var array
      */
@@ -131,7 +137,7 @@ class general_test extends \advanced_testcase {
         $assign = $this->create_assign_instance([
           'submissiondrafts' => 0,
           'completionsubmit' => 1,
-          'completion' => COMPLETION_TRACKING_AUTOMATIC
+          'completion' => COMPLETION_TRACKING_AUTOMATIC,
         ]);
 
         $gradeitem = \grade_item::fetch(['courseid' => $this->course->id,
@@ -340,11 +346,11 @@ class general_test extends \advanced_testcase {
 
         $pageinstance = $this->getDataGenerator()->create_module('page', [
             'course' => $this->course->id,
-            'completion' => COMPLETION_TRACKING_MANUAL
+            'completion' => COMPLETION_TRACKING_MANUAL,
         ]);
         $labelinstance = $this->getDataGenerator()->create_module('label', [
             'course' => $this->course->id,
-            'completion' => COMPLETION_TRACKING_MANUAL
+            'completion' => COMPLETION_TRACKING_MANUAL,
         ]);
 
         $modinfo = get_fast_modinfo($this->course);

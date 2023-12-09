@@ -72,6 +72,7 @@ class overview extends \table_sql {
         $this->progress = $progress;
         $this->output = $PAGE->get_renderer('block_completion_progress');
         $this->strs['strftimedaydatetime'] = get_string('strftimedaydatetime', 'langconfig');
+        $this->strs['strftimedatetimeshort'] = get_string('strftimedatetimeshort', 'langconfig');
         $this->strs['indeterminate'] = get_string('indeterminate', 'block_completion_progress');
         $this->strs['never'] = get_string('never');
 
@@ -279,7 +280,7 @@ class overview extends \table_sql {
         if ($row->timeaccess == 0) {
             return $this->strs['never'];
         }
-        return userdate($row->timeaccess, $this->strs['strftimedaydatetime']);
+        return userdate($row->timeaccess, $this->strs[$this->is_downloading() ? 'strftimedatetimeshort' : 'strftimedaydatetime']);
     }
 
     /**
