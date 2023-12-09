@@ -43,6 +43,12 @@ use block_completion_progress\defaults;
  */
 class overview_test extends \advanced_testcase {
     /**
+     * Course.
+     * @var object
+     */
+    private $course;
+
+    /**
      * Teacher users.
      * @var array
      */
