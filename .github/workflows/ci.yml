@@ -47,6 +47,8 @@ jobs:
         env:
           MYSQL_USER: 'root'
           MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+          MYSQL_CHARACTER_SET_SERVER: "utf8mb4"
+          MYSQL_COLLATION_SERVER: "utf8mb4_unicode_ci"
         ports:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval 10s --health-timeout 5s --health-retries 3
@@ -67,7 +69,7 @@ jobs:
 
     - name: Deploy moodle-plugin-ci
       run: |
-        composer create-project -n --no-dev --prefer-dist moodlehq/moodle-plugin-ci ci ^3
+        composer create-project -n --no-dev --prefer-dist moodlehq/moodle-plugin-ci ci ^4
         echo $(cd ci/bin; pwd) >> $GITHUB_PATH
         echo $(cd ci/vendor/bin; pwd) >> $GITHUB_PATH
         sudo locale-gen en_AU.UTF-8
@@ -81,41 +83,45 @@ jobs:
         MOODLE_REPO: https://github.com/moodle/moodle.git
 
     - name: Run phplint
-      if: ${{ always() }}
+      if: ${{ !cancelled() }}
       run: moodle-plugin-ci phplint
 
     - name: Run phpcpd
-      if: ${{ always() }}
+      if: ${{ !cancelled() }}
       run: moodle-plugin-ci phpcpd
 
     - name: Run phpmd
-      if: ${{ always() }}
+      if: ${{ !cancelled() }}
       run: moodle-plugin-ci phpmd
 
-    - name: Run codechecker
-      if: ${{ always() }}
-      run: moodle-plugin-ci codechecker
+    - name: Run phpcs
+      if: ${{ !cancelled() }}
+      run: moodle-plugin-ci phpcs
+
+    - name: Run phpdoc
+      if: ${{ !cancelled() }}
+      run: moodle-plugin-ci phpdoc
 
     - name: Run validate
-      if: ${{ always() }}
+      if: ${{ !cancelled() }}
       run: moodle-plugin-ci validate
 
     - name: Run savepoints
-      if: ${{ always() }}
+      if: ${{ !cancelled() }}
       run: moodle-plugin-ci savepoints
 
     - name: Run grunt
-      if: ${{ always() }}
+      if: ${{ !cancelled() }}
       run: moodle-plugin-ci grunt
 
-    - name: Run phpdoc
-      if: ${{ always() }}
-      run: moodle-plugin-ci phpdoc
-
     - name: Run phpunit
-      if: ${{ always() }}
+      if: ${{ !cancelled() }}
       run: moodle-plugin-ci phpunit
 
     - name: Run behat
-      if: ${{ always() }}
+      if: ${{ !cancelled() }}
       run: moodle-plugin-ci behat --profile chrome
+
+    - name: Mark cancelled jobs as failed
+      if: ${{ cancelled() }}
+      run: exit 1

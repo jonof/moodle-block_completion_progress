@@ -61,6 +61,12 @@ class overview_test extends \advanced_testcase {
     private $groups = [];
 
     /**
+     * A course object.
+     * @var object
+     */
+    private $course = null;
+
+    /**
      * Number of students to create.
      */
     const STUDENT_COUNT = 4;

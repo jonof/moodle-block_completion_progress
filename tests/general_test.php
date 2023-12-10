@@ -56,6 +56,12 @@ class general_test extends \advanced_testcase {
     private $students = [];
 
     /**
+     * A course object.
+     * @var object
+     */
+    private $course = null;
+
+    /**
      * Number of students to create.
      */
     const STUDENT_COUNT = 4;
