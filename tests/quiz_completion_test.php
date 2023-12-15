@@ -69,7 +69,7 @@ class quiz_completion_test extends \block_completion_progress\tests\completion_t
      * @covers \block_completion_progress\completion_progress
      * @dataProvider grademethod_provider
      */
-    public function test_quiz_passfail($grademethod) {
+    public function test_quiz_passfail($grademethod): void {
         $generator = $this->getDataGenerator();
 
         $instance = $generator->create_module('quiz', [
@@ -152,7 +152,7 @@ class quiz_completion_test extends \block_completion_progress\tests\completion_t
      * @covers \block_completion_progress\completion_progress
      * @dataProvider grademethod_provider
      */
-    public function test_quiz_basic($grademethod) {
+    public function test_quiz_basic($grademethod): void {
         $generator = $this->getDataGenerator();
 
         $instance = $generator->create_module('quiz', [

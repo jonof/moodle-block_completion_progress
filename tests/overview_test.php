@@ -122,7 +122,7 @@ class overview_test extends \advanced_testcase {
      * Test optional settings' effects on the overview table.
      * @covers \block_completion_progress\table\overview
      */
-    public function test_overview_options() {
+    public function test_overview_options(): void {
         global $DB, $PAGE;
 
         $output = $PAGE->get_renderer('block_completion_progress');
@@ -209,7 +209,7 @@ class overview_test extends \advanced_testcase {
      * Test that the overview table correctly sorts by progress.
      * @covers \block_completion_progress\table\overview
      */
-    public function test_overview_percentage_sort() {
+    public function test_overview_percentage_sort(): void {
         global $DB, $PAGE;
 
         $PAGE->set_url('/');
