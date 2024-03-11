@@ -243,6 +243,18 @@ class block_completion_progress extends block_base {
     protected function prepare_course_content(&$barinstances) {
         global $USER, $COURSE, $CFG, $OUTPUT;
 
+        $moduleinfo = get_fast_modinfo($COURSE);
+
+        $maxmodules = (int)get_config('block_completion_progress', 'max_modules');
+        $modules = count($moduleinfo->get_cms());
+        if ($maxmodules !== 0 && $modules > $maxmodules) {
+            $this->content->text .= get_string('too_many_modules', 'block_completion_progress', (object)[
+                'maxmodules' => $maxmodules,
+                'modules' => $modules,
+            ]);
+            return false;
+        }
+
         $output = $this->page->get_renderer('block_completion_progress');
 
         // Check if user is in group for block.
