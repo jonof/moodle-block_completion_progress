@@ -25,6 +25,9 @@
 $string['completed_colour'] = '#73A839';
 $string['completed_colour_descr'] = 'HTML Colour code for elements that have been completed';
 $string['completed_colour_title'] = 'Completed colour';
+$string['too_many_modules'] = '<i class="fa fa-exclamation-circle text-danger fa-fw"></i>Too many modules to display.<br> {$a->maxmodules} modules are allowed, this course has {$a->modules}.';
+$string['max_modules'] = 'The amount of modules allowed in a course for the block to show completion progress';
+$string['max_modules_desc'] = 'If the course has more modules than this, the block will not show completion progress. <strong>By setting this setting to 0, the block will always show completion progress.</strong>';
 $string['completion_not_enabled'] = 'Completion tracking is not enabled on this site.';
 $string['completion_not_enabled_course'] = 'Completion tracking is not enabled in this course.';
 $string['completion_progress:addinstance'] = 'Add a new Completion Progress block';
