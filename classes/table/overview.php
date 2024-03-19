@@ -147,6 +147,11 @@ class overview extends \table_sql {
             "{$enroljoin->wheres} {$rolewhere}",
             $params
         );
+
+        $this->set_count_sql(
+            "SELECT COUNT(DISTINCT u.id) FROM {$this->sql->from} WHERE {$this->sql->where}",
+            $params
+        );
     }
 
     /**
