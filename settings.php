@@ -102,8 +102,17 @@ if ($ADMIN->fulltree) {
         defaults::SHOWLASTINCOURSE)
     );
     $settings->add(new admin_setting_configcheckbox('block_completion_progress/forceiconsinbar',
-        get_string('forceiconsinbar', 'block_completion_progress'),
-        '',
-        defaults::FORCEICONSINBAR)
+            get_string('forceiconsinbar', 'block_completion_progress'),
+            '',
+            defaults::FORCEICONSINBAR)
+    );
+    $settings->add(
+        new admin_setting_configtext(
+            'block_completion_progress/max_modules',
+            get_string('max_modules', 'block_completion_progress'),
+            get_string('max_modules_desc', 'block_completion_progress'),
+        0,
+        PARAM_INT
+        )
     );
 }
