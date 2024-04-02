@@ -173,7 +173,7 @@ if (!$progress->has_activities()) {
 echo $output->container_start('progressoverviewmenus');
 if ($groupoptions) {
     echo $output->single_select($PAGE->url, 'group', $groupoptions, $group,
-        ['' => 'choosedots'], null, ['label' => get_string('groupsvisible')]);
+        ['' => 'choosedots'], null, ['label' => s(get_string('groupsgroupings', 'group'))]);
 }
 if ($roleoptions) {
     echo $output->single_select($PAGE->url, 'role', $roleoptions, $role,
