@@ -117,25 +117,25 @@ class completion_progress implements \renderable {
 
     /**
      * Whether exclusions have been loaded for all course users already.
-     * @var boolean
+     * @var bool
      */
     protected $exclusionsforall = false;
 
     /**
      * Whether submissions have been loaded for all course users already.
-     * @var boolean
+     * @var bool
      */
     protected $submissionsforall = false;
 
     /**
      * Whether completions have been loaded for all course users already.
-     * @var boolean
+     * @var bool
      */
     protected $completionsforall = false;
 
     /**
      * Simple bar mode (for overview).
-     * @var boolean
+     * @var bool
      */
     protected $simplebar = false;
 

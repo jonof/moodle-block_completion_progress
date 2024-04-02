@@ -42,7 +42,7 @@ use block_completion_progress\defaults;
  * @copyright  2017 onwards Nelson Moller  {@link http://moodle.com}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class general_test extends \advanced_testcase {
+final class general_test extends \advanced_testcase {
     /**
      * Teacher users.
      * @var array

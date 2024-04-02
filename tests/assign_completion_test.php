@@ -40,7 +40,7 @@ use block_completion_progress\defaults;
  * @copyright  2020 Jonathon Fowler <fowlerj@usq.edu.au>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class assign_completion_test extends \block_completion_progress\tests\completion_testcase {
+final class assign_completion_test extends \block_completion_progress\tests\completion_testcase {
     /**
      * Test assignment completion state changes.
      * @covers \block_completion_progress\completion_progress

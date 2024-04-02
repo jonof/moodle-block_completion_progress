@@ -41,7 +41,7 @@ use block_completion_progress\defaults;
  * @copyright  2021 Jonathon Fowler <fowlerj@usq.edu.au>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class overview_test extends \advanced_testcase {
+final class overview_test extends \advanced_testcase {
     /**
      * Teacher users.
      * @var array
