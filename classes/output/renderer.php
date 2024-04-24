@@ -17,10 +17,10 @@
 /**
  * Completion Progress block renderer.
  *
- * @package    block_completion_progress
- * @copyright  2016 Michael de Raadt
- * @copyright  2020 Jonathon Fowler <fowlerj@usq.edu.au>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   block_completion_progress
+ * @copyright 2016 Michael de Raadt
+ * @copyright 2020 Jonathon Fowler <fowlerj@usq.edu.au>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace block_completion_progress\output;
@@ -33,14 +33,15 @@ use html_writer;
 /**
  * Completion Progress block renderer.
  *
- * @package    block_completion_progress
- * @copyright  2020 Jonathon Fowler <fowlerj@usq.edu.au>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   block_completion_progress
+ * @copyright 2020 Jonathon Fowler <fowlerj@usq.edu.au>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class renderer extends plugin_renderer_base {
     /**
      * Generate a progress bar.
-     * @param completion_progress $progress
+     *
+     * @param  completion_progress $progress
      * @return string HTML
      */
     public function render_completion_progress(completion_progress $progress) {
@@ -147,9 +148,9 @@ class renderer extends plugin_renderer_base {
 
         // Determine links to activities.
         for ($i = 0; $i < $numactivities; $i++) {
-            if ($userid != $USER->id &&
-                array_key_exists($activities[$i]->type, $alternatelinks) &&
-                has_capability($alternatelinks[$activities[$i]->type]['capability'], $activities[$i]->context)
+            if ($userid != $USER->id
+                && array_key_exists($activities[$i]->type, $alternatelinks)
+                && has_capability($alternatelinks[$activities[$i]->type]['capability'], $activities[$i]->context)
             ) {
                 $substitutions = [
                     '/:courseid/' => $courseid,
@@ -184,10 +185,9 @@ class renderer extends plugin_renderer_base {
             } else if ($complete == COMPLETION_COMPLETE || $complete == COMPLETION_COMPLETE_PASS) {
                 $celloptions['class'] .= ' completed';
 
-            } else if (
-                $complete == COMPLETION_COMPLETE_FAIL ||
-                (!isset($config->orderby) || $config->orderby == 'orderbytime') &&
-                (isset($activity->expected) && $activity->expected > 0 && $activity->expected < $now)
+            } else if ($complete == COMPLETION_COMPLETE_FAIL
+                || (!isset($config->orderby) || $config->orderby == 'orderbytime')
+                && (isset($activity->expected) && $activity->expected > 0 && $activity->expected < $now)
             ) {
                 $celloptions['class'] .= ' notCompleted';
 
@@ -266,8 +266,10 @@ class renderer extends plugin_renderer_base {
             $content .= html_writer::start_tag('div', $divoptions);
 
             $text = '';
-            $text .= html_writer::empty_tag('img',
-                    ['src' => $activity->icon, 'class' => 'moduleIcon', 'alt' => '', 'role' => 'presentation']);
+            $text .= html_writer::empty_tag(
+                'img',
+                ['src' => $activity->icon, 'class' => 'moduleIcon', 'alt' => '', 'role' => 'presentation']
+            );
             $text .= $activity->name;
             if (!empty($activity->link) && (!empty($activity->available) || $simple)) {
                 $attrs = ['class' => 'action_link'];

@@ -18,9 +18,9 @@
 /**
  * Completion Progress block definition
  *
- * @package    block_completion_progress
- * @copyright  2016 Michael de Raadt
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   block_completion_progress
+ * @copyright 2016 Michael de Raadt
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 use block_completion_progress\completion_progress;
@@ -138,7 +138,8 @@ class block_completion_progress extends block_base {
         // Organise access to JS.
         $this->page->requires->js_call_amd('block_completion_progress/progressbar', 'init', [
             'instances' => $barinstances,
-        ]);
+            ]
+        );
         $cachevalue = debugging('', DEBUG_DEVELOPER) ? -1 : (int)get_config('block_completion_progress', 'cachevalue');
         $this->page->requires->css('/blocks/completion_progress/css.php?v=' . $cachevalue);
 
@@ -147,7 +148,8 @@ class block_completion_progress extends block_base {
 
     /**
      * Produce content for the Dashboard or Front page.
-     * @param array $barinstances receives block instance ids
+     *
+     * @param  array $barinstances receives block instance ids
      * @return boolean false if an early exit
      */
     protected function prepare_dashboard_content(&$barinstances) {
@@ -196,14 +198,16 @@ class block_completion_progress extends block_base {
                 $blockprogress = (clone $courseprogress)->for_block_instance($birec);
                 $blockinstance = $blockprogress->get_block_instance();
                 $blockconfig = $blockprogress->get_block_config();
-                if (!has_capability('block/completion_progress:showbar', context_block::instance($blockinstance->id)) ||
-                        !$blockinstance->visible ||
-                        !$blockprogress->has_visible_activities()) {
+                if (!has_capability('block/completion_progress:showbar', context_block::instance($blockinstance->id))
+                    || !$blockinstance->visible
+                    || !$blockprogress->has_visible_activities()
+                ) {
                     continue;
                 }
-                if (!empty($blockconfig->group) &&
-                        !has_capability('moodle/site:accessallgroups', $courseprogress->get_context()) &&
-                        !$this->check_group_membership($blockconfig->group, $course->id)) {
+                if (!empty($blockconfig->group)
+                    && !has_capability('moodle/site:accessallgroups', $courseprogress->get_context())
+                    && !$this->check_group_membership($blockconfig->group, $course->id)
+                ) {
                     continue;
                 }
 
@@ -237,7 +241,8 @@ class block_completion_progress extends block_base {
 
     /**
      * Produce content for a course page.
-     * @param array $barinstances receives block instance ids
+     *
+     * @param  array $barinstances receives block instance ids
      * @return boolean false if an early exit
      */
     protected function prepare_course_content(&$barinstances) {
@@ -246,11 +251,9 @@ class block_completion_progress extends block_base {
         $output = $this->page->get_renderer('block_completion_progress');
 
         // Check if user is in group for block.
-        if (
-            !empty($this->config->group) &&
-            !has_capability('moodle/site:accessallgroups', $this->context) &&
-            !$this->check_group_membership($this->config->group, $COURSE->id)
-        ) {
+        if (!empty($this->config->group)
+            && !has_capability('moodle/site:accessallgroups', $this->context)
+            && !$this->check_group_membership($this->config->group, $COURSE->id)) {
             return false;
         }
 
@@ -311,8 +314,8 @@ class block_completion_progress extends block_base {
     /**
      * Determines whether the current user is a member of a given group or grouping
      *
-     * @param string $group    The group or grouping identifier starting with 'group-' or 'grouping-'
-     * @param int    $courseid The ID of the course containing the block instance
+     * @param  string $group    The group or grouping identifier starting with 'group-' or 'grouping-'
+     * @param  int    $courseid The ID of the course containing the block instance
      * @return boolean value indicating membership
      */
     private function check_group_membership($group, $courseid) {
@@ -332,7 +335,7 @@ class block_completion_progress extends block_base {
     /**
      * Checks whether the given page is site-level (Dashboard or Front page) or not.
      *
-     * @param moodle_page $page the page to check, or the current page if not passed.
+     * @param  moodle_page $page the page to check, or the current page if not passed.
      * @return boolean True when on the Dashboard or Site home page.
      */
     public static function on_site_page($page = null) {

@@ -29,11 +29,14 @@ use block_completion_progress\defaults;
 if ($ADMIN->fulltree) {
 
     $options = [10 => 10, 12 => 12, 14 => 14, 16 => 16, 18 => 18, 20 => 20];
-    $settings->add(new admin_setting_configselect('block_completion_progress/wrapafter',
-        get_string('wrapafter', 'block_completion_progress'),
-        '',
-        defaults::WRAPAFTER,
-        $options)
+    $settings->add(
+        new admin_setting_configselect(
+            'block_completion_progress/wrapafter',
+            get_string('wrapafter', 'block_completion_progress'),
+            '',
+            defaults::WRAPAFTER,
+            $options
+        )
     );
 
     $options = [
@@ -41,69 +44,92 @@ if ($ADMIN->fulltree) {
         'scroll' => get_string('config_scroll', 'block_completion_progress'),
         'wrap' => get_string('config_wrap', 'block_completion_progress'),
     ];
-    $settings->add(new admin_setting_configselect('block_completion_progress/defaultlongbars',
-        get_string('defaultlongbars', 'block_completion_progress'),
-        '',
-        defaults::LONGBARS,
-        $options)
+    $settings->add(
+        new admin_setting_configselect(
+            'block_completion_progress/defaultlongbars',
+            get_string('defaultlongbars', 'block_completion_progress'),
+            '',
+            defaults::LONGBARS,
+            $options
+        )
     );
 
     $options = [
         'shortname' => get_string('shortname', 'block_completion_progress'),
         'fullname' => get_string('fullname', 'block_completion_progress'),
     ];
-    $settings->add(new admin_setting_configselect('block_completion_progress/coursenametoshow',
-        get_string('coursenametoshow', 'block_completion_progress'),
-        '',
-        defaults::COURSENAMETOSHOW,
-        $options)
+    $settings->add(
+        new admin_setting_configselect(
+            'block_completion_progress/coursenametoshow',
+            get_string('coursenametoshow', 'block_completion_progress'),
+            '',
+            defaults::COURSENAMETOSHOW,
+            $options
+        )
     );
 
-    $coloursetting = new admin_setting_configcolourpicker('block_completion_progress/completed_colour',
+    $coloursetting = new admin_setting_configcolourpicker(
+        'block_completion_progress/completed_colour',
         get_string('completed_colour_title', 'block_completion_progress'),
         get_string('completed_colour_descr', 'block_completion_progress'),
         get_string('completed_colour', 'block_completion_progress'),
-        null );
+        null
+    );
     $coloursetting->set_updatedcallback('block_completion_progress::increment_cache_value');
     $settings->add($coloursetting);
 
-    $coloursetting = new admin_setting_configcolourpicker('block_completion_progress/submittednotcomplete_colour',
+    $coloursetting = new admin_setting_configcolourpicker(
+        'block_completion_progress/submittednotcomplete_colour',
         get_string('submittednotcomplete_colour_title', 'block_completion_progress'),
         get_string('submittednotcomplete_colour_descr', 'block_completion_progress'),
         get_string('submittednotcomplete_colour', 'block_completion_progress'),
-        null );
+        null
+    );
     $coloursetting->set_updatedcallback('block_completion_progress::increment_cache_value');
     $settings->add($coloursetting);
 
-    $coloursetting = new admin_setting_configcolourpicker('block_completion_progress/notCompleted_colour',
+    $coloursetting = new admin_setting_configcolourpicker(
+        'block_completion_progress/notCompleted_colour',
         get_string('notCompleted_colour_title', 'block_completion_progress'),
         get_string('notCompleted_colour_descr', 'block_completion_progress'),
         get_string('notCompleted_colour', 'block_completion_progress'),
-        null );
+        null
+    );
     $coloursetting->set_updatedcallback('block_completion_progress::increment_cache_value');
     $settings->add($coloursetting);
 
-    $coloursetting = new admin_setting_configcolourpicker('block_completion_progress/futureNotCompleted_colour',
+    $coloursetting = new admin_setting_configcolourpicker(
+        'block_completion_progress/futureNotCompleted_colour',
         get_string('futureNotCompleted_colour_title', 'block_completion_progress'),
         get_string('futureNotCompleted_colour_descr', 'block_completion_progress'),
         get_string('futureNotCompleted_colour', 'block_completion_progress'),
-        null );
+        null
+    );
     $coloursetting->set_updatedcallback('block_completion_progress::increment_cache_value');
     $settings->add($coloursetting);
 
-    $settings->add(new admin_setting_configcheckbox('block_completion_progress/showinactive',
-        get_string('showinactive', 'block_completion_progress'),
-        '',
-        defaults::SHOWINACTIVE)
+    $settings->add(
+        new admin_setting_configcheckbox(
+            'block_completion_progress/showinactive',
+            get_string('showinactive', 'block_completion_progress'),
+            '',
+            defaults::SHOWINACTIVE
+        )
     );
-    $settings->add(new admin_setting_configcheckbox('block_completion_progress/showlastincourse',
-        get_string('showlastincourse', 'block_completion_progress'),
-        '',
-        defaults::SHOWLASTINCOURSE)
+    $settings->add(
+        new admin_setting_configcheckbox(
+            'block_completion_progress/showlastincourse',
+            get_string('showlastincourse', 'block_completion_progress'),
+            '',
+            defaults::SHOWLASTINCOURSE
+        )
     );
-    $settings->add(new admin_setting_configcheckbox('block_completion_progress/forceiconsinbar',
-        get_string('forceiconsinbar', 'block_completion_progress'),
-        '',
-        defaults::FORCEICONSINBAR)
+    $settings->add(
+        new admin_setting_configcheckbox(
+            'block_completion_progress/forceiconsinbar',
+            get_string('forceiconsinbar', 'block_completion_progress'),
+            '',
+            defaults::FORCEICONSINBAR
+        )
     );
 }

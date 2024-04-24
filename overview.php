@@ -18,9 +18,9 @@
 /**
  * Completion Progress block overview page
  *
- * @package    block_completion_progress
- * @copyright  2018 Michael de Raadt
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   block_completion_progress
+ * @copyright 2018 Michael de Raadt
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 // Include required files.
@@ -172,12 +172,16 @@ if (!$progress->has_activities()) {
 
 echo $output->container_start('progressoverviewmenus');
 if ($groupoptions) {
-    echo $output->single_select($PAGE->url, 'group', $groupoptions, $group,
-        ['' => 'choosedots'], null, ['label' => s(get_string('groupsgroupings', 'group'))]);
+    echo $output->single_select(
+        $PAGE->url, 'group', $groupoptions, $group,
+        ['' => 'choosedots'], null, ['label' => s(get_string('groupsgroupings', 'group'))]
+    );
 }
 if ($roleoptions) {
-    echo $output->single_select($PAGE->url, 'role', $roleoptions, $role,
-        ['' => 'choosedots'], null, ['label' => get_string('role')]);
+    echo $output->single_select(
+        $PAGE->url, 'role', $roleoptions, $role,
+        ['' => 'choosedots'], null, ['label' => get_string('role')]
+    );
 }
 echo $output->container_end();
 
@@ -210,12 +214,20 @@ if ($table->totalrows > $perpage || $perpage == SHOW_ALL_PAGE_SIZE) {
     $perpageurl = new moodle_url($PAGE->url, ['page' => 0]);
     if ($perpage < SHOW_ALL_PAGE_SIZE) {
         $perpageurl->param('perpage', SHOW_ALL_PAGE_SIZE);
-        echo $output->container(html_writer::link($perpageurl,
-            get_string('showall', '', $table->totalrows)), [], 'showall');
+        echo $output->container(
+            html_writer::link(
+                $perpageurl,
+                get_string('showall', '', $table->totalrows)
+            ), [], 'showall'
+        );
     } else {
         $perpageurl->param('perpage', DEFAULT_PAGE_SIZE);
-        echo $output->container(html_writer::link($perpageurl,
-            get_string('showperpage', '', DEFAULT_PAGE_SIZE)), [], 'showall');
+        echo $output->container(
+            html_writer::link(
+                $perpageurl,
+                get_string('showperpage', '', DEFAULT_PAGE_SIZE)
+            ), [], 'showall'
+        );
     }
 }
 
@@ -250,9 +262,11 @@ echo html_writer::end_tag('form');
 echo $table->download_buttons();
 
 // Organise access to JS for progress bars.
-$PAGE->requires->js_call_amd('block_completion_progress/progressbar', 'init', [
+$PAGE->requires->js_call_amd(
+    'block_completion_progress/progressbar', 'init', [
     'instances' => [$block->id],
-]);
+    ]
+);
 
 echo $output->container_end();
 echo $output->footer();

@@ -17,9 +17,9 @@
 /**
  * Overview table unit tests for block_completion_progress.
  *
- * @package    block_completion_progress
- * @copyright  2021 Jonathon Fowler <fowlerj@usq.edu.au>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   block_completion_progress
+ * @copyright 2021 Jonathon Fowler <fowlerj@usq.edu.au>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace block_completion_progress;
@@ -37,31 +37,35 @@ use block_completion_progress\defaults;
 /**
  * Overview table unit tests for block_completion_progress.
  *
- * @package    block_completion_progress
- * @copyright  2021 Jonathon Fowler <fowlerj@usq.edu.au>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   block_completion_progress
+ * @copyright 2021 Jonathon Fowler <fowlerj@usq.edu.au>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class overview_test extends \advanced_testcase {
     /**
      * Teacher users.
+     *
      * @var array
      */
     private $teachers = [];
 
     /**
      * Student users.
+     *
      * @var array
      */
     private $students = [];
 
     /**
      * Groups.
+     *
      * @var array
      */
     private $groups = [];
 
     /**
      * A course object.
+     *
      * @var object
      */
     private $course = null;
@@ -81,9 +85,11 @@ final class overview_test extends \advanced_testcase {
 
         $generator = $this->getDataGenerator();
 
-        $this->course = $generator->create_course([
-          'enablecompletion' => 1,
-        ]);
+        $this->course = $generator->create_course(
+            [
+            'enablecompletion' => 1,
+            ]
+        );
 
         $this->teachers[0] = $generator->create_and_enrol($this->course, 'teacher');
 
@@ -92,21 +98,25 @@ final class overview_test extends \advanced_testcase {
 
         for ($i = 0; $i < self::STUDENT_COUNT; $i++) {
             $status = $i >= 3 ? ENROL_USER_SUSPENDED : null;
-            $this->students[$i] = $generator->create_and_enrol($this->course, 'student',
-                null, 'manual', 0, 0, $status);
+            $this->students[$i] = $generator->create_and_enrol(
+                $this->course, 'student',
+                null, 'manual', 0, 0, $status
+            );
 
             // Students are put into even/odd groups.
-            $generator->create_group_member([
+            $generator->create_group_member(
+                [
                 'groupid' => $this->groups[$i % 2]->id,
                 'userid' => $this->students[$i]->id,
-            ]);
+                ]
+            );
         }
     }
 
     /**
      * Convenience function to create a testable instance of an assignment.
      *
-     * @param array $params Array of parameters to pass to the generator
+     * @param  array $params Array of parameters to pass to the generator
      * @return assign Assign class.
      */
     protected function create_assign_instance($params) {
@@ -120,6 +130,7 @@ final class overview_test extends \advanced_testcase {
 
     /**
      * Test optional settings' effects on the overview table.
+     *
      * @covers \block_completion_progress\table\overview
      */
     public function test_overview_options(): void {
@@ -137,22 +148,28 @@ final class overview_test extends \advanced_testcase {
             'timecreated' => time(),
             'timemodified' => time(),
             'defaultregion' => 'side-post',
-            'configdata' => base64_encode(serialize((object)[
-                'orderby' => defaults::ORDERBY,
-                'longbars' => defaults::LONGBARS,
-                'progressBarIcons' => 0,    // Non-default.
-                'showpercentage' => defaults::SHOWPERCENTAGE,
-                'progressTitle' => "",
-                'activitiesincluded' => defaults::ACTIVITIESINCLUDED,
-            ])),
+            'configdata' => base64_encode(
+                serialize(
+                    (object)[
+                    'orderby' => defaults::ORDERBY,
+                    'longbars' => defaults::LONGBARS,
+                    'progressBarIcons' => 0,    // Non-default.
+                    'showpercentage' => defaults::SHOWPERCENTAGE,
+                    'progressTitle' => "",
+                    'activitiesincluded' => defaults::ACTIVITIESINCLUDED,
+                    ]
+                )
+            ),
         ];
         $blockinstance = $this->getDataGenerator()->create_block('completion_progress', $blockinfo);
 
-        $assign = $this->create_assign_instance([
-          'submissiondrafts' => 0,
-          'completionsubmit' => 1,
-          'completion' => COMPLETION_TRACKING_AUTOMATIC,
-        ]);
+        $assign = $this->create_assign_instance(
+            [
+            'submissiondrafts' => 0,
+            'completionsubmit' => 1,
+            'completion' => COMPLETION_TRACKING_AUTOMATIC,
+            ]
+        );
 
         $PAGE->set_url('/');
 
@@ -207,6 +224,7 @@ final class overview_test extends \advanced_testcase {
 
     /**
      * Test that the overview table correctly sorts by progress.
+     *
      * @covers \block_completion_progress\table\overview
      */
     public function test_overview_percentage_sort(): void {
@@ -226,26 +244,34 @@ final class overview_test extends \advanced_testcase {
             'timecreated' => time(),
             'timemodified' => time(),
             'defaultregion' => 'side-post',
-            'configdata' => base64_encode(serialize((object)[
-                'orderby' => defaults::ORDERBY,
-                'longbars' => defaults::LONGBARS,
-                'progressBarIcons' => 0,    // Non-default.
-                'showpercentage' => defaults::SHOWPERCENTAGE,
-                'progressTitle' => "",
-                'activitiesincluded' => defaults::ACTIVITIESINCLUDED,
-            ])),
+            'configdata' => base64_encode(
+                serialize(
+                    (object)[
+                    'orderby' => defaults::ORDERBY,
+                    'longbars' => defaults::LONGBARS,
+                    'progressBarIcons' => 0,    // Non-default.
+                    'showpercentage' => defaults::SHOWPERCENTAGE,
+                    'progressTitle' => "",
+                    'activitiesincluded' => defaults::ACTIVITIESINCLUDED,
+                    ]
+                )
+            ),
         ];
         $blockinstance = $generator->create_block('completion_progress', $blockinfo);
 
-        $page1 = $generator->create_module('page', [
+        $page1 = $generator->create_module(
+            'page', [
             'course' => $this->course->id,
             'completion' => COMPLETION_TRACKING_MANUAL,
-        ]);
+            ]
+        );
         $page1cm = get_coursemodule_from_id('page', $page1->cmid);
-        $page2 = $generator->create_module('page', [
+        $page2 = $generator->create_module(
+            'page', [
             'course' => $this->course->id,
             'completion' => COMPLETION_TRACKING_MANUAL,
-        ]);
+            ]
+        );
         $page2cm = get_coursemodule_from_id('page', $page2->cmid);
 
         $completion = new \completion_info($this->course);

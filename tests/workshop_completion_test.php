@@ -17,9 +17,9 @@
 /**
  * Workshop activity-related unit tests for Completion Progress block.
  *
- * @package    block_completion_progress
- * @copyright  2020 Jonathon Fowler <fowlerj@usq.edu.au>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   block_completion_progress
+ * @copyright 2020 Jonathon Fowler <fowlerj@usq.edu.au>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace block_completion_progress;
@@ -36,13 +36,14 @@ use block_completion_progress\defaults;
 /**
  * Workshop activity-related unit tests for Completion Progress block.
  *
- * @package    block_completion_progress
- * @copyright  2020 Jonathon Fowler <fowlerj@usq.edu.au>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   block_completion_progress
+ * @copyright 2020 Jonathon Fowler <fowlerj@usq.edu.au>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class workshop_completion_test extends \block_completion_progress\tests\completion_testcase {
     /**
      * Test completion determination in a Workshop activity with pass/fail enabled.
+     *
      * @covers \block_completion_progress\completion_progress
      */
     public function test_workshop_passfail(): void {
@@ -50,25 +51,29 @@ final class workshop_completion_test extends \block_completion_progress\tests\co
 
         $generator = $this->getDataGenerator();
 
-        $instance = $generator->create_module('workshop', [
+        $instance = $generator->create_module(
+            'workshop', [
             'course' => $this->course->id,
             'grade' => 80,
             'gradinggrade' => 20,
             'completion' => COMPLETION_TRACKING_AUTOMATIC,
             'completionusegrade' => 1,      // The student must receive a grade to complete.
             'completionexpected' => time() - DAYSECS,
-        ]);
+            ]
+        );
         $cm = get_coursemodule_from_id('workshop', $instance->cmid);
 
         // Set the passing grades for submission and assessment.
-        $item = \grade_item::fetch([
+        $item = \grade_item::fetch(
+            [
             'courseid' => $this->course->id,
             'itemtype' => 'mod',
             'itemmodule' => 'workshop',
             'iteminstance' => $instance->id,
             'itemnumber' => 0,
             'outcomeid' => null,
-        ]);
+            ]
+        );
         $item->gradepass = 40;
         $item->update();
 
@@ -97,6 +102,7 @@ final class workshop_completion_test extends \block_completion_progress\tests\co
 
     /**
      * Test completion determination in an Workshop activity with basic completion.
+     *
      * @covers \block_completion_progress\completion_progress
      */
     public function test_workshop_basic(): void {
@@ -104,14 +110,16 @@ final class workshop_completion_test extends \block_completion_progress\tests\co
 
         $generator = $this->getDataGenerator();
 
-        $instance = $generator->create_module('workshop', [
+        $instance = $generator->create_module(
+            'workshop', [
             'course' => $this->course->id,
             'grade' => 80,
             'gradinggrade' => 20,
             'completion' => COMPLETION_TRACKING_AUTOMATIC,
             'completionusegrade' => 1,      // The student must receive a grade to complete.
             'completionexpected' => time() - DAYSECS,
-        ]);
+            ]
+        );
         $cm = get_coursemodule_from_id('workshop', $instance->cmid);
 
         $workshop = new \testable_workshop($instance, $cm, $this->course);
@@ -140,8 +148,8 @@ final class workshop_completion_test extends \block_completion_progress\tests\co
     /**
      * Make a submission for a student.
      *
-     * @param object $student
-     * @param object $workshop
+     * @param  object $student
+     * @param  object $workshop
      * @return object
      */
     protected function submit_for_student($student, $workshop) {
@@ -149,28 +157,32 @@ final class workshop_completion_test extends \block_completion_progress\tests\co
 
         $generator = $this->getDataGenerator()->get_plugin_generator('mod_workshop');
 
-        $id = $generator->create_submission($workshop->id, $student->id, [
+        $id = $generator->create_submission(
+            $workshop->id, $student->id, [
             'title' => 'Submission',
-        ]);
+            ]
+        );
         return $DB->get_record('workshop_submissions', ['id' => $id]);
     }
 
     /**
      * Award a grade to a submission.
      *
-     * @param object $submission
-     * @param object $workshop
-     * @param integer $grade
+     * @param  object  $submission
+     * @param  object  $workshop
+     * @param  integer $grade
      * @return object
      */
     protected function grade_submission($submission, $workshop, $grade) {
-        $workshop->aggregate_submission_grades_process([
+        $workshop->aggregate_submission_grades_process(
+            [
             (object)[
                 'submissionid' => $submission->id,
                 'submissiongrade' => null,
                 'weight' => 1,
                 'grade' => $grade,
             ],
-        ]);
+            ]
+        );
     }
 }

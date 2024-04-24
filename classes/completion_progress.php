@@ -17,10 +17,10 @@
 /**
  * Completion Progress block.
  *
- * @package    block_completion_progress
- * @copyright  2016 Michael de Raadt
- * @copyright  2021 Jonathon Fowler <fowlerj@usq.edu.au>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   block_completion_progress
+ * @copyright 2016 Michael de Raadt
+ * @copyright 2021 Jonathon Fowler <fowlerj@usq.edu.au>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace block_completion_progress;
@@ -33,10 +33,10 @@ use coding_exception;
 /**
  * Completion Progress.
  *
- * @package    block_completion_progress
- * @copyright  2016 Michael de Raadt
- * @copyright  2021 Jonathon Fowler <fowlerj@usq.edu.au>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   block_completion_progress
+ * @copyright 2016 Michael de Raadt
+ * @copyright 2021 Jonathon Fowler <fowlerj@usq.edu.au>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class completion_progress implements \renderable {
     /**
@@ -51,102 +51,118 @@ class completion_progress implements \renderable {
 
     /**
      * The course.
+     *
      * @var object
      */
     protected $course;
 
     /**
      * The course context.
+     *
      * @var context_course
      */
     protected $context;
 
     /**
      * Completion info for the course.
+     *
      * @var completion_info
      */
     protected $completioninfo;
 
     /**
      * The user.
+     *
      * @var object
      */
     protected $user;
 
     /**
      * Block instance record.
+     *
      * @var stdClass
      */
     protected $blockinstance;
 
     /**
      * Block instance config.
+     *
      * @var stdClass
      */
     protected $blockconfig;
 
     /**
      * List of activities.
+     *
      * @var array cmid => obj
      */
     protected $activities = null;
 
     /**
      * List of visible activities.
+     *
      * @var array cmid => obj
      */
     protected $visibleactivities = null;
 
     /**
      * List of grade exclusions.
+     *
      * @var array of: [module-instance-userid, ...]
      */
     protected $exclusions = null;
 
     /**
      * List of submissions.
+     *
      * @var array of arrays: userid => [cmid => obj]
      */
     protected $submissions = null;
 
     /**
      * List of computed completions.
+     *
      * @var array of arrays: userid => [cmid => state]
      */
     protected $completions = null;
 
     /**
      * Whether exclusions have been loaded for all course users already.
+     *
      * @var bool
      */
     protected $exclusionsforall = false;
 
     /**
      * Whether submissions have been loaded for all course users already.
+     *
      * @var bool
      */
     protected $submissionsforall = false;
 
     /**
      * Whether completions have been loaded for all course users already.
+     *
      * @var bool
      */
     protected $completionsforall = false;
 
     /**
      * Simple bar mode (for overview).
+     *
      * @var bool
      */
     protected $simplebar = false;
 
     /**
      * Constructor.
+     *
      * @param object|int $courseorid
      */
     public function __construct($courseorid) {
         global $CFG;
 
-        require_once($CFG->libdir.'/completionlib.php');
+        include_once($CFG->libdir.'/completionlib.php');
 
         if (is_object($courseorid)) {
             $this->course = $courseorid;
@@ -159,7 +175,8 @@ class completion_progress implements \renderable {
 
     /**
      * Specialise for a specific user.
-     * @param stdClass $user containing minimum of core_user\fields::for_name()
+     *
+     * @param  stdClass $user containing minimum of core_user\fields::for_name()
      * @return self
      */
     public function for_user(stdClass $user): self {
@@ -175,6 +192,7 @@ class completion_progress implements \renderable {
 
     /**
      * Specialise for overview page use.
+     *
      * @return self
      */
     public function for_overview() {
@@ -193,8 +211,9 @@ class completion_progress implements \renderable {
 
     /**
      * Specialise for a particular block instance.
-     * @param stdClass $instance Instance record.
-     * @param boolean $selectedonly Whether to filter by configured selected items.
+     *
+     * @param  stdClass $instance     Instance record.
+     * @param  boolean  $selectedonly Whether to filter by configured selected items.
      * @return self
      */
     public function for_block_instance(stdClass $instance, $selectedonly = true): self {
@@ -212,6 +231,7 @@ class completion_progress implements \renderable {
 
     /**
      * Return the course object.
+     *
      * @return object
      */
     public function get_course(): stdClass {
@@ -220,6 +240,7 @@ class completion_progress implements \renderable {
 
     /**
      * Return the course object.
+     *
      * @return context_course
      */
     public function get_context(): context_course {
@@ -228,6 +249,7 @@ class completion_progress implements \renderable {
 
     /**
      * Return the completion info object.
+     *
      * @return completion_info
      */
     public function get_completion_info(): completion_info {
@@ -236,6 +258,7 @@ class completion_progress implements \renderable {
 
     /**
      * Return the user.
+     *
      * @return stdClass
      */
     public function get_user(): ?stdClass {
@@ -244,6 +267,7 @@ class completion_progress implements \renderable {
 
     /**
      * Return the simple bar mode.
+     *
      * @return boolean
      */
     public function is_simple_bar(): bool {
@@ -252,6 +276,7 @@ class completion_progress implements \renderable {
 
     /**
      * Check whether any activities are available.
+     *
      * @return boolean
      */
     public function has_activities(): bool {
@@ -263,7 +288,8 @@ class completion_progress implements \renderable {
 
     /**
      * Return the activities in presentation order.
-     * @param string|null $orderoverride
+     *
+     * @param  string|null $orderoverride
      * @return array
      */
     public function get_activities($orderoverride = null): array {
@@ -277,6 +303,7 @@ class completion_progress implements \renderable {
 
     /**
      * Check whether any visible activities are available.
+     *
      * @return boolean
      */
     public function has_visible_activities(): bool {
@@ -288,7 +315,8 @@ class completion_progress implements \renderable {
 
     /**
      * Return the activities visible to the user in presentation order.
-     * @param string|null $orderoverride
+     *
+     * @param  string|null $orderoverride
      * @return array
      */
     public function get_visible_activities($orderoverride = null): array {
@@ -302,6 +330,7 @@ class completion_progress implements \renderable {
 
     /**
      * Return the exclusions.
+     *
      * @return array of modname-modinstance-userid formatted items
      */
     public function get_exclusions(): array {
@@ -310,6 +339,7 @@ class completion_progress implements \renderable {
 
     /**
      * Get block instance.
+     *
      * @return stdClass|null
      */
     public function get_block_instance(): ?stdClass {
@@ -318,6 +348,7 @@ class completion_progress implements \renderable {
 
     /**
      * Get block configuration.
+     *
      * @return stdClass
      */
     public function get_block_config(): stdClass {
@@ -326,6 +357,7 @@ class completion_progress implements \renderable {
 
     /**
      * Get user activity submissions.
+     *
      * @return array cmid => info
      */
     public function get_submissions(): array {
@@ -341,6 +373,7 @@ class completion_progress implements \renderable {
 
     /**
      * Get user activity completion states.
+     *
      * @return array cmid => status
      */
     public function get_completions() {
@@ -362,6 +395,7 @@ class completion_progress implements \renderable {
 
     /**
      * Calculates an overall percentage of progress.
+     *
      * @return integer  Progress value as a percentage
      */
     public function get_percentage(): ?int {
@@ -383,8 +417,8 @@ class completion_progress implements \renderable {
     /**
      * Used to compare two activity entries based on order on course page.
      *
-     * @param array $a
-     * @param array $b
+     * @param  array $a
+     * @param  array $b
      * @return integer
      */
     private function sorter_orderbycourse($a, $b): int {
@@ -398,8 +432,8 @@ class completion_progress implements \renderable {
     /**
      * Used to compare two activity entries based their expected completion times
      *
-     * @param array $a
-     * @param array $b
+     * @param  array $a
+     * @param  array $b
      * @return integer
      */
     private function sorter_orderbytime($a, $b): int {
@@ -418,7 +452,7 @@ class completion_progress implements \renderable {
     /**
      * Loads activities with completion set in current course.
      *
-     * @param boolean $selectedonly Whether to filter by configured selected items.
+     * @param  boolean $selectedonly Whether to filter by configured selected items.
      * @return array
      */
     protected function load_activities($selectedonly) {
@@ -578,7 +612,8 @@ class completion_progress implements \renderable {
             if ($compl->completionstate == COMPLETION_INCOMPLETE && $submission) {
                 $this->completions[$compl->userid][$compl->cmid] = 'submitted';
             } else if ($compl->completionstate == COMPLETION_COMPLETE_FAIL && $submission
-                    && !$submission->graded) {
+                && !$submission->graded
+            ) {
                 $this->completions[$compl->userid][$compl->cmid] = 'submitted';
             } else {
                 $this->completions[$compl->userid][$compl->cmid] = $compl->completionstate;
@@ -598,7 +633,7 @@ class completion_progress implements \renderable {
             return;
         }
 
-        require_once($CFG->dirroot . '/mod/quiz/lib.php');
+        include_once($CFG->dirroot . '/mod/quiz/lib.php');
 
         $params = [
             'courseid' => $this->course->id,
@@ -747,5 +782,4 @@ class completion_progress implements \renderable {
             }
         }
     }
-
 }

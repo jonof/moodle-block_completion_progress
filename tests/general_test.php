@@ -17,9 +17,9 @@
 /**
  * General unit tests for block_completion_progress.
  *
- * @package    block_completion_progress
- * @copyright  2017 onwards Nelson Moller  {@link http://moodle.com}
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   block_completion_progress
+ * @copyright 2017 onwards Nelson Moller  {@link http://moodle.com}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace block_completion_progress;
@@ -38,25 +38,28 @@ use block_completion_progress\defaults;
 /**
  * General unit tests for block_completion_progress.
  *
- * @package    block_completion_progress
- * @copyright  2017 onwards Nelson Moller  {@link http://moodle.com}
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   block_completion_progress
+ * @copyright 2017 onwards Nelson Moller  {@link http://moodle.com}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class general_test extends \advanced_testcase {
     /**
      * Teacher users.
+     *
      * @var array
      */
     private $teachers = [];
 
     /**
      * Student users.
+     *
      * @var array
      */
     private $students = [];
 
     /**
      * A course object.
+     *
      * @var object
      */
     private $course = null;
@@ -76,23 +79,27 @@ final class general_test extends \advanced_testcase {
 
         $generator = $this->getDataGenerator();
 
-        $this->course = $generator->create_course([
-          'enablecompletion' => 1,
-        ]);
+        $this->course = $generator->create_course(
+            [
+            'enablecompletion' => 1,
+            ]
+        );
 
         $this->teachers[0] = $generator->create_and_enrol($this->course, 'teacher');
 
         for ($i = 0; $i < self::STUDENT_COUNT; $i++) {
             $status = $i >= 3 ? ENROL_USER_SUSPENDED : null;
-            $this->students[$i] = $generator->create_and_enrol($this->course, 'student',
-                null, 'manual', 0, 0, $status);
+            $this->students[$i] = $generator->create_and_enrol(
+                $this->course, 'student',
+                null, 'manual', 0, 0, $status
+            );
         }
     }
 
     /**
      * Convenience function to create a testable instance of an assignment.
      *
-     * @param array $params Array of parameters to pass to the generator
+     * @param  array $params Array of parameters to pass to the generator
      * @return assign Assign class.
      */
     protected function create_assign_instance($params) {
@@ -106,6 +113,7 @@ final class general_test extends \advanced_testcase {
 
     /**
      * Check that a student's excluded grade hides the activity from the student's progress bar.
+     *
      * @covers \block_completion_progress\completion_progress
      */
     public function test_grade_excluded(): void {
@@ -123,29 +131,37 @@ final class general_test extends \advanced_testcase {
             'timecreated' => time(),
             'timemodified' => time(),
             'defaultregion' => 'side-post',
-            'configdata' => base64_encode(serialize((object)[
-                'orderby' => defaults::ORDERBY,
-                'longbars' => defaults::LONGBARS,
-                'progressBarIcons' => defaults::PROGRESSBARICONS,
-                'showpercentage' => defaults::SHOWPERCENTAGE,
-                'progressTitle' => "",
-                'activitiesincluded' => defaults::ACTIVITIESINCLUDED,
-            ])),
+            'configdata' => base64_encode(
+                serialize(
+                    (object)[
+                    'orderby' => defaults::ORDERBY,
+                    'longbars' => defaults::LONGBARS,
+                    'progressBarIcons' => defaults::PROGRESSBARICONS,
+                    'showpercentage' => defaults::SHOWPERCENTAGE,
+                    'progressTitle' => "",
+                    'activitiesincluded' => defaults::ACTIVITIESINCLUDED,
+                    ]
+                )
+            ),
         ];
         $blockinstance = $this->getDataGenerator()->create_block('completion_progress', $blockinfo);
 
-        $assign = $this->create_assign_instance([
-          'submissiondrafts' => 0,
-          'completionsubmit' => 1,
-          'completion' => COMPLETION_TRACKING_AUTOMATIC,
-        ]);
+        $assign = $this->create_assign_instance(
+            [
+            'submissiondrafts' => 0,
+            'completionsubmit' => 1,
+            'completion' => COMPLETION_TRACKING_AUTOMATIC,
+            ]
+        );
 
-        $gradeitem = \grade_item::fetch([
+        $gradeitem = \grade_item::fetch(
+            [
             'courseid' => $this->course->id,
             'itemtype' => 'mod',
             'itemmodule' => 'assign',
             'iteminstance' => $assign->get_course_module()->instance,
-        ]);
+            ]
+        );
 
         // Set student 1's grade to be excluded.
         $grade = $gradeitem->get_grade($this->students[1]->id);
@@ -169,6 +185,7 @@ final class general_test extends \advanced_testcase {
 
     /**
      * Test checking of pages at site-level or not.
+     *
      * @covers \block_completion_progress
      */
     public function test_on_site_page(): void {
@@ -219,6 +236,7 @@ final class general_test extends \advanced_testcase {
 
     /**
      * Test that asynchronous course copy preserves all expected block instances.
+     *
      * @covers \restore_completion_progress_block_task
      */
     public function test_course_copy(): void {
@@ -237,15 +255,19 @@ final class general_test extends \advanced_testcase {
             'timecreated' => time(),
             'timemodified' => time(),
             'defaultregion' => 'side-post',
-            'configdata' => base64_encode(serialize((object)[
-                'orderby' => defaults::ORDERBY,
-                'longbars' => defaults::LONGBARS,
-                'progressBarIcons' => 0,    // Non-default.
-                'showpercentage' => defaults::SHOWPERCENTAGE,
-                'progressTitle' => "Instance 1",
-                'activitiesincluded' => defaults::ACTIVITIESINCLUDED,
-                'group' => 'group-' . $group->id,
-            ])),
+            'configdata' => base64_encode(
+                serialize(
+                    (object)[
+                    'orderby' => defaults::ORDERBY,
+                    'longbars' => defaults::LONGBARS,
+                    'progressBarIcons' => 0,    // Non-default.
+                    'showpercentage' => defaults::SHOWPERCENTAGE,
+                    'progressTitle' => "Instance 1",
+                    'activitiesincluded' => defaults::ACTIVITIESINCLUDED,
+                    'group' => 'group-' . $group->id,
+                    ]
+                )
+            ),
         ];
         $generator->create_block('completion_progress', $block1data);
         $block2data = [
@@ -256,14 +278,18 @@ final class general_test extends \advanced_testcase {
             'timecreated' => time(),
             'timemodified' => time(),
             'defaultregion' => 'side-post',
-            'configdata' => base64_encode(serialize((object)[
-                'orderby' => defaults::ORDERBY,
-                'longbars' => defaults::LONGBARS,
-                'progressBarIcons' => 0,    // Non-default.
-                'showpercentage' => defaults::SHOWPERCENTAGE,
-                'progressTitle' => "Instance 2",
-                'activitiesincluded' => defaults::ACTIVITIESINCLUDED,
-            ])),
+            'configdata' => base64_encode(
+                serialize(
+                    (object)[
+                    'orderby' => defaults::ORDERBY,
+                    'longbars' => defaults::LONGBARS,
+                    'progressBarIcons' => 0,    // Non-default.
+                    'showpercentage' => defaults::SHOWPERCENTAGE,
+                    'progressTitle' => "Instance 2",
+                    'activitiesincluded' => defaults::ACTIVITIESINCLUDED,
+                    ]
+                )
+            ),
         ];
         $generator->create_block('completion_progress', $block2data);
 
@@ -299,18 +325,26 @@ final class general_test extends \advanced_testcase {
         $context = \context_course::instance($copy->id);
         $copygroup = groups_get_group_by_idnumber($copy->id, 'g1');
 
-        $blocks = $DB->get_records('block_instances', [
+        $blocks = $DB->get_records(
+            'block_instances', [
             'blockname' => 'completion_progress',
             'parentcontextid' => $context->id,
-        ]);
+            ]
+        );
         $this->assertCount(2, $blocks);
 
-        array_walk($blocks, function ($record) {
-            $record->config = unserialize(base64_decode($record->configdata));
-        });
-        $copyblockmap = array_flip(array_map(function ($record) {
-            return $record->config->progressTitle;
-        }, $blocks));
+        array_walk(
+            $blocks, function ($record) {
+                $record->config = unserialize(base64_decode($record->configdata));
+            }
+        );
+        $copyblockmap = array_flip(
+            array_map(
+                function ($record) {
+                    return $record->config->progressTitle;
+                }, $blocks
+            )
+        );
 
         // Ensure both block instances were copied.
         $this->assertArrayHasKey('Instance 1', $copyblockmap);
@@ -322,6 +356,7 @@ final class general_test extends \advanced_testcase {
 
     /**
      * Test course modules view urls.
+     *
      * @covers \block_completion_progress\completion_progress
      */
     public function test_view_urls(): void {
@@ -331,7 +366,8 @@ final class general_test extends \advanced_testcase {
 
         // Add a block.
         $context = \context_course::instance($this->course->id);
-        $blockinstance = $this->getDataGenerator()->create_block('completion_progress', [
+        $blockinstance = $this->getDataGenerator()->create_block(
+            'completion_progress', [
             'parentcontextid' => $context->id,
             'pagetypepattern' => 'course-view-*',
             'showinsubcontexts' => 0,
@@ -339,24 +375,33 @@ final class general_test extends \advanced_testcase {
             'timecreated' => time(),
             'timemodified' => time(),
             'defaultregion' => 'side-post',
-            'configdata' => base64_encode(serialize((object)[
-                'orderby' => defaults::ORDERBY,
-                'longbars' => defaults::LONGBARS,
-                'progressBarIcons' => defaults::PROGRESSBARICONS,
-                'showpercentage' => defaults::SHOWPERCENTAGE,
-                'progressTitle' => "",
-                'activitiesincluded' => defaults::ACTIVITIESINCLUDED,
-            ])),
-        ]);
+            'configdata' => base64_encode(
+                serialize(
+                    (object)[
+                    'orderby' => defaults::ORDERBY,
+                    'longbars' => defaults::LONGBARS,
+                    'progressBarIcons' => defaults::PROGRESSBARICONS,
+                    'showpercentage' => defaults::SHOWPERCENTAGE,
+                    'progressTitle' => "",
+                    'activitiesincluded' => defaults::ACTIVITIESINCLUDED,
+                    ]
+                )
+            ),
+            ]
+        );
 
-        $pageinstance = $this->getDataGenerator()->create_module('page', [
+        $pageinstance = $this->getDataGenerator()->create_module(
+            'page', [
             'course' => $this->course->id,
             'completion' => COMPLETION_TRACKING_MANUAL,
-        ]);
-        $labelinstance = $this->getDataGenerator()->create_module('label', [
+            ]
+        );
+        $labelinstance = $this->getDataGenerator()->create_module(
+            'label', [
             'course' => $this->course->id,
             'completion' => COMPLETION_TRACKING_MANUAL,
-        ]);
+            ]
+        );
 
         $modinfo = get_fast_modinfo($this->course);
         $pagecm = $modinfo->get_cm($pageinstance->cmid);

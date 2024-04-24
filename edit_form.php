@@ -18,9 +18,9 @@
 /**
  * Completion Progress block configuration form definition
  *
- * @package    block_completion_progress
- * @copyright  2016 Michael de Raadt
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   block_completion_progress
+ * @copyright 2016 Michael de Raadt
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die;
@@ -58,10 +58,14 @@ class block_completion_progress_edit_form extends block_edit_form {
         // Control order of items in Progress Bar.
         $expectedbystring = get_string('completionexpected', 'completion');
         $options = [
-            completion_progress::ORDERBY_TIME   => get_string('config_orderby_due_time',
-                'block_completion_progress', $expectedbystring),
-            completion_progress::ORDERBY_COURSE => get_string('config_orderby_course_order',
-                'block_completion_progress'),
+            completion_progress::ORDERBY_TIME   => get_string(
+                'config_orderby_due_time',
+                'block_completion_progress', $expectedbystring
+            ),
+            completion_progress::ORDERBY_COURSE => get_string(
+                'config_orderby_course_order',
+                'block_completion_progress'
+            ),
         ];
         $label = get_string('config_orderby', 'block_completion_progress');
         $mform->addElement('select', 'config_orderby', $label, $options);
@@ -96,17 +100,21 @@ class block_completion_progress_edit_form extends block_edit_form {
 
         // Allow icons to be turned on/off on the block.
         if (get_config('block_completion_progress', 'forceiconsinbar') !== "1") {
-            $mform->addElement('selectyesno', 'config_progressBarIcons',
-                               get_string('config_icons', 'block_completion_progress').' '.
+            $mform->addElement(
+                'selectyesno', 'config_progressBarIcons',
+                get_string('config_icons', 'block_completion_progress').' '.
                                $OUTPUT->pix_icon('tick', '', 'block_completion_progress', ['class' => 'iconOnConfig']).
-                               $OUTPUT->pix_icon('cross', '', 'block_completion_progress', ['class' => 'iconOnConfig']));
+                $OUTPUT->pix_icon('cross', '', 'block_completion_progress', ['class' => 'iconOnConfig'])
+            );
             $mform->setDefault('config_progressBarIcons', defaults::PROGRESSBARICONS);
             $mform->addHelpButton('config_progressBarIcons', 'why_use_icons', 'block_completion_progress');
         }
 
         // Allow progress percentage to be turned on for students.
-        $mform->addElement('selectyesno', 'config_showpercentage',
-                           get_string('config_percentage', 'block_completion_progress'));
+        $mform->addElement(
+            'selectyesno', 'config_showpercentage',
+            get_string('config_percentage', 'block_completion_progress')
+        );
         $mform->setDefault('config_showpercentage', defaults::SHOWPERCENTAGE);
         $mform->addHelpButton('config_showpercentage', 'why_show_precentage', 'block_completion_progress');
 
@@ -130,8 +138,10 @@ class block_completion_progress_edit_form extends block_edit_form {
         }
 
         // Set block instance title.
-        $mform->addElement('text', 'config_progressTitle',
-                           get_string('config_title', 'block_completion_progress'));
+        $mform->addElement(
+            'text', 'config_progressTitle',
+            get_string('config_title', 'block_completion_progress')
+        );
         $mform->setDefault('config_progressTitle', '');
         $mform->setType('config_progressTitle', PARAM_TEXT);
         $mform->addHelpButton('config_progressTitle', 'why_set_the_title', 'block_completion_progress');

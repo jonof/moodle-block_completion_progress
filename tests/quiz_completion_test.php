@@ -17,9 +17,9 @@
 /**
  * Quiz activity-related unit tests for Completion Progress block.
  *
- * @package    block_completion_progress
- * @copyright  2020 Jonathon Fowler <fowlerj@usq.edu.au>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   block_completion_progress
+ * @copyright 2020 Jonathon Fowler <fowlerj@usq.edu.au>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace block_completion_progress;
@@ -42,13 +42,14 @@ if (!class_exists('mod_quiz\quiz_settings')) {
 /**
  * Quiz activity-related unit tests for Completion Progress block.
  *
- * @package    block_completion_progress
- * @copyright  2020 Jonathon Fowler <fowlerj@usq.edu.au>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   block_completion_progress
+ * @copyright 2020 Jonathon Fowler <fowlerj@usq.edu.au>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 final class quiz_completion_test extends \block_completion_progress\tests\completion_testcase {
     /**
      * A data provider supplying each of the possible quiz grade methods.
+     *
      * @return array
      */
     public static function grademethod_provider(): array {
@@ -66,13 +67,14 @@ final class quiz_completion_test extends \block_completion_progress\tests\comple
      *
      * @param integer $grademethod
      *
-     * @covers \block_completion_progress\completion_progress
+     * @covers       \block_completion_progress\completion_progress
      * @dataProvider grademethod_provider
      */
     public function test_quiz_passfail($grademethod): void {
         $generator = $this->getDataGenerator();
 
-        $instance = $generator->create_module('quiz', [
+        $instance = $generator->create_module(
+            'quiz', [
             'course' => $this->course->id,
             'grade' => 100,
             'sumgrades' => 100,
@@ -82,30 +84,35 @@ final class quiz_completion_test extends \block_completion_progress\tests\comple
             'completion' => COMPLETION_TRACKING_AUTOMATIC,
             'completionusegrade' => 1,      // Student must receive a grade to complete.
             'completionexpected' => time() - DAYSECS,
-        ]);
+            ]
+        );
         $cm = get_coursemodule_from_id('quiz', $instance->cmid);
 
         // Set the passing grade.
-        $item = \grade_item::fetch([
+        $item = \grade_item::fetch(
+            [
             'courseid' => $this->course->id,
             'itemtype' => 'mod',
             'itemmodule' => 'quiz',
             'iteminstance' => $instance->id,
             'outcomeid' => null,
-        ]);
+            ]
+        );
         $item->gradepass = 50;
         $item->update();
 
         $questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
         $cat = $questiongenerator->create_question_category();
-        $question = $questiongenerator->create_question('essay', null, [
+        $question = $questiongenerator->create_question(
+            'essay', null, [
             'category' => $cat->id,
             'name' => 'Pass-fail essay question',
             'defaultmark' => 100,
             'responserequired' => 1,
             'attachmentsrequired' => 0,
             'responseformat' => 'editor',
-        ]);
+            ]
+        );
         quiz_add_quiz_question($question->id, $instance, 1);
 
         $teacher = $generator->create_and_enrol($this->course, 'editingteacher');
@@ -149,13 +156,14 @@ final class quiz_completion_test extends \block_completion_progress\tests\comple
      *
      * @param integer $grademethod
      *
-     * @covers \block_completion_progress\completion_progress
+     * @covers       \block_completion_progress\completion_progress
      * @dataProvider grademethod_provider
      */
     public function test_quiz_basic($grademethod): void {
         $generator = $this->getDataGenerator();
 
-        $instance = $generator->create_module('quiz', [
+        $instance = $generator->create_module(
+            'quiz', [
             'course' => $this->course->id,
             'grade' => 100,
             'sumgrades' => 100,
@@ -165,19 +173,22 @@ final class quiz_completion_test extends \block_completion_progress\tests\comple
             'completion' => COMPLETION_TRACKING_AUTOMATIC,
             'completionusegrade' => 1,      // Student must receive a grade to complete.
             'completionexpected' => time() - DAYSECS,
-        ]);
+            ]
+        );
         $cm = get_coursemodule_from_id('quiz', $instance->cmid);
 
         $questiongenerator = $this->getDataGenerator()->get_plugin_generator('core_question');
         $cat = $questiongenerator->create_question_category();
-        $question = $questiongenerator->create_question('essay', null, [
+        $question = $questiongenerator->create_question(
+            'essay', null, [
             'category' => $cat->id,
             'name' => 'Basic essay question',
             'defaultmark' => 100,
             'responserequired' => 1,
             'attachmentsrequired' => 0,
             'responseformat' => 'editor',
-        ]);
+            ]
+        );
         quiz_add_quiz_question($question->id, $instance, 1);
 
         $teacher = $generator->create_and_enrol($this->course, 'editingteacher');
@@ -218,9 +229,10 @@ final class quiz_completion_test extends \block_completion_progress\tests\comple
 
     /**
      * Submit a quiz attempt.
-     * @param object $student
-     * @param object $quiz
-     * @param integer $attemptnumber
+     *
+     * @param  object  $student
+     * @param  object  $quiz
+     * @param  integer $attemptnumber
      * @return quiz_attempt
      */
     private function submit_for_student($student, $quiz, $attemptnumber) {
@@ -230,10 +242,12 @@ final class quiz_completion_test extends \block_completion_progress\tests\comple
 
         // Save a response for the essay in the first slot.
         $qa = $attemptobj->get_question_attempt(1);
-        $qa->process_action([
+        $qa->process_action(
+            [
             'answer'         => 'Response',
             'answerformat'   => FORMAT_HTML,
-        ], null, $student->id);
+            ], null, $student->id
+        );
 
         // Finish the attempt.
         $attemptobj->process_attempt(time(), true, false, 1);
@@ -243,9 +257,10 @@ final class quiz_completion_test extends \block_completion_progress\tests\comple
 
     /**
      * Mark the first question of an attempt.
+     *
      * @param quiz_attempt $attemptobj
-     * @param object $teacher
-     * @param integer $mark
+     * @param object       $teacher
+     * @param integer      $mark
      */
     private function mark_student($attemptobj, $teacher, $mark) {
         global $DB;
@@ -254,7 +269,8 @@ final class quiz_completion_test extends \block_completion_progress\tests\comple
 
         $quba = $attemptobj->get_question_usage();
         $quba->get_question_attempt(1)->manual_grade(
-                'Comment', $mark, FORMAT_HTML);
+            'Comment', $mark, FORMAT_HTML
+        );
         \question_engine::save_questions_usage_by_activity($quba);
 
         $update = new \stdClass();

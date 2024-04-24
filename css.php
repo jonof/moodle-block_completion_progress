@@ -17,9 +17,9 @@
 /**
  * Completion Progress block runtime configured styles.
  *
- * @package    block_completion_progress
- * @copyright  2020 Jonathon Fowler
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   block_completion_progress
+ * @copyright 2020 Jonathon Fowler
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 define('NO_DEBUG_DISPLAY', true);
