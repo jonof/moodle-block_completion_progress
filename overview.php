@@ -75,9 +75,10 @@ $PAGE->set_url(
 );
 $PAGE->set_context($context);
 $title = get_string('overview', 'block_completion_progress');
-$PAGE->set_title($title);
-$PAGE->set_heading($title);
-$PAGE->navbar->add($title);
+$PAGE->set_title("$course->shortname: $title");
+$PAGE->set_heading($course->fullname);
+$PAGE->navbar->add($title, new moodle_url('/blocks/completion_progress/overview.php',
+    ['instanceid' => $id, 'courseid' => $courseid]));
 $PAGE->set_pagelayout('report');
 
 $cachevalue = debugging() ? -1 : (int)get_config('block_completion_progress', 'cachevalue');
