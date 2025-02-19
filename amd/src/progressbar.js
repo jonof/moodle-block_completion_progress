@@ -29,8 +29,17 @@ define(['jquery', 'core/pubsub', 'core/utils'],
         function showInfo(event) {
             var cell = $(this);
             var container = cell.closest('.block_completion_progress .barContainer');
+            var cells = container.find('.progressBarCell');
             var visibleinfo = container.siblings('.progressEventInfo:visible');
             var infotoshow = container.siblings('#' + cell.data('infoRef'));
+
+            // Manage tab attributes for keyboard navigation.
+            cells.each(function() {
+                $(this).attr('aria-selected', false);
+                $(this).attr('tabindex', '-1');
+            });
+            cell.attr('aria-selected', true);
+            cell.attr('tabindex', '0');
 
             if (!visibleinfo.is(infotoshow)) {
                 visibleinfo.hide();
@@ -168,8 +177,8 @@ define(['jquery', 'core/pubsub', 'core/utils'],
             var barcontainers = $('.block_completion_progress ' +
                 '.barContainer[data-instanceid="' + instanceid + '"]');
 
-            // Show information elements on hover or tap.
-            barcontainers.on('touchstart mouseover', '.progressBarCell', showInfo);
+            // Show information elements on hover, tap, or focus.
+            barcontainers.on('touchstart mouseover focus', '.progressBarCell', showInfo);
 
             // Navigate to the activity when its cell is clicked.
             barcontainers.on('click', '.progressBarCell[data-haslink=true]', viewActivity);

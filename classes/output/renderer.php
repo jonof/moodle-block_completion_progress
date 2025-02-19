@@ -98,7 +98,12 @@ class renderer extends plugin_renderer_base {
         $showpercentage = $config->showpercentage ?? defaults::SHOWPERCENTAGE;
 
         $rowoptions = ['style' => ''];
-        $cellsoptions = ['style' => ''];
+        $cellsoptions = [
+            'style' => '',
+            'role' => 'tablist',
+            'tabindex' => '0',
+            'aria-labelledby' => 'progressBarInfo'.$instance.'-'.$userid.'-info'
+        ];
         $barclasses = ['barRow'];
 
         $content .= html_writer::start_div('barContainer', ['data-instanceid' => $instance]);
@@ -176,13 +181,19 @@ class renderer extends plugin_renderer_base {
             $cellcontent = '';
             $celloptions = [
                 'class' => 'progressBarCell',
+                'id' => 'progressBarTab'.$instance.'-'.$userid.'-'.$activity->id,
                 'data-info-ref' => 'progressBarInfo'.$instance.'-'.$userid.'-'.$activity->id,
+                'tabindex' => $counter === 1 ? '0' : '-1',
+                'role' => 'tab',
+                'aria-label' => $activity->name . $complete
             ];
             if ($complete === 'submitted') {
                 $celloptions['class'] .= ' submittedNotComplete';
+                $celloptions['aria-label'] = $activity->name . ', ' . get_string('submitted', 'block_completion_progress');
 
             } else if ($complete == COMPLETION_COMPLETE || $complete == COMPLETION_COMPLETE_PASS) {
                 $celloptions['class'] .= ' completed';
+                $celloptions['aria-label'] = $activity->name . ', ' . get_string('completed', 'block_completion_progress');
 
             } else if (
                 $complete == COMPLETION_COMPLETE_FAIL ||
@@ -190,9 +201,11 @@ class renderer extends plugin_renderer_base {
                 (isset($activity->expected) && $activity->expected > 0 && $activity->expected < $now)
             ) {
                 $celloptions['class'] .= ' notCompleted';
+                $celloptions['aria-label'] = $activity->name . ', ' . get_string('completion-fail', 'completion');
 
             } else {
                 $celloptions['class'] .= ' futureNotCompleted';
+                $celloptions['aria-label'] = $activity->name . ', ' . get_string('completion-n', 'completion');
             }
             if (empty($activity->link)) {
                 $celloptions['data-haslink'] = 'false';
@@ -262,6 +275,9 @@ class renderer extends plugin_renderer_base {
                 'class' => 'progressEventInfo',
                 'id' => 'progressBarInfo'.$instance.'-'.$userid.'-'.$activity->id,
                 'style' => 'display: none;',
+                'role' => 'tabpanel',
+                'tabindex' => '0',
+                'aria-labelledby' => 'progressBarTab'.$instance.'-'.$userid.'-'.$activity->id,
             ];
             $content .= html_writer::start_tag('div', $divoptions);
 
