@@ -16,9 +16,13 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - php: '8.3'
+          - php: '8.4'
             database: 'pgsql'
             moodle-branch: 'main'
+          - php: '8.3'
+            database: 'pgsql'
+            moodle-branch: 'MOODLE_500_STABLE'
+            # EOL 2026-10-05
           - php: '8.2'
             database: 'pgsql'
             moodle-branch: 'MOODLE_405_STABLE'
