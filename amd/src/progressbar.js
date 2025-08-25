@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -55,9 +56,10 @@ define(['jquery', 'core/pubsub', 'core/utils'],
 
         /**
          * Navigate to a cell's activity location.
+         *
+         * @param {object} cell
          */
-        function viewActivity() {
-            var cell = $(this);
+        function viewActivity(cell) {
             var container = cell.closest('.block_completion_progress .barContainer');
             var infotoshow = container.siblings('#' + cell.data('infoRef'));
             var infolink = infotoshow.find('a.action_link');
@@ -169,10 +171,17 @@ define(['jquery', 'core/pubsub', 'core/utils'],
                 '.barContainer[data-instanceid="' + instanceid + '"]');
 
             // Show information elements on hover or tap.
-            barcontainers.on('touchstart mouseover', '.progressBarCell', showInfo);
+            barcontainers.on('touchstart mouseover focus', '.progressBarCell', showInfo);
 
             // Navigate to the activity when its cell is clicked.
-            barcontainers.on('click', '.progressBarCell[data-haslink=true]', viewActivity);
+            barcontainers.on('click', '.progressBarCell[data-haslink=true]', function() {
+                viewActivity($(this));
+            });
+            barcontainers.on('keypress', '.progressBarCell[data-haslink=true]', function(e) {
+                if (e.which == 13) {
+                    viewActivity($(this));
+                }
+            });
 
             // Show all information elements when the 'show all' link is clicked.
             barcontainers.siblings('.progressEventInfo').find('.progressShowAllInfo').click(showAllInfo);

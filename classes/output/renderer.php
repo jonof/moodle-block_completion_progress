@@ -176,6 +176,8 @@ class renderer extends plugin_renderer_base {
             $cellcontent = '';
             $celloptions = [
                 'class' => 'progressBarCell',
+                'tabindex' => '0',
+                'role' => 'menuitem',
                 'data-info-ref' => 'progressBarInfo'.$instance.'-'.$userid.'-'.$activity->id,
             ];
             if ($complete === 'submitted') {
