@@ -383,23 +383,23 @@ class completion_progress implements \renderable {
     /**
      * Used to compare two activity entries based on order on course page.
      *
-     * @param array $a
-     * @param array $b
+     * @param object $a
+     * @param object $b
      * @return integer
      */
     private function sorter_orderbycourse($a, $b): int {
         if ($a->section != $b->section) {
             return $a->section <=> $b->section;
         } else {
-            return $a->position <=> $b->position;
+            return strnatcasecmp($a->position, $b->position);
         }
     }
 
     /**
      * Used to compare two activity entries based their expected completion times
      *
-     * @param array $a
-     * @param array $b
+     * @param object $a
+     * @param object $b
      * @return integer
      */
     private function sorter_orderbytime($a, $b): int {
@@ -439,6 +439,21 @@ class completion_progress implements \renderable {
                     continue;
                 }
 
+                $sectionkey = $cm->sectionnum;
+                $positionkey = array_search($cm->id, $sections[$cm->sectionnum]);
+                $sectinfo = $modinfo->get_section_info($cm->sectionnum);
+                if (method_exists($sectinfo, 'is_delegated') && $sectinfo->is_delegated()) {
+                    // If $cm lives within a section delegated to a module, use the parent cm's sectionnum
+                    // as the section key, and make the position key be the parent cm's position followed
+                    // by $cm's position in the delegated section.
+                    $sectdelegate = $sectinfo->get_component_instance();
+                    if ($sectdelegate instanceof \core_courseformat\sectiondelegatemodule) {
+                        $parentcm = $sectdelegate->get_cm();
+                        $sectionkey = $parentcm->sectionnum;
+                        $positionkey = array_search($parentcm->id, $sections[$parentcm->sectionnum]) . ',' . $positionkey;
+                    }
+                }
+
                 $this->activities[$cm->id] = (object)[
                     'type'       => $module,
                     'modulename' => $modulename,
@@ -446,8 +461,8 @@ class completion_progress implements \renderable {
                     'instance'   => $cm->instance,
                     'name'       => $cm->get_formatted_name(),
                     'expected'   => $cm->completionexpected,
-                    'section'    => $cm->sectionnum,
-                    'position'   => array_search($cm->id, $sections[$cm->sectionnum]),
+                    'section'    => $sectionkey,
+                    'position'   => $positionkey,
                     'url'        => $cm->url instanceof \moodle_url ? $cm->url->out() : '',
                     'onclick'    => $cm->onclick,
                     'context'    => $cm->context,
