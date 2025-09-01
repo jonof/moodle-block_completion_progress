@@ -22,7 +22,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['completed_colour'] = '#73A839';
+$string['completed_colour'] = '#6A9C35';
 $string['completed_colour_descr'] = 'HTML Colour code for elements that have been completed';
 $string['completed_colour_title'] = 'Completed colour';
 $string['completion_not_enabled'] = 'Completion tracking is not enabled on this site.';
