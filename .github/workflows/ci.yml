@@ -19,6 +19,10 @@ jobs:
           - php: '8.4'
             database: 'pgsql'
             moodle-branch: 'main'
+          - php: '8.4'
+            database: 'pgsql'
+            moodle-branch: 'MOODLE_501_STABLE'
+            # EOL 2027-04-05
           - php: '8.3'
             database: 'pgsql'
             moodle-branch: 'MOODLE_500_STABLE'
@@ -26,15 +30,11 @@ jobs:
           - php: '8.2'
             database: 'pgsql'
             moodle-branch: 'MOODLE_405_STABLE'
-            # EOL 2027-10-06
+            # LTS, EOL 2027-10-06
           - php: '8.1'
             database: 'pgsql'
             moodle-branch: 'MOODLE_404_STABLE'
             # EOL 2025-12-08
-          - php: '8.0'
-            database: 'pgsql'
-            moodle-branch: 'MOODLE_403_STABLE'
-            # EOL 2025-04-21
           - php: '7.4'
             database: 'mariadb'
             moodle-branch: 'MOODLE_401_STABLE'
