@@ -141,8 +141,8 @@ class renderer extends plugin_renderer_base {
                 $nowpos++;
             }
             $nowstring = get_string('now_indicator', 'block_completion_progress');
-            $leftarrowimg = $this->pix_icon('left', $nowstring, 'block_completion_progress', ['class' => 'nowicon']);
-            $rightarrowimg = $this->pix_icon('right', $nowstring, 'block_completion_progress', ['class' => 'nowicon']);
+            $leftarrowimg = $this->pix_icon('left', '', 'block_completion_progress', ['class' => 'nowicon']);
+            $rightarrowimg = $this->pix_icon('right', '', 'block_completion_progress', ['class' => 'nowicon']);
         }
 
         // Determine links to activities.
@@ -279,29 +279,23 @@ class renderer extends plugin_renderer_base {
                 $content .= $text;
             }
             $content .= html_writer::empty_tag('br');
-            $altattribute = '';
             if ($completed == COMPLETION_COMPLETE) {
                 $content .= $strcomplete.'&nbsp;';
                 $icon = 'tick';
-                $altattribute = $strcomplete;
             } else if ($completed == COMPLETION_COMPLETE_PASS) {
                 $content .= $strpassed.'&nbsp;';
                 $icon = 'tick';
-                $altattribute = $strpassed;
             } else if ($completed == COMPLETION_COMPLETE_FAIL) {
                 $content .= $strfailed.'&nbsp;';
                 $icon = 'cross';
-                $altattribute = $strfailed;
             } else {
                 $content .= $strincomplete .'&nbsp;';
                 $icon = 'cross';
-                $altattribute = $strincomplete;
                 if ($completed === 'submitted') {
                     $content .= '(' . $strsubmitted . ')&nbsp;';
-                    $altattribute .= '(' . $strsubmitted . ')';
                 }
             }
-            $content .= $this->pix_icon($icon, $altattribute, 'block_completion_progress', ['class' => 'iconInInfo']);
+            $content .= $this->pix_icon($icon, '', 'block_completion_progress', ['class' => 'iconInInfo']);
             $content .= html_writer::empty_tag('br');
             if ($activity->expected != 0) {
                 $content .= html_writer::start_tag('div', ['class' => 'expectedBy']);
