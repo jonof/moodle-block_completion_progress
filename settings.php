@@ -106,4 +106,10 @@ if ($ADMIN->fulltree) {
         '',
         defaults::FORCEICONSINBAR)
     );
+    $settings->add(new admin_setting_configduration('block_completion_progress/overviewcachetime',
+        get_string('overviewcachetime', 'block_completion_progress'),
+        '',
+        defaults::OVERVIEWCACHETIME,
+        HOURSECS)
+    );
 }

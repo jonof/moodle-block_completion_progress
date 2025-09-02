@@ -192,6 +192,71 @@ class completion_progress implements \renderable {
     }
 
     /**
+     * Compute and cache completion percentages for overview use.
+     * @param callable $progresscallback receives a percentage
+     * @return void
+     */
+    public function compute_overview_percentages($progresscallback = null): void {
+        global $DB;
+        if ($this->user) {
+            throw new coding_exception('cannot compute overview percentages when specialised for a user');
+        } else if (!$this->completionsforall) {
+            throw new coding_exception('cannot compute overview percentages until completions are loaded');
+        }
+
+        if (is_callable($progresscallback)) {
+            call_user_func($progresscallback, 0);
+        }
+
+        $numdone = 0;
+        $numcompletions = count($this->completions);
+        $cachetime = get_config('block_completion_progress', 'overviewcachetime') ?: defaults::OVERVIEWCACHETIME;
+        foreach ($this->completions as $userid => $completions) {
+            $trans = $DB->start_delegated_transaction();
+            $rec = [
+                'blockinstanceid' => $this->blockinstance->id,
+                'userid' => $userid,
+            ];
+            $rec = $DB->get_record('block_completion_progress', $rec) ?: (object)$rec;
+
+            if (!empty($rec->timemodified) && time() - $rec->timemodified < $cachetime) {
+                $trans->allow_commit();
+                continue;
+            }
+
+            if (count($completions) == 0) {
+                $rec->percentage = null;
+            } else {
+                $this->for_user((object)['id' => $userid]);
+                $completecount = 0;
+                foreach ($completions as $complete) {
+                    if ($complete == COMPLETION_COMPLETE || $complete == COMPLETION_COMPLETE_PASS) {
+                        $completecount++;
+                    }
+                }
+                $rec->percentage = (int)round(100 * $completecount / count($this->visibleactivities));
+            }
+            $rec->timemodified = time();
+
+            if (empty($rec->id)) {
+                $rec->id = $DB->insert_record('block_completion_progress', $rec);
+            } else {
+                $DB->update_record('block_completion_progress', $rec);
+            }
+            $trans->allow_commit();
+
+            $numdone++;
+            if (is_callable($progresscallback)) {
+                call_user_func($progresscallback, 100 * $numdone / $numcompletions);
+            }
+        }
+
+        if (is_callable($progresscallback)) {
+            call_user_func($progresscallback, 100);
+        }
+    }
+
+    /**
      * Specialise for a particular block instance.
      * @param stdClass $instance Instance record.
      * @param boolean $selectedonly Whether to filter by configured selected items.

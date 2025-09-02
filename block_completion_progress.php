@@ -88,6 +88,15 @@ class block_completion_progress extends block_base {
     }
 
     /**
+     * Clean up cached percentages.
+     */
+    public function instance_delete() {
+        global $DB;
+        $DB->delete_records('block_completion_progress', ['blockinstanceid' => $this->instance->id]);
+        return parent::instance_delete();
+    }
+
+    /**
      * Defines where the block can be added
      *
      * @return array

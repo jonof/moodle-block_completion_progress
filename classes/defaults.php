@@ -83,4 +83,9 @@ abstract class defaults {
      * Default choice of activites included: activitycompletion or selectedactivities.
      */
     const ACTIVITIESINCLUDED = 'activitycompletion';
+
+    /**
+     * Default number of seconds to cache completion percentages for overview pages.
+     */
+    const OVERVIEWCACHETIME = 3600;
 }

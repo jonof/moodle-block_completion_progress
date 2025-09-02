@@ -27,7 +27,9 @@
  * @param int $oldversion
  */
 function xmldb_block_completion_progress_upgrade($oldversion) {
-    global $OUTPUT;
+    global $DB, $OUTPUT;
+
+    $dbman = $DB->get_manager();
 
     if ($oldversion < 2025011600) {
         $context = context_system::instance();
@@ -52,6 +54,11 @@ function xmldb_block_completion_progress_upgrade($oldversion) {
         }
 
         upgrade_plugin_savepoint(true, 2025011600, 'block', 'completion_progress');
+    }
+
+    if ($oldversion < 2025090200) {
+        $dbman->install_from_xmldb_file(__DIR__ . '/install.xml');
+        upgrade_plugin_savepoint(true, 2025090200, 'block', 'completion_progress');
     }
 
     return true;

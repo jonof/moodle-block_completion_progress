@@ -28,6 +28,7 @@ namespace block_completion_progress\table;
 defined('MOODLE_INTERNAL') || die;
 
 use block_completion_progress\completion_progress;
+use block_completion_progress\defaults;
 
 require_once($CFG->libdir.'/tablelib.php');
 
@@ -141,9 +142,15 @@ class overview extends \table_sql {
             $rolejoin = $rolewhere = '';
         }
 
+        $cachetime = get_config('block_completion_progress', 'overviewcachetime') ?: defaults::OVERVIEWCACHETIME;
+        $params['cachemin'] = time() - $cachetime;
+        $params['bi'] = $this->progress->get_block_instance()->id;
         $this->set_sql(
-            "DISTINCT $picturefields, l.timeaccess",
-            "{user} u {$enroljoin->joins} {$rolejoin} LEFT JOIN {user_lastaccess} l ON l.userid = u.id AND l.courseid = :courseid",
+            "DISTINCT $picturefields, l.timeaccess, b.percentage AS progress, b.timemodified AS progressage",
+            "{user} u {$enroljoin->joins} {$rolejoin} " .
+                "LEFT JOIN {user_lastaccess} l ON l.userid = u.id AND l.courseid = :courseid " .
+                "LEFT JOIN {block_completion_progress} b ON b.userid = u.id AND " .
+                    "b.blockinstanceid = :bi AND b.timemodified > :cachemin",
             "{$enroljoin->wheres} {$rolewhere}",
             $params
         );
@@ -163,72 +170,6 @@ class overview extends \table_sql {
             unset($this->headers[$this->columns['progressbar']], $this->columns['progressbar']);
         }
         parent::setup();
-    }
-
-    /**
-     * Fudge the SQL sort parameters to exclude the runtime computed progress percentage.
-     * @return string SQL fragment
-     */
-    public function get_sql_sort() {
-        $sortcols = $this->get_sort_columns();
-        unset($sortcols['progress']);
-        return self::construct_order_by($sortcols);
-    }
-
-    /**
-     * Assemble the dataset.
-     * @param integer $pagesize
-     * @param boolean $useinitialsbar
-     */
-    public function query_db($pagesize, $useinitialsbar=true) {
-        global $DB;
-
-        $sortcols = $this->get_sort_columns();
-        if (array_keys($sortcols)[0] === 'progress') {
-            // Kludge to sort by the runtime-computed percentage column.
-            if ($useinitialsbar && !$this->is_downloading()) {
-                $this->initialbars(true);
-            }
-            list($wsql, $wparams) = $this->get_sql_where();
-            if ($wsql) {
-                $this->sql->where .= ' AND '.$wsql;
-                $this->sql->params = array_merge($this->sql->params, $wparams);
-            }
-            if (($sort = $this->get_sql_sort())) {
-                $sort = "ORDER BY $sort";
-            }
-            $sql = "SELECT {$this->sql->fields}
-                    FROM {$this->sql->from}
-                    WHERE {$this->sql->where}
-                    {$sort}";
-            $rawdata = $DB->get_recordset_sql($sql, $this->sql->params);
-
-            // Compute the percentage for each record and sort.
-            $data = [];
-            $percents = [];
-            foreach ($rawdata as $key => $row) {
-                $this->progress->for_user($row);
-                $percents[$key] = $this->progress->get_percentage() ?? -1;
-                $data[$key] = $row;
-            }
-            $sortfunc = $sortcols['progress'] === SORT_ASC ? 'asort' : 'arsort';
-            $sortfunc($percents);
-            $rawdata->close();
-
-            if (!$this->is_downloading()) {
-                $pagestart = $this->currpage * $pagesize;
-                $percents = array_slice($percents, $pagestart, $pagesize, true);
-                $this->pagesize($pagesize, count($data));
-            }
-
-            $this->rawdata = [];
-            foreach (array_keys($percents) as $key) {
-                $this->rawdata[] = $data[$key];
-            }
-            return;
-        }
-
-        parent::query_db($pagesize, $useinitialsbar);
     }
 
     /**
@@ -302,10 +243,17 @@ class overview extends \table_sql {
      * @return string HTML
      */
     public function col_progress($row) {
-        $pct = $this->progress->get_percentage();
+        $pct = $row->progress ?? $this->progress->get_percentage();
         if ($pct === null) {
-            return $this->strs['indeterminate'];
+            $value = $this->strs['indeterminate'];
+        } else {
+            $value = get_string('percents', '', $pct);
         }
-        return get_string('percents', '', $pct);
+        $age = time() - (int)$row->progressage;
+        if ($row->progressage !== null && $age > 0) {
+            $title = get_string('progresscachetime', 'block_completion_progress', \format_time($age));
+            $value = \html_writer::span($value, '', ['title' => $title]);
+        }
+        return $value;
     }
 }
