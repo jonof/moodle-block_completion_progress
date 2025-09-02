@@ -165,6 +165,9 @@
 #page-blocks-completion_progress-overview .overviewTable {
     table-layout: fixed;
 }
+#page-blocks-completion_progress-overview .overviewTable th.col-select .form-check {
+    padding-left: 0;
+}
 #page-blocks-completion_progress-overview .overviewTable .col-select {
     width: 2rem;
     text-align: center;
