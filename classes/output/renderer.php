@@ -147,7 +147,8 @@ class renderer extends plugin_renderer_base {
 
         // Determine links to activities.
         for ($i = 0; $i < $numactivities; $i++) {
-            if ($userid != $USER->id &&
+            if (
+                $userid != $USER->id &&
                 array_key_exists($activities[$i]->type, $alternatelinks) &&
                 has_capability($alternatelinks[$activities[$i]->type]['capability'], $activities[$i]->context)
             ) {
@@ -159,7 +160,7 @@ class renderer extends plugin_renderer_base {
                 ];
                 $link = $alternatelinks[$activities[$i]->type]['url'];
                 $link = preg_replace(array_keys($substitutions), array_values($substitutions), $link);
-                $activities[$i]->link = $CFG->wwwroot.$link;
+                $activities[$i]->link = $CFG->wwwroot . $link;
             } else {
                 $activities[$i]->link = $activities[$i]->url;
             }
@@ -176,21 +177,18 @@ class renderer extends plugin_renderer_base {
             $cellcontent = '';
             $celloptions = [
                 'class' => 'progressBarCell',
-                'data-info-ref' => 'progressBarInfo'.$instance.'-'.$userid.'-'.$activity->id,
+                'data-info-ref' => 'progressBarInfo' . $instance . '-' . $userid . '-' . $activity->id,
             ];
             if ($complete === 'submitted') {
                 $celloptions['class'] .= ' submittedNotComplete';
-
             } else if ($complete == COMPLETION_COMPLETE || $complete == COMPLETION_COMPLETE_PASS) {
                 $celloptions['class'] .= ' completed';
-
             } else if (
                 $complete == COMPLETION_COMPLETE_FAIL ||
                 (!isset($config->orderby) || $config->orderby == 'orderbytime') &&
                 (isset($activity->expected) && $activity->expected > 0 && $activity->expected < $now)
             ) {
                 $celloptions['class'] .= ' notCompleted';
-
             } else {
                 $celloptions['class'] .= ' futureNotCompleted';
             }
@@ -205,14 +203,14 @@ class renderer extends plugin_renderer_base {
             // Place the NOW indicator.
             if ($nowpos >= 0) {
                 if ($nowpos == 0 && $counter == 1) {
-                    $nowcontent = $usingrtl ? $rightarrowimg.$nowstring : $leftarrowimg.$nowstring;
+                    $nowcontent = $usingrtl ? $rightarrowimg . $nowstring : $leftarrowimg . $nowstring;
                     $cellcontent .= html_writer::div($nowcontent, 'nowDiv firstNow');
                 } else if ($nowpos == $counter) {
                     if ($nowpos < $numactivities / 2) {
-                        $nowcontent = $usingrtl ? $rightarrowimg.$nowstring : $leftarrowimg.$nowstring;
+                        $nowcontent = $usingrtl ? $rightarrowimg . $nowstring : $leftarrowimg . $nowstring;
                         $cellcontent .= html_writer::div($nowcontent, 'nowDiv firstHalfNow');
                     } else {
-                        $nowcontent = $usingrtl ? $nowstring.$leftarrowimg : $nowstring.$rightarrowimg;
+                        $nowcontent = $usingrtl ? $nowstring . $leftarrowimg : $nowstring . $rightarrowimg;
                         $cellcontent .= html_writer::div($nowcontent, 'nowDiv lastHalfNow');
                     }
                 }
@@ -228,7 +226,7 @@ class renderer extends plugin_renderer_base {
         // Add the percentage below the progress bar.
         if ($showpercentage && !$simple) {
             $progress = $progress->get_percentage();
-            $percentagecontent = get_string('progress', 'block_completion_progress').': '.$progress.'%';
+            $percentagecontent = get_string('progress', 'block_completion_progress') . ': ' . $progress . '%';
             $percentageoptions = ['class' => 'progressPercentage'];
             $content .= html_writer::tag('div', $percentagecontent, $percentageoptions);
         }
@@ -236,7 +234,7 @@ class renderer extends plugin_renderer_base {
         // Add the info box below the table.
         $divoptions = [
             'class' => 'progressEventInfo',
-            'id' => 'progressBarInfo'.$instance.'-'.$userid.'-info',
+            'id' => 'progressBarInfo' . $instance . '-' . $userid . '-info',
         ];
         $content .= html_writer::start_tag('div', $divoptions);
         if (!$simple) {
@@ -260,14 +258,16 @@ class renderer extends plugin_renderer_base {
             $completed = $completions[$activity->id] ?? null;
             $divoptions = [
                 'class' => 'progressEventInfo',
-                'id' => 'progressBarInfo'.$instance.'-'.$userid.'-'.$activity->id,
+                'id' => 'progressBarInfo' . $instance . '-' . $userid . '-' . $activity->id,
                 'style' => 'display: none;',
             ];
             $content .= html_writer::start_tag('div', $divoptions);
 
             $text = '';
-            $text .= html_writer::empty_tag('img',
-                    ['src' => $activity->icon, 'class' => 'moduleIcon', 'alt' => '', 'role' => 'presentation']);
+            $text .= html_writer::empty_tag(
+                'img',
+                ['src' => $activity->icon, 'class' => 'moduleIcon', 'alt' => '', 'role' => 'presentation']
+            );
             $text .= $activity->name;
             if (!empty($activity->link) && (!empty($activity->available) || $simple)) {
                 $attrs = ['class' => 'action_link'];
@@ -280,16 +280,16 @@ class renderer extends plugin_renderer_base {
             }
             $content .= html_writer::empty_tag('br');
             if ($completed == COMPLETION_COMPLETE) {
-                $content .= $strcomplete.'&nbsp;';
+                $content .= $strcomplete . '&nbsp;';
                 $icon = 'tick';
             } else if ($completed == COMPLETION_COMPLETE_PASS) {
-                $content .= $strpassed.'&nbsp;';
+                $content .= $strpassed . '&nbsp;';
                 $icon = 'tick';
             } else if ($completed == COMPLETION_COMPLETE_FAIL) {
-                $content .= $strfailed.'&nbsp;';
+                $content .= $strfailed . '&nbsp;';
                 $icon = 'cross';
             } else {
-                $content .= $strincomplete .'&nbsp;';
+                $content .= $strincomplete . '&nbsp;';
                 $icon = 'cross';
                 if ($completed === 'submitted') {
                     $content .= '(' . $strsubmitted . ')&nbsp;';
@@ -299,7 +299,7 @@ class renderer extends plugin_renderer_base {
             $content .= html_writer::empty_tag('br');
             if ($activity->expected != 0) {
                 $content .= html_writer::start_tag('div', ['class' => 'expectedBy']);
-                $content .= $strtimeexpected.': ';
+                $content .= $strtimeexpected . ': ';
                 $content .= userdate($activity->expected, $strdateformat, $CFG->timezone);
                 $content .= html_writer::end_tag('div');
             }

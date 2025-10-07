@@ -27,8 +27,8 @@ namespace block_completion_progress;
 defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
-require_once($CFG->dirroot.'/mod/workshop/locallib.php');
-require_once($CFG->dirroot.'/mod/workshop/tests/fixtures/testable.php');
+require_once($CFG->dirroot . '/mod/workshop/locallib.php');
+require_once($CFG->dirroot . '/mod/workshop/tests/fixtures/testable.php');
 
 use block_completion_progress\completion_progress;
 use block_completion_progress\defaults;
@@ -55,7 +55,7 @@ final class workshop_completion_test extends \block_completion_progress\tests\co
             'grade' => 80,
             'gradinggrade' => 20,
             'completion' => COMPLETION_TRACKING_AUTOMATIC,
-            'completionusegrade' => 1,      // The student must receive a grade to complete.
+            'completionusegrade' => 1, // The student must receive a grade to complete.
             'completionexpected' => time() - DAYSECS,
         ]);
         $cm = get_coursemodule_from_id('workshop', $instance->cmid);
@@ -109,7 +109,7 @@ final class workshop_completion_test extends \block_completion_progress\tests\co
             'grade' => 80,
             'gradinggrade' => 20,
             'completion' => COMPLETION_TRACKING_AUTOMATIC,
-            'completionusegrade' => 1,      // The student must receive a grade to complete.
+            'completionusegrade' => 1, // The student must receive a grade to complete.
             'completionexpected' => time() - DAYSECS,
         ]);
         $cm = get_coursemodule_from_id('workshop', $instance->cmid);

@@ -32,7 +32,6 @@ use block_completion_progress\defaults;
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class block_completion_progress extends block_base {
-
     /**
      * Sets the block title
      *
@@ -120,7 +119,7 @@ class block_completion_progress extends block_base {
         if ($this->content !== null) {
             return $this->content;
         }
-        $this->content = new stdClass;
+        $this->content = new stdClass();
         $this->content->text = '';
         $this->content->footer = '';
         $barinstances = [];
@@ -135,7 +134,6 @@ class block_completion_progress extends block_base {
             if (!$this->prepare_dashboard_content($barinstances)) {
                 return $this->content;
             }
-
         } else {
             // Gather content for block on regular course.
             if (!$this->prepare_course_content($barinstances)) {
@@ -182,7 +180,7 @@ class block_completion_progress extends block_base {
                        bi.configdata
                   FROM {block_instances} bi
              LEFT JOIN {block_positions} bp ON bp.blockinstanceid = bi.id
-                                           AND ".$DB->sql_like('bp.pagetype', ':pagetype', false)."
+                           AND {$DB->sql_like('bp.pagetype', ':pagetype', false)}
                  WHERE bi.blockname = 'completion_progress'
                    AND bi.parentcontextid = :contextid
               ORDER BY COALESCE(bp.region, bi.defaultregion),
@@ -204,14 +202,18 @@ class block_completion_progress extends block_base {
                 $blockprogress = (clone $courseprogress)->for_block_instance($birec);
                 $blockinstance = $blockprogress->get_block_instance();
                 $blockconfig = $blockprogress->get_block_config();
-                if (!has_capability('block/completion_progress:showbar', context_block::instance($blockinstance->id)) ||
-                        !$blockinstance->visible ||
-                        !$blockprogress->has_visible_activities()) {
+                if (
+                    !has_capability('block/completion_progress:showbar', context_block::instance($blockinstance->id)) ||
+                    !$blockinstance->visible ||
+                    !$blockprogress->has_visible_activities()
+                ) {
                     continue;
                 }
-                if (!empty($blockconfig->group) &&
-                        !has_capability('moodle/site:accessallgroups', $courseprogress->get_context()) &&
-                        !$this->check_group_membership($blockconfig->group, $course->id)) {
+                if (
+                    !empty($blockconfig->group) &&
+                    !has_capability('moodle/site:accessallgroups', $courseprogress->get_context()) &&
+                    !$this->check_group_membership($blockconfig->group, $course->id)
+                ) {
                     continue;
                 }
 
@@ -361,5 +363,4 @@ class block_completion_progress extends block_base {
             return false;
         }
     }
-
 }

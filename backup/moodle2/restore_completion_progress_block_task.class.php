@@ -30,7 +30,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class restore_completion_progress_block_task extends restore_block_task {
-
     /**
      * Translates the backed up configuration data for the target course modules.
      */
@@ -70,8 +69,12 @@ class restore_completion_progress_block_task extends restore_block_task {
                 if (preg_match('/^(?P<type>group|grouping)-(?P<id>\d+)$/', $config['group'], $matches)) {
                     $rec = restore_dbops::get_backup_ids_record($this->get_restoreid(), $matches['type'], $matches['id']);
                     if (!$rec || !$rec->newitemid) {
-                        if ($DB->record_exists($matches['type'] . 's',
-                                ['id' => $matches['id'], 'courseid' => $courseid])) {
+                        if (
+                            $DB->record_exists(
+                                $matches['type'] . 's',
+                                ['id' => $matches['id'], 'courseid' => $courseid]
+                            )
+                        ) {
                             $newgroup = $config['group'];
                         }
                     } else {

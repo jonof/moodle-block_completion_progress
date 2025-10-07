@@ -30,7 +30,7 @@ defined('MOODLE_INTERNAL') || die;
 use block_completion_progress\completion_progress;
 use block_completion_progress\defaults;
 
-require_once($CFG->libdir.'/tablelib.php');
+require_once($CFG->libdir . '/tablelib.php');
 
 
 /**
@@ -129,8 +129,13 @@ class overview extends \table_sql {
             $picturefields = \user_picture::fields('u');
         }
 
-        $enroljoin = get_enrolled_with_capabilities_join($this->progress->get_context(), '', '', $groups,
-            get_config('block_completion_progress', 'showinactive') == 0);
+        $enroljoin = get_enrolled_with_capabilities_join(
+            $this->progress->get_context(),
+            '',
+            '',
+            $groups,
+            get_config('block_completion_progress', 'showinactive') == 0
+        );
 
         $params = $enroljoin->params + ['courseid' => $this->progress->get_course()->id];
         if ($roleid) {
@@ -193,8 +198,11 @@ class overview extends \table_sql {
             'id' => 'user' . $row->id,
             'name' => 'user' . $row->id,
             'checked' => false,
-            'label' => get_string('selectitem', 'block_completion_progress',
-                fullname($row, has_capability('moodle/site:viewfullnames', $this->progress->get_context()))),
+            'label' => get_string(
+                'selectitem',
+                'block_completion_progress',
+                fullname($row, has_capability('moodle/site:viewfullnames', $this->progress->get_context()))
+            ),
             'labelclasses' => 'accesshide',
         ]);
         return $this->output->render($checkbox);

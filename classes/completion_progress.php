@@ -146,7 +146,7 @@ class completion_progress implements \renderable {
     public function __construct($courseorid) {
         global $CFG;
 
-        require_once($CFG->libdir.'/completionlib.php');
+        require_once($CFG->libdir . '/completionlib.php');
 
         if (is_object($courseorid)) {
             $this->course = $courseorid;
@@ -500,7 +500,7 @@ class completion_progress implements \renderable {
                 if ($cm->completion == COMPLETION_TRACKING_NONE) {
                     continue;
                 }
-                if ($selectedonly && !in_array($module.'-'.$cm->instance, $selectedcms)) {
+                if ($selectedonly && !in_array($module . '-' . $cm->instance, $selectedcms)) {
                     continue;
                 }
 
@@ -574,7 +574,7 @@ class completion_progress implements \renderable {
             }
 
             // Check for exclusions.
-            if (in_array($activity->type.'-'.$activity->instance.'-'.$this->user->id, $this->exclusions)) {
+            if (in_array($activity->type . '-' . $activity->instance . '-' . $this->user->id, $this->exclusions)) {
                 continue;
             }
 
@@ -657,8 +657,11 @@ class completion_progress implements \renderable {
 
             if ($compl->completionstate == COMPLETION_INCOMPLETE && $submission) {
                 $this->completions[$compl->userid][$compl->cmid] = 'submitted';
-            } else if ($compl->completionstate == COMPLETION_COMPLETE_FAIL && $submission
-                    && !$submission->graded) {
+            } else if (
+                $compl->completionstate == COMPLETION_COMPLETE_FAIL &&
+                $submission &&
+                !$submission->graded
+            ) {
                 $this->completions[$compl->userid][$compl->cmid] = 'submitted';
             } else {
                 $this->completions[$compl->userid][$compl->cmid] = $compl->completionstate;
@@ -707,7 +710,7 @@ class completion_progress implements \renderable {
                 // Assignments with individual submission, or groups requiring a submission per user,
                 // or ungrouped users in a group submission situation.
                 'module' => 'assign',
-                'query' => "SELECT ". $DB->sql_concat('s.userid', "'-'", 'c.id') ." AS id,
+                'query' => "SELECT {$DB->sql_concat('s.userid', "'-'", 'c.id')} AS id,
                              s.userid, c.id AS cmid,
                              MAX(CASE WHEN ag.grade IS NULL OR ag.grade = -1 THEN 0 ELSE 1 END) AS graded
                           FROM {assign_submission} s
@@ -733,7 +736,7 @@ class completion_progress implements \renderable {
             [
                 // Assignments with groups requiring only one submission per group.
                 'module' => 'assign',
-                'query' => "SELECT ". $DB->sql_concat('s.userid', "'-'", 'c.id') ." AS id,
+                'query' => "SELECT {$DB->sql_concat('s.userid', "'-'", 'c.id')} AS id,
                              s.userid, c.id AS cmid,
                              MAX(CASE WHEN ag.grade IS NULL OR ag.grade = -1 THEN 0 ELSE 1 END) AS graded
                           FROM {assign_submission} gs
@@ -756,7 +759,7 @@ class completion_progress implements \renderable {
 
             [
                 'module' => 'workshop',
-                'query' => "SELECT ". $DB->sql_concat('s.authorid', "'-'", 'c.id') ." AS id,
+                'query' => "SELECT {$DB->sql_concat('s.authorid', "'-'", 'c.id')} AS id,
                                s.authorid AS userid, c.id AS cmid,
                                1 AS graded
                              FROM {workshop_submissions} s, {workshop} w, {modules} m, {course_modules} c
@@ -773,7 +776,7 @@ class completion_progress implements \renderable {
             [
                 // Quizzes with 'first' and 'last attempt' grading methods.
                 'module' => 'quiz',
-                'query' => "SELECT ". $DB->sql_concat('qa.userid', "'-'", 'c.id') ." AS id,
+                'query' => "SELECT {$DB->sql_concat('qa.userid', "'-'", 'c.id')} AS id,
                            qa.userid, c.id AS cmid,
                            (CASE WHEN qa.sumgrades IS NULL THEN 0 ELSE 1 END) AS graded
                          FROM {quiz_attempts} qa
@@ -799,7 +802,7 @@ class completion_progress implements \renderable {
             [
                 // Quizzes with 'maximum' and 'average' grading methods.
                 'module' => 'quiz',
-                'query' => "SELECT ". $DB->sql_concat('qa.userid', "'-'", 'c.id') ." AS id,
+                'query' => "SELECT {$DB->sql_concat('qa.userid', "'-'", 'c.id')} AS id,
                            qa.userid, c.id AS cmid,
                            MIN(CASE WHEN qa.sumgrades IS NULL THEN 0 ELSE 1 END) AS graded
                          FROM {quiz_attempts} qa
@@ -827,5 +830,4 @@ class completion_progress implements \renderable {
             }
         }
     }
-
 }
