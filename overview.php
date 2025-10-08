@@ -80,6 +80,7 @@ $PAGE->set_context($context);
 $title = get_string('overview', 'block_completion_progress');
 $PAGE->set_title("$course->shortname: $title");
 $PAGE->set_heading($course->fullname);
+$PAGE->navbar->add($course->fullname, new moodle_url('/course/view.php', ['id' => $courseid]));
 $PAGE->navbar->add($title, new moodle_url('/blocks/completion_progress/overview.php',
     ['instanceid' => $id, 'courseid' => $courseid]));
 $PAGE->set_pagelayout('report');
