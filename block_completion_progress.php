@@ -301,6 +301,14 @@ class block_completion_progress extends block_base {
         // Allow teachers to access the overview page.
         if (has_capability('block/completion_progress:overview', $this->context)) {
             $parameters = ['instanceid' => $this->instance->id, 'courseid' => $COURSE->id];
+            if(!empty($this->config->preselectgroup) && !empty($this->config->group)){
+                $group = $this->config->group;
+                if (substr($group, 0, 6) === 'group-') {
+                    $parameters['group'] = substr($group, 6);
+                } elseif (substr($group, 0, 9) === 'grouping-') {
+                    $parameters['group'] = 'g' . substr($group, 9);
+                }
+            }
             $url = new moodle_url('/blocks/completion_progress/overview.php', $parameters);
             $label = get_string('overview', 'block_completion_progress');
             $options = ['class' => 'overviewButton'];
