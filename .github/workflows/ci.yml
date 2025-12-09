@@ -31,14 +31,6 @@ jobs:
             database: 'pgsql'
             moodle-branch: 'MOODLE_405_STABLE'
             # LTS, EOL 2027-10-06
-          - php: '8.1'
-            database: 'pgsql'
-            moodle-branch: 'MOODLE_404_STABLE'
-            # EOL 2025-12-08
-          - php: '7.4'
-            database: 'mariadb'
-            moodle-branch: 'MOODLE_401_STABLE'
-            # LTS, EOL 2025-12-08
 
     services:
       postgres:
