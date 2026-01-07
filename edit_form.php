@@ -120,6 +120,61 @@ class block_completion_progress_edit_form extends block_edit_form {
         $mform->setDefault('config_showpercentage', defaults::SHOWPERCENTAGE);
         $mform->addHelpButton('config_showpercentage', 'why_show_precentage', 'block_completion_progress');
 
+        // Choose which overview columns to display.
+        $mform->addElement('header', 'config_overviewcolumns', get_string('config_overviewcolumns', 'block_completion_progress'));
+        $mform->addElement(
+            'advcheckbox',
+            'config_showidnumber',
+            get_string('config_showidnumber', 'block_completion_progress')
+        );
+        $mform->setDefault('config_showidnumber', 1);
+        $mform->addElement(
+            'advcheckbox',
+            'config_showemail',
+            get_string('config_showemail', 'block_completion_progress')
+        );
+        $mform->setDefault('config_showemail', 1);
+        $mform->setAdvanced('config_showidnumber', true);
+        $mform->setAdvanced('config_showemail', true);
+
+        // Configure reminder emails to students below a threshold.
+        $mform->addElement('header', 'config_reminders', get_string('config_reminders', 'block_completion_progress'));
+        $mform->addElement(
+            'advcheckbox',
+            'config_reminderenabled',
+            get_string('config_reminderenabled', 'block_completion_progress')
+        );
+        $mform->setDefault('config_reminderenabled', defaults::REMINDERENABLED);
+
+        $options = [
+            'daily' => get_string('frequencydaily', 'block_completion_progress'),
+            'weekly' => get_string('frequencyweekly', 'block_completion_progress'),
+            'monthly' => get_string('frequencymonthly', 'block_completion_progress'),
+            'yearly' => get_string('frequencyyearly', 'block_completion_progress'),
+        ];
+        $mform->addElement(
+            'select',
+            'config_reminderfrequency',
+            get_string('config_reminderfrequency', 'block_completion_progress'),
+            $options
+        );
+        $mform->setDefault('config_reminderfrequency', defaults::REMINDERFREQUENCY);
+
+        $mform->addElement(
+            'text',
+            'config_reminderthreshold',
+            get_string('config_reminderthreshold', 'block_completion_progress'),
+            ['size' => 3]
+        );
+        $mform->setType('config_reminderthreshold', PARAM_INT);
+        $mform->setDefault('config_reminderthreshold', defaults::REMINDERTHRESHOLD);
+
+        $mform->disabledIf('config_reminderfrequency', 'config_reminderenabled', 'notchecked');
+        $mform->disabledIf('config_reminderthreshold', 'config_reminderenabled', 'notchecked');
+        $mform->setAdvanced('config_reminderenabled', true);
+        $mform->setAdvanced('config_reminderfrequency', true);
+        $mform->setAdvanced('config_reminderthreshold', true);
+
         // Allow the block to be visible to a single group or grouping.
         $groups = groups_get_all_groups($COURSE->id);
         $groupings = groups_get_all_groupings($COURSE->id);

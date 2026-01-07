@@ -88,4 +88,19 @@ abstract class defaults {
      * Default number of seconds to cache completion percentages for overview pages.
      */
     const OVERVIEWCACHETIME = 3600;
+
+    /**
+     * Default reminder email enabled state.
+     */
+    const REMINDERENABLED = 0;
+
+    /**
+     * Default reminder threshold percentage.
+     */
+    const REMINDERTHRESHOLD = 100;
+
+    /**
+     * Default reminder frequency.
+     */
+    const REMINDERFREQUENCY = 'weekly';
 }

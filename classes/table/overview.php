@@ -78,6 +78,10 @@ class overview extends \table_sql {
 
         parent::__construct('block-completion_progress-overview');
 
+        $blockconfig = $this->progress->get_block_config();
+        $showidnumber = !isset($blockconfig->showidnumber) || (int)$blockconfig->showidnumber === 1;
+        $showemail = !isset($blockconfig->showemail) || (int)$blockconfig->showemail === 1;
+
         $tablecolumns = [];
         $tableheaders = [];
 
@@ -95,6 +99,14 @@ class overview extends \table_sql {
 
         $tablecolumns[] = 'fullname';
         $tableheaders[] = get_string('fullname');
+        if ($showidnumber) {
+            $tablecolumns[] = 'idnumber';
+            $tableheaders[] = get_string('matricnumber', 'block_completion_progress');
+        }
+        if ($showemail) {
+            $tablecolumns[] = 'email';
+            $tableheaders[] = get_string('email');
+        }
 
         if (get_config('block_completion_progress', 'showlastincourse') != 0) {
             $tablecolumns[] = 'timeaccess';
@@ -118,6 +130,12 @@ class overview extends \table_sql {
 
         $this->set_attribute('class', 'overviewTable');
         $this->column_class('fullname', 'col-fullname');
+        if ($showidnumber) {
+            $this->column_class('idnumber', 'col-idnumber');
+        }
+        if ($showemail) {
+            $this->column_class('email', 'col-email');
+        }
         $this->column_class('timeaccess', 'col-timeaccess');
         $this->column_class('progressbar', 'col-progressbar');
         $this->column_class('progress', 'col-progress');
@@ -151,7 +169,7 @@ class overview extends \table_sql {
         $params['cachemin'] = time() - $cachetime;
         $params['bi'] = $this->progress->get_block_instance()->id;
         $this->set_sql(
-            "DISTINCT $picturefields, l.timeaccess, b.percentage AS progress, b.timemodified AS progressage",
+            "DISTINCT $picturefields, u.idnumber, u.email, l.timeaccess, b.percentage AS progress, b.timemodified AS progressage",
             "{user} u {$enroljoin->joins} {$rolejoin} " .
                 "LEFT JOIN {user_lastaccess} l ON l.userid = u.id AND l.courseid = :courseid " .
                 "LEFT JOIN {block_completion_progress} b ON b.userid = u.id AND " .
@@ -222,6 +240,34 @@ class overview extends \table_sql {
         } else {
             return parent::col_fullname($row);
         }
+    }
+
+    /**
+     * Format the user idnumber.
+     * @param object $row
+     * @return string
+     */
+    public function col_idnumber($row) {
+        if ($this->is_downloading()) {
+            return $row->idnumber;
+        }
+        return s($row->idnumber);
+    }
+
+    /**
+     * Format the email address.
+     * @param object $row
+     * @return string
+     */
+    public function col_email($row) {
+        if ($this->is_downloading()) {
+            return $row->email;
+        }
+        if (!$row->email) {
+            return '';
+        }
+        $email = s($row->email);
+        return \html_writer::link('mailto:' . $email, $email);
     }
 
     /**

@@ -15,17 +15,23 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Completion Progress block version details
+ * Scheduled tasks.
  *
  * @package    block_completion_progress
- * @copyright  2018 Michael de Raadt
+ * @copyright  2025
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die;
 
-$plugin->version   = 2025101400;
-$plugin->requires  = 2022112800;
-$plugin->maturity  = MATURITY_STABLE;
-$plugin->release   = 'Version for Moodle 4.1 onwards';
-$plugin->component = 'block_completion_progress';
+$tasks = [
+    [
+        'classname' => '\block_completion_progress\task\send_reminders',
+        'blocking' => 0,
+        'minute' => '0',
+        'hour' => '3',
+        'day' => '*',
+        'dayofweek' => '*',
+        'month' => '*',
+    ],
+];

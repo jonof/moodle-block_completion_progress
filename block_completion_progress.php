@@ -69,6 +69,28 @@ class block_completion_progress extends block_base {
     }
 
     /**
+     * Normalize reminder settings when saving the block config.
+     *
+     * @param stdClass $data
+     * @param bool $nolongerused
+     */
+    public function instance_config_save($data, $nolongerused = false) {
+        $current = $this->config ?? (object)[];
+        $enabled = !empty($data->reminderenabled);
+        $wasenabled = !empty($current->reminderenabled);
+        $frequency = $data->reminderfrequency ?? null;
+        $threshold = $data->reminderthreshold ?? null;
+        $prevfrequency = $current->reminderfrequency ?? null;
+        $prevthreshold = $current->reminderthreshold ?? null;
+
+        if (!$enabled || !$wasenabled || $frequency !== $prevfrequency || $threshold !== $prevthreshold) {
+            $data->reminderlastsent = 0;
+        }
+
+        parent::instance_config_save($data, $nolongerused);
+    }
+
+    /**
      * Controls whether multiple instances of the block are allowed on a page
      *
      * @return bool
