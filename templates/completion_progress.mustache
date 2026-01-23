@@ -65,8 +65,8 @@
     <div class="block_completion_progress">
         <div class="barContainer" data-courseid="{{courseid}}" data-instanceid="{{instanceid}}" data-userid="{{userid}}">
             {{#barscroll}}
-                <svg class="left-arrow-svg" height="30" width="30"><polygon points="30,0 0,15 30,30" class="triangle-polygon"></svg>
-                <svg class="right-arrow-svg" height="30" width="30"><polygon points="0,0 30,15 0,30" class="triangle-polygon"></svg>
+                <svg class="left-arrow-svg" height="30" width="30" viewBox="0 0 30 30" tabindex="0"><polygon
+                    points="26,4 4,15 26,26" class="triangle-polygon"></svg>
             {{/barscroll}}
 
             <div class="barRow
@@ -101,6 +101,11 @@
                     </div>{{/cells}}
                 </div>
             </div>
+
+            {{#barscroll}}
+                <svg class="right-arrow-svg" height="30" width="30" viewBox="0 0 30 30" tabindex="0"><polygon
+                    points="4,4 26,15 4,26" class="triangle-polygon"></svg>
+            {{/barscroll}}
         </div>
 
         {{#progresspercentage}}

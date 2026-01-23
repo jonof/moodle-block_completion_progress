@@ -6,29 +6,22 @@
     position: relative;
     padding: 0;
     clear: both;
+    display: flex;
 }
 
 .block_completion_progress .left-arrow-svg,
 .block_completion_progress .right-arrow-svg {
-    position: absolute;
-    top: calc(50% - 10px);
     display: none;
-    z-index: 10;
-}
-
-.block_completion_progress .left-arrow-svg {
-    /* rtl:ignore */
-    left: 5px;
-}
-.block_completion_progress .right-arrow-svg {
-    /* rtl:ignore */
-    right: 5px;
+    width: 1.6em;
+    height: 1.6em;
+    align-self: end;
 }
 
 .block_completion_progress .triangle-polygon {
-    fill: rgba(0, 0, 0, 0.3);
-    stroke: white;
-    stroke-width: 3px;
+    fill: #eaeaea;
+}
+.block_completion_progress .active .triangle-polygon {
+    fill: #aeaeae;
 }
 
 .block_completion_progress .barRow {

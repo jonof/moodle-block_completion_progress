@@ -73,8 +73,12 @@ define(['jquery', 'core/ajax', 'core/log', 'core/templates', 'core/utils'],
          * @param {Event} event
          */
         function scrollContainer(event) {
+            if (event.type == "keydown" && event.which != 13) {
+                return;
+            }
             var barrow = $(this).closest('.block_completion_progress .barContainer').find('.barRow');
-            var amount = event.data * barrow.prop('scrollWidth') * 0.15;
+            var cellswidth = barrow.find('.barRowCells').prop('clientWidth');
+            var amount = event.data * cellswidth;
 
             barrow.prop('scrollLeft', barrow.prop('scrollLeft') + amount);
 
@@ -96,27 +100,11 @@ define(['jquery', 'core/ajax', 'core/log', 'core/templates', 'core/utils'],
             if (document.dir === 'rtl') {
                 scrolled = -scrolled;
 
-                if (scrolled > threshold) {
-                    rightarrow.css('display', 'block');
-                } else {
-                    rightarrow.css('display', 'none');
-                }
-                if (scrollWidth > threshold && scrolled < scrollWidth - threshold) {
-                    leftarrow.css('display', 'block');
-                } else {
-                    leftarrow.css('display', 'none');
-                }
+                rightarrow.toggleClass('active', (scrolled > threshold));
+                leftarrow.toggleclass('active', (scrollWidth > threshold && scrolled < scrollWidth - threshold));
             } else {
-                if (scrolled > threshold) {
-                    leftarrow.css('display', 'block');
-                } else {
-                    leftarrow.css('display', 'none');
-                }
-                if (scrollWidth > threshold && scrolled < scrollWidth - threshold) {
-                    rightarrow.css('display', 'block');
-                } else {
-                    rightarrow.css('display', 'none');
-                }
+                leftarrow.toggleClass('active', (scrolled > threshold));
+                rightarrow.toggleClass('active', (scrollWidth > threshold && scrolled < scrollWidth - threshold));
             }
         }
 
@@ -132,13 +120,21 @@ define(['jquery', 'core/ajax', 'core/log', 'core/templates', 'core/utils'],
                 barrows = $('.block_completion_progress .barRow');
             }
             var nowicons = barrows.find('.nowDiv .icon');
+
+            var barcontainer = barrows.closest('.block_completion_progress .barContainer');
+            var leftarrow = barcontainer.find('.left-arrow-svg');
+            var rightarrow = barcontainer.find('.right-arrow-svg');
+            leftarrow.css('display', 'block');
+            rightarrow.css('display', 'block');
+
             nowicons.each(function() {
                 var nowicon = $(this);
                 var barrow = nowicon.closest('.block_completion_progress .barRow');
+                var cellswidth = barrow.find('.barRowCells').prop('clientWidth');
 
                 barrow.prop('scrollLeft', 0);
                 barrow.prop('scrollLeft', nowicon.offset().left - barrow.offset().left -
-                    barrow.width() / 2);
+                    cellswidth / 2);
             });
             barrows.each(checkArrows);
         }
@@ -202,8 +198,8 @@ define(['jquery', 'core/ajax', 'core/log', 'core/templates', 'core/utils'],
                     checkArrows.call(e.target);
                 }
             }, true);
-            $(document.body).on('click', '.block_completion_progress .left-arrow-svg', -1, scrollContainer);
-            $(document.body).on('click', '.block_completion_progress .right-arrow-svg', 1, scrollContainer);
+            $(document.body).on('click keydown', '.block_completion_progress .left-arrow-svg.active', -1, scrollContainer);
+            $(document.body).on('click keydown', '.block_completion_progress .right-arrow-svg.active', 1, scrollContainer);
             $(window).resize(() => $('.block_completion_progress .barRow').each(checkArrows));
             $(document).on('theme_boost/drawers:shown theme_boost/drawers:hidden',
                 Utils.debounce(() => $('.block_completion_progress .barRow').each(checkArrows), 250));
