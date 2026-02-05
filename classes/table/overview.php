@@ -368,7 +368,8 @@ class overview extends sql_table implements dynamic, renderable {
         } else {
             $value = get_string('percents', '', $pct);
         }
-        $age = time() - (int)$row->progressage;
+        $clock = \core\di::get(\core\clock::class);
+        $age = $clock->time() - (int)$row->progressage;
         if ($row->progressage !== null && $age > 0) {
             $title = get_string('progresscachetime', 'block_completion_progress', \format_time($age));
             $value = \html_writer::span($value, '', ['title' => $title]);

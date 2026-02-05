@@ -208,6 +208,8 @@ class completion_progress implements \renderable, \templatable {
             call_user_func($progresscallback, 0);
         }
 
+        $clock = \core\di::get(\core\clock::class);
+
         $numdone = 0;
         $numcompletions = count($this->completions);
         $cachetime = get_config('block_completion_progress', 'overviewcachetime') ?: defaults::OVERVIEWCACHETIME;
@@ -219,7 +221,7 @@ class completion_progress implements \renderable, \templatable {
             ];
             $rec = $DB->get_record('block_completion_progress', $rec) ?: (object)$rec;
 
-            if (!empty($rec->timemodified) && time() - $rec->timemodified < $cachetime) {
+            if (!empty($rec->timemodified) && $clock->time() - $rec->timemodified < $cachetime) {
                 $trans->allow_commit();
                 continue;
             }
@@ -243,7 +245,7 @@ class completion_progress implements \renderable, \templatable {
                     $rec->percentage = (int)round(100 * $completecount / count($this->visibleactivities));
                 }
             }
-            $rec->timemodified = time();
+            $rec->timemodified = $clock->time();
 
             if (empty($rec->id)) {
                 $rec->id = $DB->insert_record('block_completion_progress', $rec);
@@ -557,27 +559,22 @@ class completion_progress implements \renderable, \templatable {
 
         $this->visibleactivities = [];
         $modinfo = get_fast_modinfo($this->course, $this->user->id);
-        $canviewhidden = has_capability('moodle/course:viewhiddenactivities', $this->context, $this->user);
 
         // Keep only activities that are visible.
         foreach ($this->activities as $key => $activity) {
             $cm = $modinfo->cms[$activity->id];
+            $section = $cm->get_section_info();
 
-            // Check visibility in course.
-            if (!$cm->visible && !$canviewhidden) {
+            if (!$section->uservisible) {
                 continue;
-            }
-
-            // Check availability, allowing for visible, but not accessible items.
-            if (!empty($CFG->enableavailability)) {
-                if ($canviewhidden) {
-                    $activity->available = true;
+            } else if (!$cm->uservisible) {
+                if (!!$cm->availableinfo) {
+                    $activity->available = false;
                 } else {
-                    if (isset($cm->available) && !$cm->available && empty($cm->availableinfo)) {
-                        continue;
-                    }
-                    $activity->available = $cm->available;
+                    continue;
                 }
+            } else {
+                $activity->available = true;
             }
 
             // Check for exclusions.
@@ -585,7 +582,7 @@ class completion_progress implements \renderable, \templatable {
                 continue;
             }
 
-            // Save the visible event.
+            // Save the visible activity.
             $this->visibleactivities[$key] = $activity;
         }
     }
@@ -848,7 +845,8 @@ class completion_progress implements \renderable, \templatable {
 
         $data = new stdClass();
 
-        $now = time();
+        $clock = \core\di::get(\core\clock::class);
+        $now = $clock->time();
         $activities = $this->get_visible_activities();
         $completions = $this->get_completions();
         $config = $this->get_block_config();

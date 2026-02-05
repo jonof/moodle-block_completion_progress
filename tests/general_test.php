@@ -377,4 +377,275 @@ final class general_test extends \advanced_testcase {
         $this->assertEquals($pagecm->url->out(), $activities[0]->url);
         $this->assertEquals('', $activities[1]->url);
     }
+
+    /** @var int Section state mask. */
+    const SECTION_MASK            = 0b00001111;
+    /** @var int Section visibility - visible. */
+    const SECTION_VISIBLE         = 0b00000000;
+    /** @var int Section visibility - hidden. */
+    const SECTION_HIDDEN          = 0b00000001;
+    /** @var int Section availability bit - visible if unavailable. */
+    const SECTION_AVVISIBLE_BIT   = 0b00000000;
+    /** @var int Section availability bit - hidden if unavailable. */
+    const SECTION_AVHIDDEN_BIT    = 0b00000010;
+    /** @var int Section availability bit - past-dated condition. */
+    const SECTION_AVPAST_BIT      = 0b00000100;
+    /** @var int Section availability bit - future-dated condition. */
+    const SECTION_AVFUTURE_BIT    = 0b00001000;
+    /** @var int Section availability - past-dated condition, visible if unavailable. */
+    const SECTION_AVPASTVISIBLE   = (self::SECTION_AVVISIBLE_BIT | self::SECTION_AVPAST_BIT);
+    /** @var int Section availability - past-dated condition, hidden if unavailable. */
+    const SECTION_AVPASTHIDDEN    = (self::SECTION_AVHIDDEN_BIT | self::SECTION_AVPAST_BIT);
+    /** @var int Section availability - future-dated condition, visible if unavailable. */
+    const SECTION_AVFUTUREVISIBLE = (self::SECTION_AVVISIBLE_BIT | self::SECTION_AVFUTURE_BIT);
+    /** @var int Section availability - future-dated condition, hidden if unavailable. */
+    const SECTION_AVFUTUREHIDDEN  = (self::SECTION_AVHIDDEN_BIT | self::SECTION_AVFUTURE_BIT);
+
+    /** @var int Activity state mask. */
+    const ACTIVITY_MASK            = 0b11110000;
+    /** @var int Activity visibility - visible. */
+    const ACTIVITY_VISIBLE         = 0b00000000;
+    /** @var int Activity visibility - hidden but available. */
+    const ACTIVITY_STEALTH         = 0b00010000;
+    /** @var int Activity availability bit - visible if unavailable. */
+    const ACTIVITY_AVVISIBLE_BIT   = 0b00000000;
+    /** @var int Activity availability bit - hidden if unavailable. */
+    const ACTIVITY_AVHIDDEN_BIT    = 0b00100000;
+    /** @var int Activity availability bit - past-dated condition. */
+    const ACTIVITY_AVPAST_BIT      = 0b01000000;
+    /** @var int Activity availability bit - future-dated condition. */
+    const ACTIVITY_AVFUTURE_BIT    = 0b10000000;
+    /** @var int Activity availability - past-dated condition, visible if unavailable. */
+    const ACTIVITY_AVPASTVISIBLE   = (self::ACTIVITY_AVVISIBLE_BIT | self::ACTIVITY_AVPAST_BIT);
+    /** @var int Activity availability - past-dated condition, hidden if unavailable. */
+    const ACTIVITY_AVPASTHIDDEN    = (self::ACTIVITY_AVHIDDEN_BIT | self::ACTIVITY_AVPAST_BIT);
+    /** @var int Activity availability - future-dated condition, visible if unavailable. */
+    const ACTIVITY_AVFUTUREVISIBLE = (self::ACTIVITY_AVVISIBLE_BIT | self::ACTIVITY_AVFUTURE_BIT);
+    /** @var int Activity availability - future-dated condition, hidden if unavailable. */
+    const ACTIVITY_AVFUTUREHIDDEN  = (self::ACTIVITY_AVHIDDEN_BIT | self::ACTIVITY_AVFUTURE_BIT);
+
+    /** @var int Visibility expectation - absent from bar. */
+    const EXPECT_ABSENT = 0;
+    /** @var int Visibility expectation - present in bar. */
+    const EXPECT_PRESENT = 1;
+    /** @var int Visibility expectation - present in bar without being linked to the cm. */
+    const EXPECT_UNLINKED = 2;
+
+    /**
+     * A data provider supplying each of the possible combinations of activity or section
+     * visibility and availability, and the expectation of what should be shown in the bar.
+     * @return array
+     */
+    public static function visibility_and_availability_provider(): array {
+        return [
+            'Section: future, hidden / Activity: none = absent' => [
+                self::SECTION_AVFUTUREHIDDEN | self::ACTIVITY_VISIBLE,
+                self::EXPECT_ABSENT,
+            ],
+            'Section: future, hidden / Activity: future, hidden = absent' => [
+                self::SECTION_AVFUTUREHIDDEN | self::ACTIVITY_AVFUTUREHIDDEN,
+                self::EXPECT_ABSENT,
+            ],
+            'Section: future, hidden / Activity: past, hidden = absent' => [
+                self::SECTION_AVFUTUREHIDDEN | self::ACTIVITY_AVPASTHIDDEN,
+                self::EXPECT_ABSENT,
+            ],
+            'Section: future, hidden / Activity: future, visible = absent' => [
+                self::SECTION_AVFUTUREHIDDEN | self::ACTIVITY_AVFUTUREVISIBLE,
+                self::EXPECT_ABSENT,
+            ],
+            'Section: future, hidden / Activity: past, visible = absent' => [
+                self::SECTION_AVFUTUREHIDDEN | self::ACTIVITY_AVPASTVISIBLE,
+                self::EXPECT_ABSENT,
+            ],
+
+            'Section: past, hidden / Activity: none = present' => [
+                self::SECTION_AVPASTHIDDEN | self::ACTIVITY_VISIBLE,
+                self::EXPECT_PRESENT,
+            ],
+            'Section: past, hidden / Activity: future, hidden = absent' => [
+                self::SECTION_AVPASTHIDDEN | self::ACTIVITY_AVFUTUREHIDDEN,
+                self::EXPECT_ABSENT,
+            ],
+            'Section: past, hidden / Activity: past, hidden = present' => [
+                self::SECTION_AVPASTHIDDEN | self::ACTIVITY_AVPASTHIDDEN,
+                self::EXPECT_PRESENT,
+            ],
+            'Section: past, hidden / Activity: future, visible = unlinked' => [
+                self::SECTION_AVPASTHIDDEN | self::ACTIVITY_AVFUTUREVISIBLE,
+                self::EXPECT_UNLINKED,
+            ],
+            'Section: past, hidden / Activity: past, visible = present' => [
+                self::SECTION_AVPASTHIDDEN | self::ACTIVITY_AVPASTVISIBLE,
+                self::EXPECT_PRESENT,
+            ],
+
+            'Section: future, visible / Activity: none = absent' => [
+                self::SECTION_AVFUTUREVISIBLE | self::ACTIVITY_VISIBLE,
+                self::EXPECT_ABSENT,
+            ],
+            'Section: future, visible / Activity: future, hidden = absent' => [
+                self::SECTION_AVFUTUREVISIBLE | self::ACTIVITY_AVFUTUREHIDDEN,
+                self::EXPECT_ABSENT,
+            ],
+            'Section: future, visible / Activity: past, hidden = absent' => [
+                self::SECTION_AVFUTUREVISIBLE | self::ACTIVITY_AVPASTHIDDEN,
+                self::EXPECT_ABSENT,
+            ],
+            'Section: future, visible / Activity: future, visible = absent' => [
+                self::SECTION_AVFUTUREVISIBLE | self::ACTIVITY_AVFUTUREVISIBLE,
+                self::EXPECT_ABSENT,
+            ],
+            'Section: future, visible / Activity: past, visible = absent' => [
+                self::SECTION_AVFUTUREVISIBLE | self::ACTIVITY_AVPASTVISIBLE,
+                self::EXPECT_ABSENT,
+            ],
+
+            'Section: past, visible / Activity: none = present' => [
+                self::SECTION_AVPASTVISIBLE | self::ACTIVITY_VISIBLE,
+                self::EXPECT_PRESENT,
+            ],
+            'Section: past, visible / Activity: future, hidden = absent' => [
+                self::SECTION_AVPASTVISIBLE | self::ACTIVITY_AVFUTUREHIDDEN,
+                self::EXPECT_ABSENT,
+            ],
+            'Section: past, visible / Activity: past, hidden = present' => [
+                self::SECTION_AVPASTVISIBLE | self::ACTIVITY_AVPASTHIDDEN,
+                self::EXPECT_PRESENT,
+            ],
+            'Section: past, visible / Activity: future, visible = unlinked' => [
+                self::SECTION_AVPASTVISIBLE | self::ACTIVITY_AVFUTUREVISIBLE,
+                self::EXPECT_UNLINKED,
+            ],
+            'Section: past, visible / Activity: past, visible = present' => [
+                self::SECTION_AVPASTVISIBLE | self::ACTIVITY_AVPASTVISIBLE,
+                self::EXPECT_PRESENT,
+            ],
+
+            'Section: none / Activity: none = present' => [
+                self::SECTION_VISIBLE | self::ACTIVITY_VISIBLE,
+                self::EXPECT_PRESENT,
+            ],
+            'Section: none / Activity: stealth = present' => [
+                self::SECTION_VISIBLE | self::ACTIVITY_STEALTH,
+                self::EXPECT_PRESENT,
+            ],
+        ];
+    }
+
+    /**
+     * Test that various combinations of activity or section visibility and availability
+     * behave as expected.
+     * @param int $inputconfig
+     * @param int $expected
+     * @covers \block_completion_progress\completion_progress
+     * @dataProvider visibility_and_availability_provider
+     */
+    public function test_visibility_and_availability($inputconfig, $expected): void {
+        $now = time();
+        $pasttime = strtotime('-1 month', $now);
+        $futuretime = strtotime('+1 month', $now);
+        $this->mock_clock_with_frozen($now);
+
+        $generator = $this->getDataGenerator();
+
+        $section = $generator->create_course_section([
+            'course' => $this->course->id,
+            'section' => 1,
+        ]);
+        $sectionupdates = [];
+        if ($inputconfig & self::SECTION_HIDDEN) {
+            $sectionupdates['visible'] = 0;
+        }
+        if ($inputconfig & (self::SECTION_AVPAST_BIT | self::SECTION_AVFUTURE_BIT)) {
+            $sectionupdates['availability'] = [
+                'op' => '&',
+                'c' => [['type' => 'date', 'd' => '>=', 't' => null]],
+                'showc' => [true],
+            ];
+            if ($inputconfig & self::SECTION_AVHIDDEN_BIT) {
+                $sectionupdates['availability']['showc'] = [false]; // Hidden bit set.
+            }
+            if ($inputconfig & self::SECTION_AVPAST_BIT) {
+                $sectionupdates['availability']['c'][0]['t'] = $pasttime;
+            } else if ($inputconfig & self::SECTION_AVFUTURE_BIT) {
+                $sectionupdates['availability']['c'][0]['t'] = $futuretime;
+            } else {
+                throw new \coding_exception('expected either past or future');
+            }
+            $sectionupdates['availability'] = json_encode($sectionupdates['availability']);
+        }
+        if ($sectionupdates) {
+            course_update_section($this->course, $section, $sectionupdates);
+        }
+
+        $activityvisibleoncourse = 1;
+        if ($inputconfig & self::ACTIVITY_STEALTH) {
+            $activityvisibleoncourse = 0;
+        }
+        $activityavailability = null;
+        if ($inputconfig & (self::ACTIVITY_AVPAST_BIT | self::ACTIVITY_AVFUTURE_BIT)) {
+            $activityavailability = [
+                'op' => '&',
+                'c' => [['type' => 'date', 'd' => '>=', 't' => null]],
+                'showc' => [true],
+            ];
+            if ($inputconfig & self::ACTIVITY_AVHIDDEN_BIT) {
+                $activityavailability['showc'] = [false]; // Hidden bit set.
+            }
+            if ($inputconfig & self::ACTIVITY_AVPAST_BIT) {
+                $activityavailability['c'][0]['t'] = $pasttime;
+            } else if ($inputconfig & self::ACTIVITY_AVFUTURE_BIT) {
+                $activityavailability['c'][0]['t'] = $futuretime;
+            } else {
+                throw new \coding_exception('expected either past or future');
+            }
+            $activityavailability = json_encode($activityavailability);
+        }
+
+        $activity = $this->getDataGenerator()->create_module('page', [
+            'course' => $this->course->id,
+            'section' => $section->sectionnum,
+            'completion' => COMPLETION_TRACKING_MANUAL,
+            'visibleoncoursepage' => $activityvisibleoncourse,
+            'availability' => $activityavailability,
+        ]);
+
+        $context = \context_course::instance($this->course->id);
+        $blockinfo = [
+            'parentcontextid' => $context->id,
+            'pagetypepattern' => 'course-view-*',
+            'showinsubcontexts' => 0,
+            'defaultweight' => 5,
+            'timecreated' => time(),
+            'timemodified' => time(),
+            'defaultregion' => 'side-post',
+            'configdata' => base64_encode(serialize((object)[
+                'orderby' => defaults::ORDERBY,
+                'longbars' => defaults::LONGBARS,
+                'progressBarIcons' => defaults::PROGRESSBARICONS,
+                'showpercentage' => defaults::SHOWPERCENTAGE,
+                'progressTitle' => "",
+                'activitiesincluded' => defaults::ACTIVITIESINCLUDED,
+            ])),
+        ];
+        $blockinstance = $generator->create_block('completion_progress', $blockinfo);
+
+        $block = new completion_progress($this->course);
+        $block->for_block_instance($blockinstance);
+        $block->for_user($this->students[0]);
+
+        $visibles = $block->get_visible_activities();
+        if ($expected == self::EXPECT_ABSENT) {
+            $this->assertEmpty($visibles);
+        } else if ($expected == self::EXPECT_PRESENT) {
+            $this->assertCount(1, $visibles);
+            $this->assertTrue($visibles[0]->available);
+        } else if ($expected == self::EXPECT_UNLINKED) {
+            $this->assertCount(1, $visibles);
+            $this->assertFalse($visibles[0]->available);
+        } else {
+            throw new \coding_exception('unexpected expected value');
+        }
+    }
 }
