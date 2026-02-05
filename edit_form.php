@@ -139,6 +139,11 @@ class block_completion_progress_edit_form extends block_edit_form {
             $mform->setAdvanced('config_group', true);
         }
 
+        $mform->addElement('advcheckbox', 'config_preselectgroup',
+                           get_string('config_preselectgroup', 'block_completion_progress'), ' ');
+        $mform->hideif('config_preselectgroup', 'config_group', 'eq', '0');
+        $mform->setAdvanced('config_preselectgroup', true);
+
         // Set block instance title.
         $mform->addElement(
             'text',
