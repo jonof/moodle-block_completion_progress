@@ -159,10 +159,12 @@ class overview extends sql_table implements dynamic, renderable {
     public function query_db($pagesize, $useinitialsbar = true) {
         global $DB;
 
-        $fields = \core_user\fields::for_userpic()->with_identity($this->context)
-            ->get_sql('u', false, '', '', false)->selects;
+        $userfields = \core_user\fields::for_userpic()->with_identity($this->context)
+            ->get_sql('u', true, '', '', false);
 
         $params = ['courseid' => $this->courseid];
+
+        $params += $userfields->params;
 
         $showinactive = !!get_config('block_completion_progress', 'showinactive');
         $enroljoin = get_enrolled_with_capabilities_join($this->context, '', '', 0, !$showinactive);
@@ -283,8 +285,8 @@ class overview extends sql_table implements dynamic, renderable {
         }
 
         $this->rawdata = $DB->get_records_sql(
-            "SELECT DISTINCT $fields, l.timeaccess, b.percentage AS progress, b.timemodified AS progressage
-                FROM {user} u {$enroljoin->joins} {$fjoins}
+            "SELECT DISTINCT {$userfields->selects}, l.timeaccess, b.percentage AS progress, b.timemodified AS progressage
+                FROM {user} u {$enroljoin->joins} {$fjoins} {$userfields->joins}
                     LEFT JOIN {user_lastaccess} l ON l.userid = u.id AND l.courseid = :courseid
                     LEFT JOIN {block_completion_progress} b ON b.userid = u.id AND b.blockinstanceid = :bi
                 WHERE {$enroljoin->wheres} AND {$twhere} AND ({$fwheres})
