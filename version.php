@@ -29,3 +29,4 @@ $plugin->requires  = 2022112800;
 $plugin->maturity  = MATURITY_STABLE;
 $plugin->release   = 'Version for Moodle 4.5 onwards';
 $plugin->component = 'block_completion_progress';
+$plugin->supported = [405, 502];

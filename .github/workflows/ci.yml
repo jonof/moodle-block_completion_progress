@@ -80,7 +80,6 @@ jobs:
       env:
         DB: ${{ matrix.database }}
         MOODLE_BRANCH: ${{ matrix.moodle-branch }}
-        MOODLE_REPO: https://github.com/moodle/moodle.git
 
     - name: Run phplint
       if: ${{ !cancelled() }}
