@@ -119,10 +119,6 @@ final class general_test extends \advanced_testcase {
      * @covers \block_completion_progress\completion_progress
      */
     public function test_grade_excluded(): void {
-        global $DB, $PAGE;
-
-        $output = $PAGE->get_renderer('block_completion_progress');
-
         // Add a block.
         $context = \context_course::instance($this->course->id);
         $blockinfo = [
@@ -335,10 +331,6 @@ final class general_test extends \advanced_testcase {
      * @covers \block_completion_progress\completion_progress
      */
     public function test_view_urls(): void {
-        global $DB, $PAGE;
-
-        $output = $PAGE->get_renderer('block_completion_progress');
-
         // Add a block.
         $context = \context_course::instance($this->course->id);
         $blockinstance = $this->getDataGenerator()->create_block('completion_progress', [

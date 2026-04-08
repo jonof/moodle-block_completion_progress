@@ -551,8 +551,6 @@ class completion_progress implements \renderable, \templatable {
      * Filter down the activities to those a user can see.
      */
     protected function filter_visible_activities() {
-        global $CFG, $USER;
-
         if (!$this->user || $this->activities === null) {
             return;
         }

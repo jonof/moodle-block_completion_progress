@@ -133,7 +133,6 @@ class block_completion_progress extends block_base {
         $this->content = new stdClass();
         $this->content->text = '';
         $this->content->footer = '';
-        $barinstances = [];
 
         // Guests do not have any progress. Don't show them the block.
         if (!isloggedin() || isguestuser()) {
@@ -142,12 +141,12 @@ class block_completion_progress extends block_base {
 
         if (helpers::on_site_page($this->page)) {
             // Draw the multi-bar content for the Dashboard and Front page.
-            if (!$this->prepare_dashboard_content($barinstances)) {
+            if (!$this->prepare_dashboard_content()) {
                 return $this->content;
             }
         } else {
             // Gather content for block on regular course.
-            if (!$this->prepare_course_content($barinstances)) {
+            if (!$this->prepare_course_content()) {
                 return $this->content;
             }
         }
@@ -161,10 +160,9 @@ class block_completion_progress extends block_base {
 
     /**
      * Produce content for the Dashboard or Front page.
-     * @param array $barinstances receives block instance ids
      * @return boolean false if an early exit
      */
-    protected function prepare_dashboard_content(&$barinstances) {
+    protected function prepare_dashboard_content() {
         global $USER, $CFG, $DB;
 
         $output = $this->page->get_renderer('block_completion_progress');
@@ -226,7 +224,6 @@ class block_completion_progress extends block_base {
                 }
 
                 $blockprogresses[$blockinstance->id] = $blockprogress;
-                $barinstances[] = $blockinstance->id;
             }
 
             // Output the Progress Bar.
@@ -255,10 +252,9 @@ class block_completion_progress extends block_base {
 
     /**
      * Produce content for a course page.
-     * @param array $barinstances receives block instance ids
      * @return boolean false if an early exit
      */
-    protected function prepare_course_content(&$barinstances) {
+    protected function prepare_course_content() {
         global $USER, $COURSE, $CFG, $OUTPUT;
 
         $output = $this->page->get_renderer('block_completion_progress');
@@ -304,7 +300,6 @@ class block_completion_progress extends block_base {
         if (has_capability('block/completion_progress:showbar', $this->context)) {
             $this->content->text .= $output->render($progress);
         }
-        $barinstances = [$this->instance->id];
 
         // Allow teachers to access the overview page.
         if (has_capability('block/completion_progress:overview', $this->context)) {

@@ -46,7 +46,7 @@ final class assign_completion_test extends \block_completion_progress\tests\comp
      * @covers \block_completion_progress\completion_progress
      */
     public function test_assign_get_completion_state(): void {
-        global $DB, $PAGE;
+        global $PAGE;
 
         $output = $PAGE->get_renderer('block_completion_progress');
         $generator = $this->getDataGenerator();
