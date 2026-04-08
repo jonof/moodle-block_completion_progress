@@ -34,6 +34,7 @@ require_once($CFG->dirroot . '/backup/util/includes/backup_includes.php');
 
 use block_completion_progress\completion_progress;
 use block_completion_progress\defaults;
+use block_completion_progress\helpers;
 
 /**
  * General unit tests for block_completion_progress.
@@ -191,39 +192,39 @@ final class general_test extends \advanced_testcase {
         $page = new \moodle_page();
         $page->set_pagetype('site-index');
         $page->set_context(\context_course::instance(SITEID));
-        $this->assertTrue(\block_completion_progress::on_site_page($page), 'front page');
+        $this->assertTrue(helpers::on_site_page($page), 'front page');
 
         // Dashboard.
         $page = new \moodle_page();
         $page->set_pagetype('my-index');
         $page->set_context(\context_user::instance(get_admin()->id));
-        $this->assertTrue(\block_completion_progress::on_site_page($page), 'dashboard');
+        $this->assertTrue(helpers::on_site_page($page), 'dashboard');
 
         // Course.
         $page = new \moodle_page();
         $page->set_pagetype('course-view-topics');
         $page->set_context(\context_course::instance($this->course->id));
-        $this->assertFalse(\block_completion_progress::on_site_page($page), 'course');
+        $this->assertFalse(helpers::on_site_page($page), 'course');
 
         // Activity, possible by making a course block viewable on all page types.
         $page = new \moodle_page();
         $page->set_pagetype('mod-assign-grader');
         $page->set_context(\context_module::instance($cm->id));
-        $this->assertFalse(\block_completion_progress::on_site_page($page), 'activity');
+        $this->assertFalse(helpers::on_site_page($page), 'activity');
 
         // AJAX-loaded fragment within a course module context.
         $page = new \moodle_page();
         $page->set_pagetype('site-index');
         $page->set_context(\context_module::instance($cm->id));
-        $this->assertFalse(\block_completion_progress::on_site_page($page), 'ajax');
+        $this->assertFalse(helpers::on_site_page($page), 'ajax');
 
         // An uninitialised page. This has a default system context.
         $page = new \moodle_page();
-        $this->assertTrue(\block_completion_progress::on_site_page($page), 'uninitialised');
+        $this->assertTrue(helpers::on_site_page($page), 'uninitialised');
 
         // Something very unusual.
         $PAGE = null;
-        $this->assertFalse(\block_completion_progress::on_site_page(null), 'oddity');
+        $this->assertFalse(helpers::on_site_page(null), 'oddity');
     }
 
     /**

@@ -74,7 +74,7 @@ if ($ADMIN->fulltree) {
         get_string('completed_colour', 'block_completion_progress'),
         null
     );
-    $coloursetting->set_updatedcallback('block_completion_progress::increment_cache_value');
+    $coloursetting->set_updatedcallback('block_completion_progress\helpers::increment_cache_value');
     $settings->add($coloursetting);
 
     $coloursetting = new admin_setting_configcolourpicker(
@@ -84,7 +84,7 @@ if ($ADMIN->fulltree) {
         get_string('submittednotcomplete_colour', 'block_completion_progress'),
         null
     );
-    $coloursetting->set_updatedcallback('block_completion_progress::increment_cache_value');
+    $coloursetting->set_updatedcallback('block_completion_progress\helpers::increment_cache_value');
     $settings->add($coloursetting);
 
     $coloursetting = new admin_setting_configcolourpicker(
@@ -94,7 +94,7 @@ if ($ADMIN->fulltree) {
         get_string('notCompleted_colour', 'block_completion_progress'),
         null
     );
-    $coloursetting->set_updatedcallback('block_completion_progress::increment_cache_value');
+    $coloursetting->set_updatedcallback('block_completion_progress\helpers::increment_cache_value');
     $settings->add($coloursetting);
 
     $coloursetting = new admin_setting_configcolourpicker(
@@ -104,7 +104,7 @@ if ($ADMIN->fulltree) {
         get_string('futureNotCompleted_colour', 'block_completion_progress'),
         null
     );
-    $coloursetting->set_updatedcallback('block_completion_progress::increment_cache_value');
+    $coloursetting->set_updatedcallback('block_completion_progress\helpers::increment_cache_value');
     $settings->add($coloursetting);
 
     $settings->add(

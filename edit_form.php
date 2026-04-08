@@ -26,6 +26,7 @@ defined('MOODLE_INTERNAL') || die;
 
 use block_completion_progress\completion_progress;
 use block_completion_progress\defaults;
+use block_completion_progress\helpers;
 
 require_once($CFG->dirroot . '/blocks/completion_progress/block_completion_progress.php');
 
@@ -47,7 +48,7 @@ class block_completion_progress_edit_form extends block_edit_form {
         $activities = $progress->get_activities(completion_progress::ORDERBY_COURSE);
 
         // The My home version is not configurable.
-        if (block_completion_progress::on_site_page()) {
+        if (helpers::on_site_page()) {
             return;
         }
 

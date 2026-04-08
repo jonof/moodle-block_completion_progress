@@ -24,6 +24,7 @@
 
 use block_completion_progress\completion_progress;
 use block_completion_progress\defaults;
+use block_completion_progress\helpers;
 
 /**
  * Completion Progress block class
@@ -74,7 +75,7 @@ class block_completion_progress extends block_base {
      * @return bool
      */
     public function instance_allow_multiple() {
-        return !self::on_site_page($this->page);
+        return !helpers::on_site_page($this->page);
     }
 
     /**
@@ -83,7 +84,7 @@ class block_completion_progress extends block_base {
      * @return bool
      */
     public function instance_allow_config() {
-        return !self::on_site_page($this->page);
+        return !helpers::on_site_page($this->page);
     }
 
     /**
@@ -139,7 +140,7 @@ class block_completion_progress extends block_base {
             return $this->content;
         }
 
-        if (self::on_site_page($this->page)) {
+        if (helpers::on_site_page($this->page)) {
             // Draw the multi-bar content for the Dashboard and Front page.
             if (!$this->prepare_dashboard_content($barinstances)) {
                 return $this->content;
@@ -318,14 +319,6 @@ class block_completion_progress extends block_base {
     }
 
     /**
-     * Bumps a value to assist in caching of configured colours in css.php.
-     */
-    public static function increment_cache_value() {
-        $value = get_config('block_completion_progress', 'cachevalue') + 1;
-        set_config('cachevalue', $value, 'block_completion_progress');
-    }
-
-    /**
      * Determines whether the current user is a member of a given group or grouping
      *
      * @param string $group    The group or grouping identifier starting with 'group-' or 'grouping-'
@@ -344,30 +337,5 @@ class block_completion_progress extends block_base {
         }
 
         return false;
-    }
-
-    /**
-     * Checks whether the given page is site-level (Dashboard or Front page) or not.
-     *
-     * @param moodle_page $page the page to check, or the current page if not passed.
-     * @return boolean True when on the Dashboard or Site home page.
-     */
-    public static function on_site_page($page = null) {
-        global $PAGE;   // phpcs:ignore moodle.PHP.ForbiddenGlobalUse.BadGlobal
-
-        $page = $page ?? $PAGE; // phpcs:ignore moodle.PHP.ForbiddenGlobalUse.BadGlobal
-        $context = $page->context ?? null;
-
-        if (!$page || !$context) {
-            return false;
-        } else if ($context->contextlevel === CONTEXT_SYSTEM && $page->requestorigin === 'restore') {
-            return false; // When restoring from a backup, pretend the page is course-level.
-        } else if ($context->contextlevel === CONTEXT_COURSE && $context->instanceid == SITEID) {
-            return true;  // Front page.
-        } else if ($context->contextlevel < CONTEXT_COURSE) {
-            return true;  // System, user (i.e. dashboard), course category.
-        } else {
-            return false;
-        }
     }
 }
