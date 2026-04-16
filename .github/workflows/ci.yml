@@ -15,14 +15,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        # https://moodledev.io/general/releases#version-support
         include:
           - php: '8.4'
-            database: 'pgsql'
+            database: 'mariadb'
             moodle-branch: 'main'
           - php: '8.4'
             database: 'pgsql'
+            moodle-branch: 'MOODLE_502_STABLE'
+            # EOL 2027-10-04
+          - php: '8.4'
+            database: 'pgsql'
             moodle-branch: 'MOODLE_501_STABLE'
-            # EOL 2027-04-05
+            # EOL 2027-04-19
           - php: '8.3'
             database: 'pgsql'
             moodle-branch: 'MOODLE_500_STABLE'
@@ -30,7 +35,7 @@ jobs:
           - php: '8.2'
             database: 'pgsql'
             moodle-branch: 'MOODLE_405_STABLE'
-            # LTS, EOL 2027-10-06
+            # LTS, EOL 2027-10-04
 
     services:
       postgres:
