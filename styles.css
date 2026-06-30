@@ -158,6 +158,9 @@
     width: 1.2em;
 }
 
+#page-blocks-completion_progress-overview #overview {
+    table-layout: fixed;
+}
 #page-blocks-completion_progress-overview #overview th.col-select .form-check {
     padding-left: 0;
 }
