@@ -48,6 +48,9 @@ export const init = async(filterRegionId, initialFilters) => {
             )
             .then(result => {
                 pendingPromise.resolve();
+                const url = new URL(window.location.href);
+                url.searchParams.set('filterset', result.dataset.tableFilters);
+                history.replaceState({}, '', url.toString());
                 return result;
             })
             .catch(Notification.exception);
