@@ -43,9 +43,12 @@ $download = optional_param('download', '', PARAM_ALPHA);
 
 // Determine course and contexts.
 $course = $DB->get_record('course', ['id' => $courseid], '*', MUST_EXIST);
-$blockinstance = $DB->get_record('block_instances', ['id' => $instanceid], '*', MUST_EXIST);
+$blockinstance = $DB->get_record('block_instances', ['id' => $instanceid, 'blockname' => 'completion_progress'], '*', MUST_EXIST);
 $context = context_course::instance($courseid);
 $blockcontext = context_block::instance($instanceid);
+if (!$blockcontext->is_child_of($context, false) && !$blockcontext->is_child_of(context_course::instance(SITEID), false)) {
+    throw new moodle_exception('errorinvalidblockinstanceid', 'block_completion_progress');
+}
 
 // Set up page parameters.
 $strtitle = get_string('overview', 'block_completion_progress');
@@ -59,7 +62,7 @@ $PAGE->set_pagelayout('report');
 
 // Check user is logged in and capable of accessing the Overview.
 require_login($course, false);
-require_capability('block/completion_progress:overview', $blockcontext);
+require_capability('block/completion_progress:overview', $context);
 
 $cachevalue = debugging() ? -1 : (int)get_config('block_completion_progress', 'cachevalue');
 $PAGE->requires->css('/blocks/completion_progress/css.php?v=' . $cachevalue);

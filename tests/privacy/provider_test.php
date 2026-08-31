@@ -54,8 +54,9 @@ final class provider_test extends provider_testcase {
 
         $user = $this->getDataGenerator()->create_user();
         $context = \context_user::instance($user->id);
+        $course = $this->getDataGenerator()->create_course();
 
-        $this->add_percentage_record($user);
+        $this->add_percentage_record($user, $course);
 
         $contextlist = provider::get_contexts_for_userid($user->id);
 
@@ -69,16 +70,16 @@ final class provider_test extends provider_testcase {
 
         $user = $this->getDataGenerator()->create_user();
         $context = \context_user::instance($user->id);
+        $course = $this->getDataGenerator()->create_course();
 
-        $this->add_percentage_record($user);
-        $this->add_percentage_record($user);
+        $this->add_percentage_record($user, $course);
 
         $writer = \core_privacy\local\request\writer::with_context($context);
         $this->assertFalse($writer->has_any_data());
         $this->export_context_data_for_user($user->id, $context, 'block_completion_progress');
 
         $data = $writer->get_data([get_string('pluginname', 'block_completion_progress')]);
-        $this->assertCount(2, $data->percentages);
+        $this->assertCount(1, $data->percentages);
         $feed1 = reset($data->percentages);
         $this->assertEquals(1, $feed1->blockinstanceid);
         $this->assertEquals(15, $feed1->percentage);
@@ -94,12 +95,13 @@ final class provider_test extends provider_testcase {
         // Create a user.
         $user = $this->getDataGenerator()->create_user();
         $usercontext = \context_user::instance($user->id);
+        $course = $this->getDataGenerator()->create_course();
 
         $userlist = new \core_privacy\local\request\userlist($usercontext, $component);
         provider::get_users_in_context($userlist);
         $this->assertCount(0, $userlist);
 
-        $this->add_percentage_record($user);
+        $this->add_percentage_record($user, $course);
 
         // The list of users within the user context should contain user.
         provider::get_users_in_context($userlist);
@@ -125,9 +127,10 @@ final class provider_test extends provider_testcase {
         $usercontext1 = \context_user::instance($user1->id);
         $user2 = $this->getDataGenerator()->create_user();
         $usercontext2 = \context_user::instance($user2->id);
+        $course = $this->getDataGenerator()->create_course();
 
-        $this->add_percentage_record($user1);
-        $this->add_percentage_record($user2);
+        $this->add_percentage_record($user1, $course);
+        $this->add_percentage_record($user2, $course);
 
         $userlist1 = new \core_privacy\local\request\userlist($usercontext1, $component);
         provider::get_users_in_context($userlist1);
@@ -180,8 +183,9 @@ final class provider_test extends provider_testcase {
 
         $user = $this->getDataGenerator()->create_user();
         $context = \context_user::instance($user->id);
+        $course = $this->getDataGenerator()->create_course();
 
-        $this->add_percentage_record($user);
+        $this->add_percentage_record($user, $course);
 
         // Check that we have an entry.
         $percentages = $DB->get_records('block_completion_progress', ['userid' => $user->id]);
@@ -202,8 +206,9 @@ final class provider_test extends provider_testcase {
 
         $user = $this->getDataGenerator()->create_user();
         $context = \context_user::instance($user->id);
+        $course = $this->getDataGenerator()->create_course();
 
-        $this->add_percentage_record($user);
+        $this->add_percentage_record($user, $course);
 
         // Check that we have an entry.
         $percentages = $DB->get_records('block_completion_progress', ['userid' => $user->id]);
@@ -225,11 +230,13 @@ final class provider_test extends provider_testcase {
      * Add a dummy completion percentage record.
      *
      * @param object $user User object
+     * @param object $course Course object
      */
-    private function add_percentage_record($user) {
+    private function add_percentage_record($user, $course) {
         global $DB;
 
         $pctdata = [
+            'courseid' => $course->id,
             'blockinstanceid' => 1,
             'userid' => $user->id,
             'percentage' => 15,

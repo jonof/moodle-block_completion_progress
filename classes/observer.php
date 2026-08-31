@@ -43,18 +43,10 @@ class observer {
         if (!$coursectx) {
             return;
         }
-        $bids = $DB->get_fieldset_select(
-            'block_instances',
-            'id',
-            'blockname = ? AND parentcontextid = ?',
-            ['completion_progress', $coursectx->id]
-        );
-        foreach ($bids as $bid) {
-            $DB->delete_records('block_completion_progress', [
-                'blockinstanceid' => $bid,
-                'userid' => $event->other['relateduserid'],
-            ]);
-        }
+        $DB->delete_records('block_completion_progress', [
+            'courseid' => $coursectx->instanceid,
+            'userid' => $event->other['relateduserid'],
+        ]);
     }
 
     /**
@@ -68,16 +60,8 @@ class observer {
         if (!$coursectx) {
             return;
         }
-        $bids = $DB->get_fieldset_select(
-            'block_instances',
-            'id',
-            'blockname = ? AND parentcontextid = ?',
-            ['completion_progress', $coursectx->id]
-        );
-        foreach ($bids as $bid) {
-            $DB->delete_records('block_completion_progress', [
-                'blockinstanceid' => $bid,
-            ]);
-        }
+        $DB->delete_records('block_completion_progress', [
+            'courseid' => $coursectx->instanceid,
+        ]);
     }
 }

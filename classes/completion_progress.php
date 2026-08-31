@@ -217,6 +217,7 @@ class completion_progress implements \renderable, \templatable {
             $trans = $DB->start_delegated_transaction();
             $rec = [
                 'blockinstanceid' => $this->blockinstance->id,
+                'courseid' => $this->course->id,
                 'userid' => $userid,
             ];
             $rec = $DB->get_record('block_completion_progress', $rec) ?: (object)$rec;

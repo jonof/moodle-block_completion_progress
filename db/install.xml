@@ -7,6 +7,7 @@
     <TABLE NAME="block_completion_progress" COMMENT="Cached completion scores">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="blockinstanceid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="The block instance the percentage relates to"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="percentage" TYPE="int" LENGTH="3" NOTNULL="false" SEQUENCE="false" COMMENT="Value between 0 and 100"/>
@@ -14,9 +15,13 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="courseid" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id"/>
         <KEY NAME="blockinstanceid" TYPE="foreign" FIELDS="blockinstanceid" REFTABLE="block_instances" REFFIELDS="id"/>
         <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id" COMMENT="The user the percentage relates to"/>
       </KEYS>
+      <INDEXES>
+        <INDEX NAME="courseid-blockinstanceid-userid" UNIQUE="true" FIELDS="courseid, blockinstanceid, userid"/>
+      </INDEXES>
     </TABLE>
   </TABLES>
 </XMLDB>

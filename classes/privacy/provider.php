@@ -53,6 +53,7 @@ class provider implements
      */
     public static function get_metadata(collection $collection): collection {
         $collection->add_database_table('block_completion_progress', [
+            'courseid' => 'privacy:metadata:block_completion_progress:courseid',
             'blockinstanceid' => 'privacy:metadata:block_completion_progress:blockinstanceid',
             'userid' => 'privacy:metadata:block_completion_progress:userid',
             'percentage' => 'privacy:metadata:block_completion_progress:percentage',
@@ -113,6 +114,7 @@ class provider implements
         $results = static::get_records($contextlist->get_user()->id);
         foreach ($results as $result) {
             $pctdata[] = (object) [
+                'courseid' => $result->courseid,
                 'blockinstanceid' => $result->blockinstanceid,
                 'userid' => $result->userid,
                 'percentage' => $result->percentage,

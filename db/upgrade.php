@@ -61,5 +61,24 @@ function xmldb_block_completion_progress_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2025090200, 'block', 'completion_progress');
     }
 
+    if ($oldversion < 2026090100) {
+        $DB->delete_records('block_completion_progress');
+
+        $table = new xmldb_table('block_completion_progress');
+        $field = new xmldb_field('courseid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null, 'id');
+        $key = new xmldb_key('courseid', XMLDB_KEY_FOREIGN, ['courseid'], 'course', ['id']);
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+            $dbman->add_key($table, $key);
+        }
+
+        $index = new xmldb_index('courseid-blockinstanceid-userid', XMLDB_INDEX_UNIQUE, ['courseid', 'blockinstanceid', 'userid']);
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        upgrade_plugin_savepoint(true, 2026090100, 'block', 'completion_progress');
+    }
+
     return true;
 }
