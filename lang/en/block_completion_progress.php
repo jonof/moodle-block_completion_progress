@@ -43,6 +43,7 @@ $string['config_orderby'] = 'Order bar by';
 $string['config_orderby_course_order'] = 'Ordering in course';
 $string['config_orderby_due_time'] = 'Time using "{$a}" date';
 $string['config_percentage'] = 'Show percentage to students';
+$string['config_preselectgroup'] = 'Preselect group/grouping on overview page';
 $string['config_scroll'] = 'Scroll';
 $string['config_selectactivities'] = 'Select activities';
 $string['config_selectedactivities'] = 'Selected activities';
