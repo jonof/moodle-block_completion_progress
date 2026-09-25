@@ -45,7 +45,7 @@ class observer {
         }
         $DB->delete_records('block_completion_progress', [
             'courseid' => $coursectx->instanceid,
-            'userid' => $event->other['relateduserid'],
+            'userid' => $event->relateduserid,
         ]);
     }
 
