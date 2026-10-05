@@ -22,6 +22,10 @@ jobs:
             moodle-branch: 'main'
           - php: '8.4'
             database: 'pgsql'
+            moodle-branch: 'MOODLE_503_STABLE'
+            # EOL 2029-10-01
+          - php: '8.4'
+            database: 'pgsql'
             moodle-branch: 'MOODLE_502_STABLE'
             # EOL 2027-10-04
           - php: '8.4'
