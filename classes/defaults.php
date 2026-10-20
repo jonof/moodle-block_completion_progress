@@ -48,6 +48,11 @@ abstract class defaults {
      * Default course name (long/short) to show on Dashboard pages.
      */
     const COURSENAMETOSHOW = 'shortname';
+    
+    /**
+     * Default activity or section link mode on the overview page.
+     */
+    const ACTIVITYORSECTIONLINK = 'activity';
 
     /**
      * Default display of inactive students on the overview page.

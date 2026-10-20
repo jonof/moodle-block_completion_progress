@@ -66,6 +66,18 @@ if ($ADMIN->fulltree) {
             $options
         )
     );
+    $settings->add(
+        new admin_setting_configselect(
+            'block_completion_progress/activityorsectionlink',
+            get_string('activityorsectionlink', 'block_completion_progress'),
+            '',
+            defaults::ACTIVITYORSECTIONLINK,
+            $options = [
+                'activity' => get_string('config_activity', 'block_completion_progress'),
+                'section' => get_string('config_section', 'block_completion_progress'),
+            ]
+        )
+    );
 
     $coloursetting = new admin_setting_configcolourpicker(
         'block_completion_progress/completed_colour',

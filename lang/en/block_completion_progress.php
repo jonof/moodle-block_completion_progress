@@ -22,6 +22,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['activityorsectionlink'] = 'Progress bar link destination';
 $string['completed_colour'] = '#6A9C35';
 $string['completed_colour_descr'] = 'HTML Colour code for elements that have been completed';
 $string['completed_colour_title'] = 'Completed colour';
@@ -33,6 +34,7 @@ $string['completion_progress:overview'] = 'View course overview of Completion Pr
 $string['completion_progress:showbar'] = 'Show the bar in the Completion Progress block';
 $string['computeprogress'] = 'Calculating progress percentages';
 $string['config_activitiesincluded'] = 'Activities included';
+$string['config_activity'] = 'Activity';
 $string['config_activitycompletion'] = 'All activities with completion set';
 $string['config_default_title'] = 'Completion Progress';
 $string['config_group'] = 'Visible only to group or grouping';
@@ -44,6 +46,7 @@ $string['config_orderby_course_order'] = 'Ordering in course';
 $string['config_orderby_due_time'] = 'Time using "{$a}" date';
 $string['config_percentage'] = 'Show percentage to students';
 $string['config_scroll'] = 'Scroll';
+$string['config_section'] = 'Course section';
 $string['config_selectactivities'] = 'Select activities';
 $string['config_selectedactivities'] = 'Selected activities';
 $string['config_squeeze'] = 'Squeeze';

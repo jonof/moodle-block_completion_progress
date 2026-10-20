@@ -576,6 +576,9 @@ class completion_progress implements \renderable, \templatable {
                 $activity->available = true;
             }
 
+            // Add section number to the activity object.
+            $activity->sectionnum = $cm->sectionnum;
+
             // Check for exclusions.
             if (in_array($activity->type . '-' . $activity->instance . '-' . $this->user->id, $this->exclusions)) {
                 continue;
@@ -922,6 +925,8 @@ class completion_progress implements \renderable, \templatable {
             $data->progresspercentage = $this->get_percentage() . '%';
         }
 
+        $courseformat = course_get_format($this->get_course());
+
         // Determine links to activities.
         for ($i = 0; $i < $numactivities; $i++) {
             if (
@@ -940,6 +945,17 @@ class completion_progress implements \renderable, \templatable {
                 $activities[$i]->link = $CFG->wwwroot . $link;
             } else {
                 $activities[$i]->link = $activities[$i]->url;
+            }
+            
+            // Override link with section link if sectionnum is available.
+            if (
+                get_config('block_completion_progress', 'activityorsectionlink') != 'activity' &&
+                isset($activities[$i]->sectionnum)
+            ) {
+                $sectionurl = $courseformat->get_view_url($activities[$i]->sectionnum);
+                if ($sectionurl !== null) {
+                    $activities[$i]->link = $sectionurl->out(false);
+                }
             }
         }
 
@@ -990,9 +1006,6 @@ class completion_progress implements \renderable, \templatable {
             $cell->activityname = $activity->name;
             if (!empty($activity->link) && (!empty($activity->available) || $simple)) {
                 $cell->activitylink = $activity->link;
-                if (!empty($activity->onclick)) {
-                    $cell->activityonclick = $activity->onclick;
-                }
             }
             if ($complete == COMPLETION_COMPLETE) {
                 $cell->infocomplete = true;
